@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<style>
+		html {
+			background: #000;
+			color: #fff;
+			font-family: "Roboto", "Helvetica Neue", sans-serif;
+
+			body {
+				margin: 0;
+				justify-content: space-around;
+				align-items: center;
+
+				#canvas-section {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+				}
+			}
+		}
+	</style>
+</head>
+<body>
+<section id="canvas-section">
+	<h1>Canvas Jelly</h1>
+	<div class="canvas-container">
+		<canvas width="1280" height="720" id="my-canvas"></canvas>
+	</div>
+</section>
+
+<script>
+	const canvas = document.querySelector("#my-canvas");
+	const ctx = canvas.getContext("2d")
+
+
+	const clear = () => {
+		ctx.fillStyle = "gray";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	}
+
+	const jelly = {
+		x: Math.floor(canvas.width / 2),
+		y: Math.floor(canvas.height / 2),
+		w: 20,
+		h: 20,
+		velX: 1,
+		velY: 1,
+		color: "#fff"
+	}
+
+	const updateJelly = () => {
+		if (jelly.x >= canvas.width - jelly.w){
+			jelly.velX *= -1;
+		}
+		if (jelly.y >= canvas.height - jelly.h){
+			jelly.velY *= -1;
+		}
+		if (jelly.x <= 0){
+			jelly.velX *= -1;
+		}
+		if (jelly.y <= 0){
+			jelly.velY *= -1;
+		}
+		jelly.x += jelly.velX;
+		jelly.y += jelly.velY;
+	}
+	const drawJelly = () => {
+		ctx.fillStyle = jelly.color;
+		ctx.fillRect(jelly.x, jelly.y, jelly.w, jelly.h);
+	}
+
+	let tick = 0;
+	const updateFrame = () => {
+		++tick;
+		window.requestAnimationFrame(() => {
+			clear();
+			updateJelly();
+			drawJelly();
+			updateFrame();
+		});
+		console.log(jelly.x);
+	}
+	updateFrame();
+</script>
+</body>
+</html>
