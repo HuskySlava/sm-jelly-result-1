@@ -332,6 +332,20 @@
 			boostBtn.click();
 		} else if (e.code === "KeyM") {
 			soundBtn.click();
+		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+			e.preventDefault();
+			const nudge = 30; // px/s added per press, lets players steer without a click
+			if (e.code === "ArrowUp") jelly.velY -= nudge;
+			else if (e.code === "ArrowDown") jelly.velY += nudge;
+			else if (e.code === "ArrowLeft") jelly.velX -= nudge;
+			else jelly.velX += nudge;
+			const speed = Math.hypot(jelly.velX, jelly.velY);
+			if (speed > maxSpeed) {
+				const scale = maxSpeed / speed;
+				jelly.velX *= scale;
+				jelly.velY *= scale;
+			}
+			updateSpeedStat();
 		}
 	});
 
