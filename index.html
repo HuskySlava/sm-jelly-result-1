@@ -57,10 +57,10 @@
 	<p id="high-score">Best: 0</p>
 	<p id="speed-stat">Speed: 85 px/s</p>
 	<p id="top-speed">Top speed: 0 px/s</p>
-	<button id="reset-btn">Reset</button>
-	<button id="pause-btn">Pause</button>
-	<button id="sound-btn">Sound: On</button>
-	<button id="boost-btn">Boost</button>
+	<button id="reset-btn" title="Reset (R)">Reset</button>
+	<button id="pause-btn" title="Pause (Space)">Pause</button>
+	<button id="sound-btn" title="Mute (M)">Sound: On</button>
+	<button id="boost-btn" title="Boost (B)">Boost</button>
 </section>
 
 <script>
@@ -290,6 +290,12 @@
 		if (e.code === "Space") {
 			e.preventDefault();
 			togglePause();
+		} else if (e.code === "KeyR") {
+			resetBtn.click();
+		} else if (e.code === "KeyB") {
+			boostBtn.click();
+		} else if (e.code === "KeyM") {
+			soundBtn.click();
 		}
 	});
 

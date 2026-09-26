@@ -27,3 +27,4 @@
 <2026-09-26-19:02> (Claude): Added a Boost button that kicks the jelly to 1.5x speed in a random direction.
 <2026-09-26-19:31> (Claude): Added click-to-steer: clicking the canvas redirects the jelly toward that point.
 2026-09-26-20:01 (Claude): Fixed bounce speedup capping each axis separately, letting diagonal speed exceed maxSpeed.
+<2026-09-26-20:31> (Claude): Added R/B/M keyboard shortcuts for reset/boost/mute with matching button tooltips.
