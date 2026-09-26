@@ -160,6 +160,8 @@
 		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawJelly();
+		// Resetting while paused wiped the overlay text; redraw it so the UI stays consistent.
+		if (paused) drawPauseOverlay();
 	});
 
 	const drawPauseOverlay = () => {
