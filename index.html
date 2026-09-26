@@ -53,6 +53,7 @@
 	<p id="bounce-counter">Bounces: 0</p>
 	<p id="high-score">Best: 0</p>
 	<button id="reset-btn">Reset</button>
+	<button id="pause-btn">Pause</button>
 </section>
 
 <script>
@@ -143,6 +144,13 @@
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 	});
 
+	let paused = false;
+	const pauseBtn = document.querySelector("#pause-btn");
+	pauseBtn.addEventListener("click", () => {
+		paused = !paused;
+		pauseBtn.textContent = paused ? "Resume" : "Pause";
+	});
+
 	let tick = 0;
 	let lastTime = null;
 	const updateFrame = () => {
@@ -151,9 +159,11 @@
 			// Cap dt so returning from a background tab doesn't teleport the jelly
 			const dt = lastTime === null ? 0 : Math.min((now - lastTime) / 1000, 0.1);
 			lastTime = now;
-			clear();
-			updateJelly(dt);
-			drawJelly();
+			if (!paused) {
+				clear();
+				updateJelly(dt);
+				drawJelly();
+			}
 			updateFrame();
 		});
 	}

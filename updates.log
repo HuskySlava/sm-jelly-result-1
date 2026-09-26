@@ -8,3 +8,4 @@
 2026-09-26-12:36 (Claude): Added a live bounce counter below the canvas that increments each time the jelly hits a wall.
 2026-09-26-13:01 (Claude): Fixed the Reset button, which previously did nothing, to actually reset the jelly and bounce counter.
 2026-09-26-13:16 (Claude): Added a persistent best-bounces high score, saved in localStorage, shown next to the bounce counter.
+2026-09-26-13:31 (Claude): Added a Pause/Resume button that freezes and resumes the jelly animation.
