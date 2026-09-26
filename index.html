@@ -51,6 +51,7 @@
 		<canvas width="1280" height="720" id="my-canvas"></canvas>
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
+	<p id="high-score">Best: 0</p>
 	<button id="reset-btn">Reset</button>
 </section>
 
@@ -78,10 +79,18 @@
 	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
 
 	const bounceCounter = document.querySelector("#bounce-counter");
+	const highScoreEl = document.querySelector("#high-score");
 	let bounces = 0;
+	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
+	highScoreEl.textContent = `Best: ${highScore}`;
 	const registerBounce = () => {
 		bounces++;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		if (bounces > highScore) {
+			highScore = bounces;
+			localStorage.setItem("jelly-high-score", highScore);
+			highScoreEl.textContent = `Best: ${highScore}`;
+		}
 	}
 
 	const updateJelly = (dt) => {
