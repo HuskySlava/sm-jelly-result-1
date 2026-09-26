@@ -1,1 +1,2 @@
 2026-09-24-16:35 (Human): Initial concept, moving object on a canvas
+2026-09-26-14:26 (Claude): Removed per-frame console.log debug spam that flooded the console and slowed the animation loop.
