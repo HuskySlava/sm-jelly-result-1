@@ -99,27 +99,29 @@
 		jelly.y += jelly.velY * dt;
 		const maxX = canvas.width - jelly.w;
 		const maxY = canvas.height - jelly.h;
+		let bounced = false;
 		if (jelly.x >= maxX){
 			jelly.x = maxX;
 			jelly.velX = -Math.abs(jelly.velX);
-			jelly.color = randomColor();
-			registerBounce();
+			bounced = true;
 		}
 		if (jelly.y >= maxY){
 			jelly.y = maxY;
 			jelly.velY = -Math.abs(jelly.velY);
-			jelly.color = randomColor();
-			registerBounce();
+			bounced = true;
 		}
 		if (jelly.x <= 0){
 			jelly.x = 0;
 			jelly.velX = Math.abs(jelly.velX);
-			jelly.color = randomColor();
-			registerBounce();
+			bounced = true;
 		}
 		if (jelly.y <= 0){
 			jelly.y = 0;
 			jelly.velY = Math.abs(jelly.velY);
+			bounced = true;
+		}
+		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
+		if (bounced) {
 			jelly.color = randomColor();
 			registerBounce();
 		}
