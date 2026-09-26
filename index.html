@@ -52,6 +52,7 @@
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
 	<p id="high-score">Best: 0</p>
+	<p id="speed-stat">Speed: 85 px/s</p>
 	<button id="reset-btn">Reset</button>
 	<button id="pause-btn">Pause</button>
 </section>
@@ -87,6 +88,11 @@
 
 	const bounceCounter = document.querySelector("#bounce-counter");
 	const highScoreEl = document.querySelector("#high-score");
+	const speedStatEl = document.querySelector("#speed-stat");
+	const updateSpeedStat = () => {
+		const speed = Math.round(Math.hypot(jelly.velX, jelly.velY));
+		speedStatEl.textContent = `Speed: ${speed} px/s`;
+	}
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -135,6 +141,7 @@
 			const maxSpeed = 240;
 			jelly.velX = Math.sign(jelly.velX) * Math.min(Math.abs(jelly.velX) * speedUp, maxSpeed);
 			jelly.velY = Math.sign(jelly.velY) * Math.min(Math.abs(jelly.velY) * speedUp, maxSpeed);
+			updateSpeedStat();
 		}
 	}
 	const drawJelly = () => {
@@ -154,6 +161,7 @@
 		jelly.color = "#fff";
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawJelly();
 	});

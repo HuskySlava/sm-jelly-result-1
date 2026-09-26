@@ -13,3 +13,4 @@
 <2026-09-26-16:41> (Claude): Jelly now speeds up slightly with each bounce, capped at a max speed, for rising difficulty.
 <2026-09-26-16:56> (Claude): Made the fading motion trail tint with the jelly's current color instead of flat gray.
 2026-09-26-17:01 (Claude): Added spacebar shortcut to toggle pause/resume, matching the pause button.
+2026-09-26-17:06 (Claude): Added a live speed readout (px/s) that updates on each bounce and reset.
