@@ -31,3 +31,4 @@
 <2026-09-26-21:01> (Claude): Added a colored particle burst effect that fires at the jelly's position on each bounce.
 <2026-09-26-21:31> (Claude): Added arrow-key nudges to steer the jelly's velocity, capped at max speed.
 2026-09-26-22:02 (Claude): Fixed sound and pause button tooltips to reflect current toggle state instead of staying static.
+<2026-09-26-22:31> (Claude): Fixed bug where arrow-key nudges could zero out velocity, permanently freezing the jelly even after boosting.

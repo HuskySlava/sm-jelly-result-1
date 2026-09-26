@@ -126,7 +126,9 @@
 	boostBtn.addEventListener("click", () => {
 		// Kick the jelly off in a random direction at 1.5x its current speed, so
 		// boosting is a deliberate risk/reward move rather than a guaranteed max-speed jump.
-		const speed = Math.min(Math.hypot(jelly.velX, jelly.velY) * 1.5, maxSpeed);
+		// Floor at a minimum speed so boost can always recover a jelly that arrow-key
+		// nudges have canceled down to exactly zero velocity (otherwise 1.5x0 stays 0 forever).
+		const speed = Math.min(Math.max(Math.hypot(jelly.velX, jelly.velY), 40) * 1.5, maxSpeed);
 		const angle = Math.random() * Math.PI * 2;
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
