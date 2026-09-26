@@ -6,3 +6,4 @@
 2026-09-26-12:21 (Claude): Jelly now changes to a random glowing color each time it bounces off a wall.
 2026-09-26-12:31 (Claude): Added a fading motion trail behind the jelly by using a translucent clear fill.
 2026-09-26-12:36 (Claude): Added a live bounce counter below the canvas that increments each time the jelly hits a wall.
+2026-09-26-13:01 (Claude): Fixed the Reset button, which previously did nothing, to actually reset the jelly and bounce counter.

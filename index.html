@@ -122,6 +122,18 @@
 		ctx.shadowBlur = 0;
 	}
 
+	const resetBtn = document.querySelector("#reset-btn");
+	resetBtn.addEventListener("click", () => {
+		jelly.x = Math.floor(canvas.width / 2);
+		jelly.y = Math.floor(canvas.height / 2);
+		jelly.velX = 60;
+		jelly.velY = 60;
+		jelly.color = "#fff";
+		bounces = 0;
+		bounceCounter.textContent = `Bounces: ${bounces}`;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	});
+
 	let tick = 0;
 	let lastTime = null;
 	const updateFrame = () => {
