@@ -5,3 +5,4 @@
 2026-09-26-12:00 (Claude): Fixed body's dead centering styles by adding display:flex so the canvas is actually centered.
 2026-09-26-12:21 (Claude): Jelly now changes to a random glowing color each time it bounces off a wall.
 2026-09-26-12:31 (Claude): Added a fading motion trail behind the jelly by using a translucent clear fill.
+2026-09-26-12:36 (Claude): Added a live bounce counter below the canvas that increments each time the jelly hits a wall.
