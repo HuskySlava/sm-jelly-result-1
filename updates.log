@@ -22,3 +22,4 @@
 <2026-09-26-17:41> (Claude): Added a persistent "Top speed" stat tracking the fastest the jelly has ever gone.
 2026-09-26-17:46 (Claude): Constrained canvas max-height so it no longer overflows short/mobile viewports, cutting off buttons.
 <2026-09-26-17:51> (Claude): Added a bounce sound effect with a mute toggle button.
+2026-09-26-18:01 (Claude): Fixed bug where sound stopped permanently after tab lost focus by removing once:true from audio-unlock listener.

@@ -95,7 +95,9 @@
 			audioCtx.resume();
 		}
 	};
-	document.addEventListener("pointerdown", unlockAudio, { once: true });
+	// Not `{ once: true }`: the context can be suspended again later (e.g. tab
+	// loses focus), so every pointerdown must be able to resume it.
+	document.addEventListener("pointerdown", unlockAudio);
 	const playBounceSound = () => {
 		if (!soundOn || !audioCtx) return;
 		const osc = audioCtx.createOscillator();
