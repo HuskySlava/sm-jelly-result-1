@@ -37,6 +37,7 @@
 			max-height: 80vh;
 			width: auto;
 			height: auto;
+			cursor: crosshair;
 		}
 
 		#bounce-counter {
@@ -130,6 +131,19 @@
 		jelly.velY = Math.sin(angle) * speed;
 		jelly.color = randomColor();
 		updateSpeedStat();
+	});
+
+	// Click the canvas to steer the jelly toward that point without changing its speed.
+	canvas.addEventListener("click", (e) => {
+		const rect = canvas.getBoundingClientRect();
+		const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+		const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const angle = Math.atan2(clickY - cy, clickX - cx);
+		const speed = Math.hypot(jelly.velX, jelly.velY);
+		jelly.velX = Math.cos(angle) * speed;
+		jelly.velY = Math.sin(angle) * speed;
 	});
 
 	const bounceCounter = document.querySelector("#bounce-counter");
