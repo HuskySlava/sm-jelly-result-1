@@ -61,9 +61,15 @@
 	const ctx = canvas.getContext("2d")
 
 
+	// Converts the jelly's current color into a translucent version so the fading
+	// trail glows with the same hue instead of a flat gray smear.
+	const withAlpha = (color, alpha) => color.startsWith("hsl")
+		? color.replace("hsl(", "hsla(").replace(")", `, ${alpha})`)
+		: `rgba(255, 255, 255, ${alpha})`;
+
 	const clear = () => {
 		// Low alpha instead of a solid fill leaves a fading motion trail behind the jelly
-		ctx.fillStyle = "rgba(128, 128, 128, 0.25)";
+		ctx.fillStyle = withAlpha(jelly.color, 0.2);
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
