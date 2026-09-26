@@ -52,7 +52,8 @@
 
 
 	const clear = () => {
-		ctx.fillStyle = "gray";
+		// Low alpha instead of a solid fill leaves a fading motion trail behind the jelly
+		ctx.fillStyle = "rgba(128, 128, 128, 0.25)";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
