@@ -218,9 +218,17 @@
 				jelly.scaleY = 0.55;
 			}
 			// Speed up slightly on each bounce for rising difficulty, capped so it stays playable.
+			// Cap the resultant vector's magnitude, not each axis separately, otherwise a
+			// diagonal bounce lets combined speed exceed maxSpeed by up to sqrt(2)x.
 			const speedUp = 1.03;
-			jelly.velX = Math.sign(jelly.velX) * Math.min(Math.abs(jelly.velX) * speedUp, maxSpeed);
-			jelly.velY = Math.sign(jelly.velY) * Math.min(Math.abs(jelly.velY) * speedUp, maxSpeed);
+			jelly.velX *= speedUp;
+			jelly.velY *= speedUp;
+			const resultSpeed = Math.hypot(jelly.velX, jelly.velY);
+			if (resultSpeed > maxSpeed) {
+				const scale = maxSpeed / resultSpeed;
+				jelly.velX *= scale;
+				jelly.velY *= scale;
+			}
 			updateSpeedStat();
 		}
 		// Ease the squash/stretch back to normal every frame, not just on bounce.
