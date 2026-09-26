@@ -217,22 +217,24 @@
 		const maxY = canvas.height - jelly.h;
 		let bouncedX = false;
 		let bouncedY = false;
-		if (jelly.x >= maxX){
+		// Require velocity into the wall before flipping it, otherwise a nudge that lands
+		// a component on exactly 0 at the boundary re-triggers the bounce every frame forever.
+		if (jelly.x >= maxX && jelly.velX > 0){
 			jelly.x = maxX;
 			jelly.velX = -Math.abs(jelly.velX);
 			bouncedX = true;
 		}
-		if (jelly.y >= maxY){
+		if (jelly.y >= maxY && jelly.velY > 0){
 			jelly.y = maxY;
 			jelly.velY = -Math.abs(jelly.velY);
 			bouncedY = true;
 		}
-		if (jelly.x <= 0){
+		if (jelly.x <= 0 && jelly.velX < 0){
 			jelly.x = 0;
 			jelly.velX = Math.abs(jelly.velX);
 			bouncedX = true;
 		}
-		if (jelly.y <= 0){
+		if (jelly.y <= 0 && jelly.velY < 0){
 			jelly.y = 0;
 			jelly.velY = Math.abs(jelly.velY);
 			bouncedY = true;
