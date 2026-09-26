@@ -1,3 +1,6 @@
 2026-09-24-16:35 (Human): Initial concept, moving object on a canvas
 2026-09-26-14:26 (Claude): Removed per-frame console.log debug spam that flooded the console and slowed the animation loop.
 2026-09-26-14:31 (Claude): Made canvas scale down to fit narrow screens instead of overflowing with zoom disabled.
+2026-09-26-14:41 (Claude): Made jelly speed frame-rate independent so it moves the same on 60Hz and 120Hz screens.
+2026-09-26-12:00 (Claude): Fixed body's dead centering styles by adding display:flex so the canvas is actually centered.
+2026-09-26-12:21 (Claude): Jelly now changes to a random glowing color each time it bounces off a wall.

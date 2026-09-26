@@ -16,6 +16,8 @@
 			font-family: "Roboto", "Helvetica Neue", sans-serif;
 
 			body {
+				display: flex;
+				min-height: 100vh;
 				margin: 0;
 				justify-content: space-around;
 				align-items: center;
@@ -59,38 +61,57 @@
 		y: Math.floor(canvas.height / 2),
 		w: 20,
 		h: 20,
-		velX: 1,
-		velY: 1,
+		velX: 60, // px per second
+		velY: 60, // px per second
 		color: "#fff"
 	}
 
-	const updateJelly = () => {
-		if (jelly.x >= canvas.width - jelly.w){
-			jelly.velX *= -1;
+	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
+
+	const updateJelly = (dt) => {
+		jelly.x += jelly.velX * dt;
+		jelly.y += jelly.velY * dt;
+		const maxX = canvas.width - jelly.w;
+		const maxY = canvas.height - jelly.h;
+		if (jelly.x >= maxX){
+			jelly.x = maxX;
+			jelly.velX = -Math.abs(jelly.velX);
+			jelly.color = randomColor();
 		}
-		if (jelly.y >= canvas.height - jelly.h){
-			jelly.velY *= -1;
+		if (jelly.y >= maxY){
+			jelly.y = maxY;
+			jelly.velY = -Math.abs(jelly.velY);
+			jelly.color = randomColor();
 		}
 		if (jelly.x <= 0){
-			jelly.velX *= -1;
+			jelly.x = 0;
+			jelly.velX = Math.abs(jelly.velX);
+			jelly.color = randomColor();
 		}
 		if (jelly.y <= 0){
-			jelly.velY *= -1;
+			jelly.y = 0;
+			jelly.velY = Math.abs(jelly.velY);
+			jelly.color = randomColor();
 		}
-		jelly.x += jelly.velX;
-		jelly.y += jelly.velY;
 	}
 	const drawJelly = () => {
 		ctx.fillStyle = jelly.color;
+		ctx.shadowColor = jelly.color;
+		ctx.shadowBlur = 20;
 		ctx.fillRect(jelly.x, jelly.y, jelly.w, jelly.h);
+		ctx.shadowBlur = 0;
 	}
 
 	let tick = 0;
+	let lastTime = null;
 	const updateFrame = () => {
 		++tick;
-		window.requestAnimationFrame(() => {
+		window.requestAnimationFrame((now) => {
+			// Cap dt so returning from a background tab doesn't teleport the jelly
+			const dt = lastTime === null ? 0 : Math.min((now - lastTime) / 1000, 0.1);
+			lastTime = now;
 			clear();
-			updateJelly();
+			updateJelly(dt);
 			drawJelly();
 			updateFrame();
 		});
