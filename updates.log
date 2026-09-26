@@ -20,3 +20,4 @@
 <2026-09-26-17:31> (Claude): Fixed canvas trail fading to jelly's own color, which made the jelly blend in and vanish over time.
 <2026-09-26-17:36> (Claude): Fixed reset button erasing the PAUSED overlay when clicked while paused.
 <2026-09-26-17:41> (Claude): Added a persistent "Top speed" stat tracking the fastest the jelly has ever gone.
+2026-09-26-17:46 (Claude): Constrained canvas max-height so it no longer overflows short/mobile viewports, cutting off buttons.
