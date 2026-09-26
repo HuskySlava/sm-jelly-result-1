@@ -81,7 +81,9 @@
 		h: 20,
 		velX: 60, // px per second
 		velY: 60, // px per second
-		color: "#fff"
+		color: "#fff",
+		scaleX: 1,
+		scaleY: 1
 	}
 
 	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
@@ -149,32 +151,44 @@
 		jelly.y += jelly.velY * dt;
 		const maxX = canvas.width - jelly.w;
 		const maxY = canvas.height - jelly.h;
-		let bounced = false;
+		let bouncedX = false;
+		let bouncedY = false;
 		if (jelly.x >= maxX){
 			jelly.x = maxX;
 			jelly.velX = -Math.abs(jelly.velX);
-			bounced = true;
+			bouncedX = true;
 		}
 		if (jelly.y >= maxY){
 			jelly.y = maxY;
 			jelly.velY = -Math.abs(jelly.velY);
-			bounced = true;
+			bouncedY = true;
 		}
 		if (jelly.x <= 0){
 			jelly.x = 0;
 			jelly.velX = Math.abs(jelly.velX);
-			bounced = true;
+			bouncedX = true;
 		}
 		if (jelly.y <= 0){
 			jelly.y = 0;
 			jelly.velY = Math.abs(jelly.velY);
-			bounced = true;
+			bouncedY = true;
 		}
 		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
-		if (bounced) {
+		if (bouncedX || bouncedY) {
 			jelly.color = randomColor();
 			registerBounce();
 			playBounceSound();
+			// Squash along the axis of impact and stretch the other, like real jelly.
+			if (bouncedX && bouncedY) {
+				jelly.scaleX = 0.7;
+				jelly.scaleY = 0.7;
+			} else if (bouncedX) {
+				jelly.scaleX = 0.55;
+				jelly.scaleY = 1.35;
+			} else {
+				jelly.scaleX = 1.35;
+				jelly.scaleY = 0.55;
+			}
 			// Speed up slightly on each bounce for rising difficulty, capped so it stays playable.
 			const speedUp = 1.03;
 			const maxSpeed = 240;
@@ -182,13 +196,22 @@
 			jelly.velY = Math.sign(jelly.velY) * Math.min(Math.abs(jelly.velY) * speedUp, maxSpeed);
 			updateSpeedStat();
 		}
+		// Ease the squash/stretch back to normal every frame, not just on bounce.
+		const ease = 1 - Math.pow(0.001, dt);
+		jelly.scaleX += (1 - jelly.scaleX) * ease;
+		jelly.scaleY += (1 - jelly.scaleY) * ease;
 	}
 	const drawJelly = () => {
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		ctx.save();
+		ctx.translate(cx, cy);
+		ctx.scale(jelly.scaleX, jelly.scaleY);
 		ctx.fillStyle = jelly.color;
 		ctx.shadowColor = jelly.color;
 		ctx.shadowBlur = 20;
-		ctx.fillRect(jelly.x, jelly.y, jelly.w, jelly.h);
-		ctx.shadowBlur = 0;
+		ctx.fillRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h);
+		ctx.restore();
 	}
 
 	const resetBtn = document.querySelector("#reset-btn");
@@ -198,6 +221,8 @@
 		jelly.velX = 60;
 		jelly.velY = 60;
 		jelly.color = "#fff";
+		jelly.scaleX = 1;
+		jelly.scaleY = 1;
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		updateSpeedStat();
