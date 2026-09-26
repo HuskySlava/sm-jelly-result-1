@@ -119,6 +119,7 @@
 	soundBtn.addEventListener("click", () => {
 		soundOn = !soundOn;
 		soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
+		soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
 	});
 
 	const boostBtn = document.querySelector("#boost-btn");
@@ -318,6 +319,7 @@
 	const togglePause = () => {
 		paused = !paused;
 		pauseBtn.textContent = paused ? "Resume" : "Pause";
+		pauseBtn.title = paused ? "Resume (Space)" : "Pause (Space)";
 		// Give visual feedback on the canvas itself, not just the button label
 		if (paused) drawPauseOverlay();
 	};
