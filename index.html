@@ -69,6 +69,7 @@
 		: `rgba(255, 255, 255, ${alpha})`;
 
 	const clear = () => {
+		// TODO: Note for Claude: withAlpha(jelly.color, 0.2); makes the jelly invisible - fix it
 		// Low alpha instead of a solid fill leaves a fading motion trail behind the jelly
 		ctx.fillStyle = withAlpha(jelly.color, 0.2);
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
