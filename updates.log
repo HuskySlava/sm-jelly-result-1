@@ -15,3 +15,4 @@
 2026-09-26-17:01 (Claude): Added spacebar shortcut to toggle pause/resume, matching the pause button.
 2026-09-26-17:06 (Claude): Added a live speed readout (px/s) that updates on each bounce and reset.
 2026-09-26-17:12 (Claude): Fixed the browser tab title, which was still the default placeholder "Document".
+2026-09-26-17:16 (Claude): Added a PAUSED overlay drawn on the canvas so pausing is visible without checking the button.

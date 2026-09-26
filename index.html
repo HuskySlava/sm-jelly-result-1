@@ -166,11 +166,23 @@
 		drawJelly();
 	});
 
+	const drawPauseOverlay = () => {
+		ctx.save();
+		ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+		ctx.font = "bold 48px 'Roboto', sans-serif";
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+		ctx.restore();
+	}
+
 	let paused = false;
 	const pauseBtn = document.querySelector("#pause-btn");
 	const togglePause = () => {
 		paused = !paused;
 		pauseBtn.textContent = paused ? "Resume" : "Pause";
+		// Give visual feedback on the canvas itself, not just the button label
+		if (paused) drawPauseOverlay();
 	};
 	pauseBtn.addEventListener("click", togglePause);
 	window.addEventListener("keydown", (e) => {
