@@ -17,3 +17,4 @@
 2026-09-26-17:12 (Claude): Fixed the browser tab title, which was still the default placeholder "Document".
 2026-09-26-17:16 (Claude): Added a PAUSED overlay drawn on the canvas so pausing is visible without checking the button.
 <2026-09-26-17:21> (Claude): Fixed broken layout by un-nesting invalid CSS that relied on unsupported nesting syntax.
+<2026-09-26-17:31> (Claude): Fixed canvas trail fading to jelly's own color, which made the jelly blend in and vanish over time.
