@@ -59,6 +59,7 @@
 	<button id="reset-btn">Reset</button>
 	<button id="pause-btn">Pause</button>
 	<button id="sound-btn">Sound: On</button>
+	<button id="boost-btn">Boost</button>
 </section>
 
 <script>
@@ -85,6 +86,7 @@
 		scaleX: 1,
 		scaleY: 1
 	}
+	const maxSpeed = 240; // px per second, shared cap for bounce speedup and boosts
 
 	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
 
@@ -116,6 +118,18 @@
 	soundBtn.addEventListener("click", () => {
 		soundOn = !soundOn;
 		soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
+	});
+
+	const boostBtn = document.querySelector("#boost-btn");
+	boostBtn.addEventListener("click", () => {
+		// Kick the jelly off in a random direction at 1.5x its current speed, so
+		// boosting is a deliberate risk/reward move rather than a guaranteed max-speed jump.
+		const speed = Math.min(Math.hypot(jelly.velX, jelly.velY) * 1.5, maxSpeed);
+		const angle = Math.random() * Math.PI * 2;
+		jelly.velX = Math.cos(angle) * speed;
+		jelly.velY = Math.sin(angle) * speed;
+		jelly.color = randomColor();
+		updateSpeedStat();
 	});
 
 	const bounceCounter = document.querySelector("#bounce-counter");
@@ -191,7 +205,6 @@
 			}
 			// Speed up slightly on each bounce for rising difficulty, capped so it stays playable.
 			const speedUp = 1.03;
-			const maxSpeed = 240;
 			jelly.velX = Math.sign(jelly.velX) * Math.min(Math.abs(jelly.velX) * speedUp, maxSpeed);
 			jelly.velY = Math.sign(jelly.velY) * Math.min(Math.abs(jelly.velY) * speedUp, maxSpeed);
 			updateSpeedStat();
