@@ -124,6 +124,11 @@
 		if (bounced) {
 			jelly.color = randomColor();
 			registerBounce();
+			// Speed up slightly on each bounce for rising difficulty, capped so it stays playable.
+			const speedUp = 1.03;
+			const maxSpeed = 240;
+			jelly.velX = Math.sign(jelly.velX) * Math.min(Math.abs(jelly.velX) * speedUp, maxSpeed);
+			jelly.velY = Math.sign(jelly.velY) * Math.min(Math.abs(jelly.velY) * speedUp, maxSpeed);
 		}
 	}
 	const drawJelly = () => {
