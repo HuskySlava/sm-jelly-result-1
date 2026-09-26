@@ -160,9 +160,16 @@
 
 	let paused = false;
 	const pauseBtn = document.querySelector("#pause-btn");
-	pauseBtn.addEventListener("click", () => {
+	const togglePause = () => {
 		paused = !paused;
 		pauseBtn.textContent = paused ? "Resume" : "Pause";
+	};
+	pauseBtn.addEventListener("click", togglePause);
+	window.addEventListener("keydown", (e) => {
+		if (e.code === "Space") {
+			e.preventDefault();
+			togglePause();
+		}
 	});
 
 	let tick = 0;

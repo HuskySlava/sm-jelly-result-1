@@ -12,3 +12,4 @@
 2026-09-26-13:46 (Claude): Fixed Reset button leaving the canvas blank when clicked while paused.<2026-09-26-14:01> (Claude): Fixed bug where corner bounces incremented the bounce counter twice instead of once.
 <2026-09-26-16:41> (Claude): Jelly now speeds up slightly with each bounce, capped at a max speed, for rising difficulty.
 <2026-09-26-16:56> (Claude): Made the fading motion trail tint with the jelly's current color instead of flat gray.
+2026-09-26-17:01 (Claude): Added spacebar shortcut to toggle pause/resume, matching the pause button.
