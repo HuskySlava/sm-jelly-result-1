@@ -281,10 +281,18 @@
 		ctx.save();
 		ctx.translate(cx, cy);
 		ctx.scale(jelly.scaleX, jelly.scaleY);
-		ctx.fillStyle = jelly.color;
 		ctx.shadowColor = jelly.color;
 		ctx.shadowBlur = 20;
-		ctx.fillRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h);
+		// Glossy radial gradient + rounded corners make it read as squishy jelly
+		// rather than a flat square.
+		const gradient = ctx.createRadialGradient(-jelly.w / 6, -jelly.h / 6, 1, 0, 0, jelly.w);
+		gradient.addColorStop(0, "#ffffff");
+		gradient.addColorStop(0.45, jelly.color);
+		gradient.addColorStop(1, jelly.color);
+		ctx.fillStyle = gradient;
+		ctx.beginPath();
+		ctx.roundRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h, jelly.w / 3);
+		ctx.fill();
 		ctx.restore();
 		drawParticles();
 	}

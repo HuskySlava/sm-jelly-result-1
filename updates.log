@@ -33,3 +33,4 @@
 2026-09-26-22:02 (Claude): Fixed sound and pause button tooltips to reflect current toggle state instead of staying static.
 <2026-09-26-22:31> (Claude): Fixed bug where arrow-key nudges could zero out velocity, permanently freezing the jelly even after boosting.
 2026-09-26-23:01 (Claude): Fixed a bug where a wall bounce could retrigger every frame forever when velocity hit exactly zero at the boundary.
+<2026-09-26-23:31> (Claude): Gave the jelly a glossy radial-gradient fill and rounded corners instead of a flat square.
