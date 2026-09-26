@@ -28,3 +28,4 @@
 <2026-09-26-19:31> (Claude): Added click-to-steer: clicking the canvas redirects the jelly toward that point.
 2026-09-26-20:01 (Claude): Fixed bounce speedup capping each axis separately, letting diagonal speed exceed maxSpeed.
 <2026-09-26-20:31> (Claude): Added R/B/M keyboard shortcuts for reset/boost/mute with matching button tooltips.
+<2026-09-26-21:01> (Claude): Added a colored particle burst effect that fires at the jelly's position on each bounce.
