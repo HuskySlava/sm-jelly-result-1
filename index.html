@@ -38,6 +38,8 @@
 			width: auto;
 			height: auto;
 			cursor: crosshair;
+			border-radius: 8px;
+			transition: box-shadow 0.2s ease;
 		}
 
 		#bounce-counter {
@@ -341,6 +343,9 @@
 		ctx.fill();
 		ctx.restore();
 		drawParticles();
+		// Ambient glow around the canvas echoes the jelly's own shadow, so the
+		// whole scene feels lit by it rather than just the sprite itself.
+		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
 		// Nudge the whole canvas element via CSS transform rather than the drawing
 		// context, so the shake doesn't leave unclear trail edges behind.
 		if (shakeMagnitude > 0) {

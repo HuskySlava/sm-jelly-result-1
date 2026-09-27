@@ -37,3 +37,4 @@
 <2026-09-27-00:01> (Claude): Added a subtle idle breathing pulse animation so the jelly feels alive between bounces.
 <2026-09-27-00:31> (Claude): Fixed bounce sound never playing for keyboard-only players by unlocking audio on keydown too.
 2026-09-27-01:01 (Claude): Styled the control buttons into a pill-shaped, translucent button bar matching the dark jelly theme.
+<2026-09-27-02:02> (Claude): Added an ambient canvas box-shadow glow matching the jelly's current color.
