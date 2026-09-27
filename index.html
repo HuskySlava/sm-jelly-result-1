@@ -77,6 +77,13 @@
 			border-color: rgba(255, 255, 255, 0.4);
 		}
 
+		/* Lets an at-a-glance scan of the toolbar show which modes are on,
+		   instead of requiring players to read each button's label text. */
+		#controls button.active {
+			background: rgba(0, 229, 255, 0.25);
+			border-color: rgba(0, 229, 255, 0.8);
+		}
+
 		#controls button:active {
 			transform: scale(0.95);
 		}
@@ -301,11 +308,13 @@
 	const soundBtn = document.querySelector("#sound-btn");
 	soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
 	soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
+	soundBtn.classList.toggle("active", soundOn);
 	soundBtn.addEventListener("click", () => {
 		soundOn = !soundOn;
 		localStorage.setItem("jelly-sound-on", soundOn);
 		soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
 		soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
+		soundBtn.classList.toggle("active", soundOn);
 	});
 
 	const boostBtn = document.querySelector("#boost-btn");
@@ -326,28 +335,34 @@
 	let gravityOn = localStorage.getItem("jelly-gravity-on") === "true";
 	const gravity = 400; // px/s^2 downward pull, only applied while gravity mode is on
 	gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
+	gravityBtn.classList.toggle("active", gravityOn);
 	gravityBtn.addEventListener("click", () => {
 		gravityOn = !gravityOn;
 		localStorage.setItem("jelly-gravity-on", gravityOn);
 		gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
+		gravityBtn.classList.toggle("active", gravityOn);
 	});
 
 	const slowmoBtn = document.querySelector("#slowmo-btn");
 	let slowMoOn = localStorage.getItem("jelly-slowmo-on") === "true";
 	slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
+	slowmoBtn.classList.toggle("active", slowMoOn);
 	slowmoBtn.addEventListener("click", () => {
 		slowMoOn = !slowMoOn;
 		localStorage.setItem("jelly-slowmo-on", slowMoOn);
 		slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
+		slowmoBtn.classList.toggle("active", slowMoOn);
 	});
 
 	const trailBtn = document.querySelector("#trail-btn");
 	let trailOn = localStorage.getItem("jelly-trail-on") === "true";
 	trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
+	trailBtn.classList.toggle("active", trailOn);
 	trailBtn.addEventListener("click", () => {
 		trailOn = !trailOn;
 		localStorage.setItem("jelly-trail-on", trailOn);
 		trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
+		trailBtn.classList.toggle("active", trailOn);
 	});
 
 	// Lets motion-sensitive players disable the camera-shake impact effect
@@ -355,10 +370,12 @@
 	const shakeBtn = document.querySelector("#shake-btn");
 	let shakeOn = localStorage.getItem("jelly-shake-on") !== "false";
 	shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
+	shakeBtn.classList.toggle("active", shakeOn);
 	shakeBtn.addEventListener("click", () => {
 		shakeOn = !shakeOn;
 		localStorage.setItem("jelly-shake-on", shakeOn);
 		shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
+		shakeBtn.classList.toggle("active", shakeOn);
 		if (!shakeOn) {
 			shakeMagnitude = 0;
 			canvas.style.transform = "";
@@ -763,6 +780,7 @@
 		paused = !paused;
 		pauseBtn.textContent = paused ? "Resume" : "Pause";
 		pauseBtn.title = paused ? "Resume (Space)" : "Pause (Space)";
+		pauseBtn.classList.toggle("active", paused);
 		// Give visual feedback on the canvas itself, not just the button label
 		if (paused) {
 			drawPauseOverlay();
