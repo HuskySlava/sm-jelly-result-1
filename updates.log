@@ -39,3 +39,4 @@
 2026-09-27-01:01 (Claude): Styled the control buttons into a pill-shaped, translucent button bar matching the dark jelly theme.
 <2026-09-27-02:02> (Claude): Added an ambient canvas box-shadow glow matching the jelly's current color.
 <2026-09-27-02:31> (Claude): Added a twinkling starfield background behind the bouncing jelly for extra visual depth.
+2026-09-27-03:02 (Claude): Added a toggleable gravity mode (button + G key) that makes the jelly fall and bounce like a ball.

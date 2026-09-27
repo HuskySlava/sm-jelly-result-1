@@ -94,6 +94,7 @@
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
 		<button id="sound-btn" title="Mute (M)">Sound: On</button>
 		<button id="boost-btn" title="Boost (B)">Boost</button>
+		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 	</div>
 </section>
 
@@ -193,6 +194,14 @@
 		updateSpeedStat();
 	});
 
+	const gravityBtn = document.querySelector("#gravity-btn");
+	let gravityOn = false;
+	const gravity = 400; // px/s^2 downward pull, only applied while gravity mode is on
+	gravityBtn.addEventListener("click", () => {
+		gravityOn = !gravityOn;
+		gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
+	});
+
 	// Click the canvas to steer the jelly toward that point without changing its speed.
 	canvas.addEventListener("click", (e) => {
 		const rect = canvas.getBoundingClientRect();
@@ -271,6 +280,16 @@
 	let shakeMagnitude = 0;
 	const updateJelly = (dt) => {
 		breatheTime += dt;
+		if (gravityOn) {
+			jelly.velY += gravity * dt;
+			const speed = Math.hypot(jelly.velX, jelly.velY);
+			if (speed > maxSpeed) {
+				const scale = maxSpeed / speed;
+				jelly.velX *= scale;
+				jelly.velY *= scale;
+			}
+			updateSpeedStat();
+		}
 		jelly.x += jelly.velX * dt;
 		jelly.y += jelly.velY * dt;
 		const maxX = canvas.width - jelly.w;
@@ -428,6 +447,8 @@
 			boostBtn.click();
 		} else if (e.code === "KeyM") {
 			soundBtn.click();
+		} else if (e.code === "KeyG") {
+			gravityBtn.click();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			const nudge = 30; // px/s added per press, lets players steer without a click
