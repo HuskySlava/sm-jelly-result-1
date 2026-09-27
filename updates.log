@@ -64,3 +64,4 @@
 <2026-09-27-14:32> (Claude): Added a Shake toggle (button + K shortcut) to let motion-sensitive players disable screen shake.
 2026-09-27-15:02 (Claude): Added multicolor confetti burst and popup celebration every 10 bounces.
 2026-09-27-16:02 (Claude): Gave the jelly a cute face whose pupils track its velocity direction.
+<2026-09-27-16:32> (Claude): Added a particle-burst and popup celebration for beating your best survival time, matching the existing bounce-streak celebration.

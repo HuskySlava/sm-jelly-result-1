@@ -546,6 +546,10 @@
 	const bestTimeEl = document.querySelector("#best-time");
 	let bestTime = Number(localStorage.getItem("jelly-best-time")) || 0;
 	bestTimeEl.textContent = `Best time: ${bestTime.toFixed(1)}s`;
+	// Snapshot of the record this run needs to beat, so the celebration below fires once per
+	// run instead of every frame while elapsedTime keeps climbing past the (constantly updated) bestTime.
+	let previousBestTime = bestTime;
+	let beatBestTimeThisRun = false;
 
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
@@ -773,6 +777,8 @@
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		elapsedTime = 0;
 		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
+		previousBestTime = bestTime;
+		beatBestTimeThisRun = false;
 		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		// clearRect wipes the stars along with the trail; redraw them immediately so a
@@ -874,6 +880,13 @@
 					bestTime = elapsedTime;
 					localStorage.setItem("jelly-best-time", bestTime);
 					bestTimeEl.textContent = `Best time: ${bestTime.toFixed(1)}s`;
+					// Only celebrate when there was an actual prior record to beat, so a
+					// brand-new player (previousBestTime 0) doesn't get "New Best Time!" at 0.1s.
+					if (!beatBestTimeThisRun && previousBestTime > 0) {
+						beatBestTimeThisRun = true;
+						spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ff2d95");
+						spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Best Time!", "#ff2d95");
+					}
 				}
 				clear();
 				drawStars(now / 1000);
