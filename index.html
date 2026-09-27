@@ -690,6 +690,25 @@
 		ctx.beginPath();
 		ctx.roundRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h, jelly.w / 3);
 		ctx.fill();
+		// A tiny face gives the jelly personality; pupils shift toward its
+		// velocity direction so it looks like it's watching where it's headed.
+		ctx.shadowBlur = 0;
+		const eyeR = jelly.w / 8;
+		const pupilR = eyeR * 0.5;
+		const pupilShift = eyeR * 0.4;
+		const lookAngle = Math.atan2(jelly.velY, jelly.velX);
+		for (const side of [-1, 1]) {
+			const eyeX = side * jelly.w / 5;
+			const eyeY = -jelly.h / 8;
+			ctx.beginPath();
+			ctx.fillStyle = "#fff";
+			ctx.arc(eyeX, eyeY, eyeR, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.fillStyle = "#1a1a1a";
+			ctx.arc(eyeX + Math.cos(lookAngle) * pupilShift, eyeY + Math.sin(lookAngle) * pupilShift, pupilR, 0, Math.PI * 2);
+			ctx.fill();
+		}
 		ctx.restore();
 		drawParticles();
 		drawRings();
