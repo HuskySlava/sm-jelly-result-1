@@ -171,6 +171,7 @@
 	<p id="top-speed">Top speed: 0 px/s</p>
 	<p id="time-stat">Time: 0.0s</p>
 	<p id="best-time">Best time: 0.0s</p>
+	<p id="orb-stat">Orbs: 0</p>
 	<p id="fps-stat">FPS: 0</p>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
@@ -630,6 +631,56 @@
 	let previousBestTime = bestTime;
 	let beatBestTimeThisRun = false;
 
+	// A glowing collectible orb spawns at a random spot; steering the jelly onto it
+	// scores a bonus distinct from the wall-bounce combo, giving players a second
+	// objective to chase between bounces.
+	const orbStatEl = document.querySelector("#orb-stat");
+	let orbsCollected = 0;
+	const orb = { x: 0, y: 0, radius: 10 };
+	const spawnOrb = () => {
+		const margin = 60;
+		orb.x = margin + Math.random() * (canvas.width - margin * 2);
+		orb.y = margin + Math.random() * (canvas.height - margin * 2);
+	};
+	spawnOrb();
+	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
+	// read as a distinct "collect" cue rather than another bounce.
+	const playOrbSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "triangle";
+		osc.frequency.value = 660;
+		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.2);
+	};
+	const checkOrbCollision = () => {
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		if (Math.hypot(cx - orb.x, cy - orb.y) < orb.radius + jelly.w / 2) {
+			orbsCollected++;
+			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
+			playOrbSound();
+			spawnParticles(orb.x, orb.y, "#ffcc00");
+			spawnPopup(orb.x, orb.y - 10, "+1 Orb!", "#ffcc00");
+			spawnOrb();
+		}
+	};
+	const drawOrb = (time) => {
+		ctx.save();
+		const pulse = 1 + Math.sin(time * 4) * 0.15;
+		ctx.shadowColor = "#ffcc00";
+		ctx.shadowBlur = 20;
+		ctx.fillStyle = "#ffcc00";
+		ctx.beginPath();
+		ctx.arc(orb.x, orb.y, orb.radius * pulse, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+	};
+
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -900,6 +951,9 @@
 		popups = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		orbsCollected = 0;
+		orbStatEl.textContent = `Orbs: ${orbsCollected}`;
+		spawnOrb();
 		combo = 0;
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
@@ -913,6 +967,7 @@
 		// reset while paused doesn't leave a starless canvas until the next unpause.
 		drawNebula(performance.now() / 1000);
 		drawStars(performance.now() / 1000);
+		drawOrb(performance.now() / 1000);
 		drawJelly();
 		// Resetting while paused wiped the overlay text; redraw it so the UI stays consistent.
 		if (paused) drawPauseOverlay();
@@ -944,6 +999,7 @@
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			drawNebula(performance.now() / 1000);
 			drawStars(performance.now() / 1000);
+			drawOrb(performance.now() / 1000);
 			drawJelly();
 		}
 	};
@@ -1036,7 +1092,9 @@
 				maybeSpawnShootingStar();
 				updateShootingStars(dt);
 				drawShootingStars();
+				drawOrb(now / 1000);
 				updateJelly(dt);
+				checkOrbCollision();
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
 				updateRings(dt);

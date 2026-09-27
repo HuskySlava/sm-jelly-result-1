@@ -71,3 +71,4 @@
 <2026-09-27-19:03> (Claude): Added a Zen mode toggle (Z) that hides the title, stats, and controls for a distraction-free view.
 2026-09-27-19:32 (Claude): Added a combo counter that rewards quick consecutive wall bounces with escalating popups.
 <2026-09-27-20:01> (Claude): Added a persisted Best Combo stat that tracks and celebrates the longest bounce streak.
+<2026-09-27-20:32> (Claude): Added a glowing collectible orb the jelly can steer into for bonus points and sound cue.
