@@ -372,6 +372,9 @@
 		const speed = Math.max(Math.hypot(jelly.velX, jelly.velY), 40);
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
+		// Steering can floor a stalled (0-velocity) jelly up to 40px/s, so the
+		// speed/top-speed stats need refreshing here too, not just on bounce/boost/nudge.
+		updateSpeedStat();
 	};
 	let steering = false;
 	canvas.addEventListener("pointerdown", (e) => {
