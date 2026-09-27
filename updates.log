@@ -66,3 +66,4 @@
 2026-09-27-16:02 (Claude): Gave the jelly a cute face whose pupils track its velocity direction.
 <2026-09-27-16:32> (Claude): Added a particle-burst and popup celebration for beating your best survival time, matching the existing bounce-streak celebration.
 <2026-09-27-17:02> (Claude): Added a live FPS counter stat next to the other jelly stats.
+2026-09-27-17:32 (Claude): Added a slowly drifting cosmic nebula gradient behind the stars for extra background atmosphere.

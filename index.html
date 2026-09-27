@@ -199,6 +199,23 @@
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
+	// Slowly drifting cosmic nebula glow behind the stars, so the black backdrop
+	// isn't perfectly flat. Low alpha keeps it from washing out the trail effect.
+	const drawNebula = (time) => {
+		ctx.save();
+		const hue1 = (time * 6) % 360;
+		const hue2 = (hue1 + 60) % 360;
+		const cx = canvas.width * (0.5 + 0.15 * Math.sin(time * 0.05));
+		const cy = canvas.height * (0.5 + 0.15 * Math.cos(time * 0.04));
+		const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, canvas.width * 0.7);
+		gradient.addColorStop(0, `hsla(${hue1}, 70%, 30%, 0.12)`);
+		gradient.addColorStop(0.5, `hsla(${hue2}, 70%, 20%, 0.06)`);
+		gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+		ctx.fillStyle = gradient;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.restore();
+	};
+
 	// Fixed set of twinkling stars gives the black backdrop some depth.
 	const stars = Array.from({ length: 80 }, () => ({
 		x: Math.random() * canvas.width,
@@ -784,6 +801,7 @@
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		// clearRect wipes the stars along with the trail; redraw them immediately so a
 		// reset while paused doesn't leave a starless canvas until the next unpause.
+		drawNebula(performance.now() / 1000);
 		drawStars(performance.now() / 1000);
 		drawJelly();
 		// Resetting while paused wiped the overlay text; redraw it so the UI stays consistent.
@@ -814,6 +832,7 @@
 			// clear() only applies a translucent fade, so without a hard clear here the
 			// "PAUSED" text would ghost-fade in via the trail effect for several frames.
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			drawNebula(performance.now() / 1000);
 			drawStars(performance.now() / 1000);
 			drawJelly();
 		}
@@ -899,6 +918,7 @@
 					}
 				}
 				clear();
+				drawNebula(now / 1000);
 				drawStars(now / 1000);
 				maybeSpawnShootingStar();
 				updateShootingStars(dt);
