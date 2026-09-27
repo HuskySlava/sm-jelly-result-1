@@ -53,3 +53,4 @@
 <2026-09-27-08:31> (Claude): Fixed click/drag steering getting stuck at zero speed when arrow-key nudges canceled velocity to exactly 0.
 2026-09-27-09:31 (Claude): Added Escape key support to close the keyboard shortcuts help overlay.
 <2026-09-27-10:01> (Claude): Fixed touch-drag steering scrolling the page by disabling default touch-action on the canvas.
+<2026-09-27-10:32> (Claude): Added a floating "New Best!" text popup that appears when the jelly beats its high score.

@@ -418,6 +418,32 @@
 		}
 	};
 
+	// A short-lived floating label reinforces "New Best!" moments beyond just the
+	// gold particle burst, since that burst looks identical to a normal bounce's
+	// particles at a glance.
+	let popups = [];
+	const spawnPopup = (x, y, text, color) => {
+		popups.push({ x, y, text, color, vy: -40, life: 1, maxLife: 1 });
+	};
+	const updatePopups = (dt) => {
+		for (const p of popups) {
+			p.y += p.vy * dt;
+			p.life -= dt;
+		}
+		popups = popups.filter(p => p.life > 0);
+	};
+	const drawPopups = () => {
+		for (const p of popups) {
+			ctx.save();
+			ctx.globalAlpha = Math.max(p.life / p.maxLife, 0);
+			ctx.fillStyle = p.color;
+			ctx.font = "bold 20px 'Roboto', sans-serif";
+			ctx.textAlign = "center";
+			ctx.fillText(p.text, p.x, p.y);
+			ctx.restore();
+		}
+	};
+
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -483,7 +509,10 @@
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			spawnRing(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			// Extra gold burst celebrates beating the best-ever bounce streak, on top of the normal impact particles.
-			if (isNewRecord) spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
+			if (isNewRecord) {
+				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Best!", "#ffd700");
+			}
 			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
 			shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);
 			// Squash along the axis of impact and stretch the other, like real jelly.
@@ -599,6 +628,7 @@
 		canvas.style.transform = "";
 		particles = [];
 		rings = [];
+		popups = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		updateSpeedStat();
@@ -697,7 +727,9 @@
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
 				updateRings(dt);
+				updatePopups(dt);
 				drawJelly();
+				drawPopups();
 			}
 			updateFrame();
 		});
