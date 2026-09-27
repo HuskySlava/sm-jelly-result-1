@@ -137,6 +137,7 @@
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
 	<p id="high-score">Best: 0</p>
+	<p id="total-bounces">Total: 0</p>
 	<p id="speed-stat">Speed: 85 px/s</p>
 	<p id="top-speed">Top speed: 0 px/s</p>
 	<div id="controls">
@@ -496,9 +497,17 @@
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
+	// Unlike "Best" (the longest streak without a reset), this counts every
+	// bounce ever landed, across all sessions and resets, and never goes down.
+	const totalBouncesEl = document.querySelector("#total-bounces");
+	let totalBounces = Number(localStorage.getItem("jelly-total-bounces")) || 0;
+	totalBouncesEl.textContent = `Total: ${totalBounces}`;
 	const registerBounce = () => {
 		bounces++;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		totalBounces++;
+		localStorage.setItem("jelly-total-bounces", totalBounces);
+		totalBouncesEl.textContent = `Total: ${totalBounces}`;
 		if (bounces > highScore) {
 			highScore = bounces;
 			localStorage.setItem("jelly-high-score", highScore);
