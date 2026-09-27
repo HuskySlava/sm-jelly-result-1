@@ -246,6 +246,7 @@
 	}
 
 	let breatheTime = 0;
+	let shakeMagnitude = 0;
 	const updateJelly = (dt) => {
 		breatheTime += dt;
 		jelly.x += jelly.velX * dt;
@@ -282,6 +283,8 @@
 			registerBounce();
 			playBounceSound();
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
+			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
+			shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);
 			// Squash along the axis of impact and stretch the other, like real jelly.
 			if (bouncedX && bouncedY) {
 				jelly.scaleX = 0.7;
@@ -311,6 +314,10 @@
 		const ease = 1 - Math.pow(0.001, dt);
 		jelly.scaleX += (1 - jelly.scaleX) * ease;
 		jelly.scaleY += (1 - jelly.scaleY) * ease;
+		// Decay multiplicatively by dt (not a fixed per-frame amount) so the shake
+		// dies out at the same real-world rate regardless of frame rate.
+		shakeMagnitude *= Math.pow(0.0001, dt);
+		if (shakeMagnitude < 0.05) shakeMagnitude = 0;
 	}
 	const drawJelly = () => {
 		const cx = jelly.x + jelly.w / 2;
@@ -334,6 +341,15 @@
 		ctx.fill();
 		ctx.restore();
 		drawParticles();
+		// Nudge the whole canvas element via CSS transform rather than the drawing
+		// context, so the shake doesn't leave unclear trail edges behind.
+		if (shakeMagnitude > 0) {
+			const dx = (Math.random() * 2 - 1) * shakeMagnitude;
+			const dy = (Math.random() * 2 - 1) * shakeMagnitude;
+			canvas.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+		} else {
+			canvas.style.transform = "";
+		}
 	}
 
 	const resetBtn = document.querySelector("#reset-btn");
@@ -345,6 +361,8 @@
 		jelly.color = "#fff";
 		jelly.scaleX = 1;
 		jelly.scaleY = 1;
+		shakeMagnitude = 0;
+		canvas.style.transform = "";
 		particles = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
