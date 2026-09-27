@@ -163,6 +163,7 @@
 		<canvas width="1280" height="720" id="my-canvas"></canvas>
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
+	<p id="combo-stat">Combo: x0</p>
 	<p id="high-score">Best: 0</p>
 	<p id="total-bounces">Total: 0</p>
 	<p id="speed-stat">Speed: 85 px/s</p>
@@ -651,10 +652,21 @@
 		return false;
 	}
 
+	// Rewards bouncing off walls in quick succession; a gap longer than the window
+	// resets the streak, both on the next bounce and passively while idling.
+	const comboStatEl = document.querySelector("#combo-stat");
+	let combo = 0;
+	let lastBounceElapsed = -Infinity;
+	const comboWindow = 1.2; // seconds allowed between bounces to keep the combo alive
+
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
 	const updateJelly = (dt) => {
 		breatheTime += dt;
+		if (combo > 0 && elapsedTime - lastBounceElapsed > comboWindow) {
+			combo = 0;
+			comboStatEl.textContent = `Combo: x${combo}`;
+		}
 		if (gravityOn) {
 			jelly.velY += gravity * dt;
 			const speed = Math.hypot(jelly.velX, jelly.velY);
@@ -704,6 +716,14 @@
 			if (isNewRecord) {
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Best!", "#ffd700");
+			}
+			// Chain bounces within the combo window to build a streak; a colorful
+			// popup celebrates every third step of the streak.
+			combo = (elapsedTime - lastBounceElapsed <= comboWindow) ? combo + 1 : 1;
+			lastBounceElapsed = elapsedTime;
+			comboStatEl.textContent = `Combo: x${combo}`;
+			if (combo >= 3 && combo % 3 === 0) {
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 50, `Combo x${combo}!`, "#ff9100");
 			}
 			// Every 10th bounce gets an extra multicolor confetti burst so milestones
 			// stand out even on runs that don't beat the best streak.
@@ -867,6 +887,9 @@
 		popups = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		combo = 0;
+		lastBounceElapsed = -Infinity;
+		comboStatEl.textContent = `Combo: x${combo}`;
 		elapsedTime = 0;
 		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 		previousBestTime = bestTime;
