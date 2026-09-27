@@ -95,6 +95,7 @@
 		<button id="sound-btn" title="Mute (M)">Sound: On</button>
 		<button id="boost-btn" title="Boost (B)">Boost</button>
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
+		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 	</div>
 </section>
 
@@ -200,6 +201,13 @@
 	gravityBtn.addEventListener("click", () => {
 		gravityOn = !gravityOn;
 		gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
+	});
+
+	const slowmoBtn = document.querySelector("#slowmo-btn");
+	let slowMoOn = false;
+	slowmoBtn.addEventListener("click", () => {
+		slowMoOn = !slowMoOn;
+		slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
 	});
 
 	// Click the canvas to steer the jelly toward that point without changing its speed.
@@ -449,6 +457,8 @@
 			soundBtn.click();
 		} else if (e.code === "KeyG") {
 			gravityBtn.click();
+		} else if (e.code === "KeyS") {
+			slowmoBtn.click();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			const nudge = 30; // px/s added per press, lets players steer without a click
@@ -472,8 +482,10 @@
 		++tick;
 		window.requestAnimationFrame((now) => {
 			// Cap dt so returning from a background tab doesn't teleport the jelly
-			const dt = lastTime === null ? 0 : Math.min((now - lastTime) / 1000, 0.1);
+			const rawDt = lastTime === null ? 0 : Math.min((now - lastTime) / 1000, 0.1);
 			lastTime = now;
+			// Scale time itself (not just drawing) so slow-mo also slows physics, bounces, and shake decay.
+			const dt = slowMoOn ? rawDt * 0.25 : rawDt;
 			if (!paused) {
 				clear();
 				drawStars(now / 1000);
