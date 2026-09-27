@@ -402,6 +402,9 @@
 	const topSpeedEl = document.querySelector("#top-speed");
 	let topSpeed = Number(localStorage.getItem("jelly-top-speed")) || 0;
 	topSpeedEl.textContent = `Top speed: ${topSpeed} px/s`;
+	// Under gravity, speed climbs every single frame while falling, so celebrating
+	// every new record would spam particles/popups; throttle to one every 500ms.
+	let lastSpeedRecordTime = -Infinity;
 	const updateSpeedStat = () => {
 		const speed = Math.round(Math.hypot(jelly.velX, jelly.velY));
 		speedStatEl.textContent = `Speed: ${speed} px/s`;
@@ -409,6 +412,12 @@
 			topSpeed = speed;
 			localStorage.setItem("jelly-top-speed", topSpeed);
 			topSpeedEl.textContent = `Top speed: ${topSpeed} px/s`;
+			const now = performance.now();
+			if (now - lastSpeedRecordTime > 500) {
+				lastSpeedRecordTime = now;
+				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#00e5ff");
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Top Speed!", "#00e5ff");
+			}
 		}
 	}
 	let particles = [];
