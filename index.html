@@ -514,6 +514,16 @@
 	const topSpeedEl = document.querySelector("#top-speed");
 	let topSpeed = Number(localStorage.getItem("jelly-top-speed")) || 0;
 	topSpeedEl.textContent = `Top speed: ${topSpeed} px/s`;
+	// The jelly starts already moving at 60/60 velocity, so without this the "Speed" stat
+	// (which reflects that starting velocity) would show a value higher than a freshly
+	// loaded "Top speed" of 0 — an impossible-looking contradiction on first paint.
+	const initialSpeed = Math.round(Math.hypot(jelly.velX, jelly.velY));
+	speedStatEl.textContent = `Speed: ${initialSpeed} px/s`;
+	if (initialSpeed > topSpeed) {
+		topSpeed = initialSpeed;
+		localStorage.setItem("jelly-top-speed", topSpeed);
+		topSpeedEl.textContent = `Top speed: ${topSpeed} px/s`;
+	}
 	// Under gravity, speed climbs every single frame while falling, so celebrating
 	// every new record would spam particles/popups; throttle to one every 500ms.
 	let lastSpeedRecordTime = -Infinity;
