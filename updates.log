@@ -46,3 +46,4 @@
 <2026-09-27-05:01> (Claude): Added a golden particle burst that celebrates each new best-bounce record.
 2026-09-27-05:31 (Claude): Added a Fullscreen toggle button and F keyboard shortcut for an immersive view.
 2026-09-27-06:02 (Claude): Added a Help overlay (button + H key) listing all keyboard shortcuts.
+2026-09-27-06:31 (Claude): Added a Snapshot button (and P shortcut) to save the canvas as a PNG.

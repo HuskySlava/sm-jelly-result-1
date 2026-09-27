@@ -145,6 +145,7 @@
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
+		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="help-btn" title="Help (H)">Help</button>
 	</div>
 </section>
@@ -160,6 +161,7 @@
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>F</kbd> Fullscreen</li>
+			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>H</kbd> Toggle this help</li>
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
 			<li>Click the canvas to steer</li>
@@ -509,6 +511,14 @@
 		fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
 	});
 
+	const snapshotBtn = document.querySelector("#snapshot-btn");
+	snapshotBtn.addEventListener("click", () => {
+		const link = document.createElement("a");
+		link.download = `canvas-jelly-${Date.now()}.png`;
+		link.href = canvas.toDataURL("image/png");
+		link.click();
+	});
+
 	const helpBtn = document.querySelector("#help-btn");
 	const helpOverlay = document.querySelector("#help-overlay");
 	const toggleHelp = () => helpOverlay.classList.toggle("open");
@@ -580,6 +590,8 @@
 			trailBtn.click();
 		} else if (e.code === "KeyF") {
 			fullscreenBtn.click();
+		} else if (e.code === "KeyP") {
+			snapshotBtn.click();
 		} else if (e.code === "KeyH") {
 			toggleHelp();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
