@@ -44,3 +44,4 @@
 <2026-09-27-04:01> (Claude): Fixed bug where resetting while paused wiped the background stars until unpaused.
 2026-09-27-04:31 (Claude): Added a toggleable particle trail effect (button + T key) that follows the jelly as it moves.
 <2026-09-27-05:01> (Claude): Added a golden particle burst that celebrates each new best-bounce record.
+2026-09-27-05:31 (Claude): Added a Fullscreen toggle button and F keyboard shortcut for an immersive view.

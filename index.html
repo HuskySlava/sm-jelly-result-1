@@ -97,6 +97,7 @@
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
+		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 	</div>
 </section>
 
@@ -430,6 +431,18 @@
 		}
 	}
 
+	const fullscreenBtn = document.querySelector("#fullscreen-btn");
+	fullscreenBtn.addEventListener("click", () => {
+		if (document.fullscreenElement) {
+			document.exitFullscreen();
+		} else {
+			document.documentElement.requestFullscreen();
+		}
+	});
+	document.addEventListener("fullscreenchange", () => {
+		fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
+	});
+
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {
 		jelly.x = Math.floor(canvas.width / 2);
@@ -490,6 +503,8 @@
 			slowmoBtn.click();
 		} else if (e.code === "KeyT") {
 			trailBtn.click();
+		} else if (e.code === "KeyF") {
+			fullscreenBtn.click();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			const nudge = 30; // px/s added per press, lets players steer without a click
