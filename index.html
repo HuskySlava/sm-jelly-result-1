@@ -40,6 +40,9 @@
 			cursor: crosshair;
 			border-radius: 8px;
 			transition: box-shadow 0.2s ease;
+			/* Without this, dragging to steer on touch devices also scrolls the
+			   page instead of just steering the jelly. */
+			touch-action: none;
 		}
 
 		#bounce-counter {
