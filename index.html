@@ -303,7 +303,9 @@
 			highScore = bounces;
 			localStorage.setItem("jelly-high-score", highScore);
 			highScoreEl.textContent = `Best: ${highScore}`;
+			return true;
 		}
+		return false;
 	}
 
 	let breatheTime = 0;
@@ -351,9 +353,11 @@
 		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
 		if (bouncedX || bouncedY) {
 			jelly.color = randomColor();
-			registerBounce();
+			const isNewRecord = registerBounce();
 			playBounceSound();
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
+			// Extra gold burst celebrates beating the best-ever bounce streak, on top of the normal impact particles.
+			if (isNewRecord) spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
 			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
 			shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);
 			// Squash along the axis of impact and stretch the other, like real jelly.
