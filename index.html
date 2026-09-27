@@ -141,6 +141,7 @@
 	<p id="speed-stat">Speed: 85 px/s</p>
 	<p id="top-speed">Top speed: 0 px/s</p>
 	<p id="time-stat">Time: 0.0s</p>
+	<p id="best-time">Best time: 0.0s</p>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
@@ -498,6 +499,10 @@
 	// Wall-clock survival time since the last reset, shown alongside the other stats.
 	const timeStatEl = document.querySelector("#time-stat");
 	let elapsedTime = 0;
+	// Longest survival streak ever reached, persisted like top speed so it survives resets/reloads.
+	const bestTimeEl = document.querySelector("#best-time");
+	let bestTime = Number(localStorage.getItem("jelly-best-time")) || 0;
+	bestTimeEl.textContent = `Best time: ${bestTime.toFixed(1)}s`;
 
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
@@ -790,6 +795,11 @@
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
 				timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
+				if (elapsedTime > bestTime) {
+					bestTime = elapsedTime;
+					localStorage.setItem("jelly-best-time", bestTime);
+					bestTimeEl.textContent = `Best time: ${bestTime.toFixed(1)}s`;
+				}
 				clear();
 				drawStars(now / 1000);
 				maybeSpawnShootingStar();

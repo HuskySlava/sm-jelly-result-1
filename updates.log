@@ -59,3 +59,4 @@
 <2026-09-27-12:02> (Claude): Added double-click/tap on canvas as a touch-friendly gesture to trigger Boost.
 2026-09-27-12:32 (Claude): Added a persistent lifetime Total bounces counter alongside the existing Best streak stat.
 <2026-09-27-13:02> (Claude): Added a live survival timer stat that tracks elapsed time since the last reset.
+2026-09-27-13:31 (Claude): Added persisted 'Best time' stat tracking the longest survival streak across sessions.
