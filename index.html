@@ -150,6 +150,7 @@
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
+		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="help-btn" title="Help (H)">Help</button>
@@ -166,6 +167,7 @@
 			<li><kbd>G</kbd> Toggle gravity</li>
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
+			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>H</kbd> Toggle this help</li>
@@ -346,6 +348,21 @@
 		trailOn = !trailOn;
 		localStorage.setItem("jelly-trail-on", trailOn);
 		trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
+	});
+
+	// Lets motion-sensitive players disable the camera-shake impact effect
+	// without losing the other bounce feedback (particles, rings, sound).
+	const shakeBtn = document.querySelector("#shake-btn");
+	let shakeOn = localStorage.getItem("jelly-shake-on") !== "false";
+	shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
+	shakeBtn.addEventListener("click", () => {
+		shakeOn = !shakeOn;
+		localStorage.setItem("jelly-shake-on", shakeOn);
+		shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
+		if (!shakeOn) {
+			shakeMagnitude = 0;
+			canvas.style.transform = "";
+		}
 	});
 	// A single faint particle per frame, drifting slower and dying quicker than a
 	// bounce burst, so the trail reads as a soft wake rather than a firework.
@@ -591,7 +608,9 @@
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Best!", "#ffd700");
 			}
 			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
-			shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);
+			if (shakeOn) {
+				shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);
+			}
 			// Squash along the axis of impact and stretch the other, like real jelly.
 			if (bouncedX && bouncedY) {
 				jelly.scaleX = 0.7;
@@ -764,6 +783,8 @@
 			slowmoBtn.click();
 		} else if (e.code === "KeyT") {
 			trailBtn.click();
+		} else if (e.code === "KeyK") {
+			shakeBtn.click();
 		} else if (e.code === "KeyF") {
 			fullscreenBtn.click();
 		} else if (e.code === "KeyP") {
