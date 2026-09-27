@@ -210,7 +210,9 @@
 		}
 	}
 
+	let breatheTime = 0;
 	const updateJelly = (dt) => {
+		breatheTime += dt;
 		jelly.x += jelly.velX * dt;
 		jelly.y += jelly.velY * dt;
 		const maxX = canvas.width - jelly.w;
@@ -280,7 +282,9 @@
 		const cy = jelly.y + jelly.h / 2;
 		ctx.save();
 		ctx.translate(cx, cy);
-		ctx.scale(jelly.scaleX, jelly.scaleY);
+		// Subtle idle breathing so the jelly feels alive even between bounces.
+		const breathe = 1 + Math.sin(breatheTime * 3) * 0.04;
+		ctx.scale(jelly.scaleX * breathe, jelly.scaleY * breathe);
 		ctx.shadowColor = jelly.color;
 		ctx.shadowBlur = 20;
 		// Glossy radial gradient + rounded corners make it read as squishy jelly

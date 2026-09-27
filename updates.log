@@ -34,3 +34,4 @@
 <2026-09-26-22:31> (Claude): Fixed bug where arrow-key nudges could zero out velocity, permanently freezing the jelly even after boosting.
 2026-09-26-23:01 (Claude): Fixed a bug where a wall bounce could retrigger every frame forever when velocity hit exactly zero at the boundary.
 <2026-09-26-23:31> (Claude): Gave the jelly a glossy radial-gradient fill and rounded corners instead of a flat square.
+<2026-09-27-00:01> (Claude): Added a subtle idle breathing pulse animation so the jelly feels alive between bounces.
