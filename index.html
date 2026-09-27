@@ -77,6 +77,53 @@
 		#controls button:active {
 			transform: scale(0.95);
 		}
+
+		#help-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.75);
+			align-items: center;
+			justify-content: center;
+			z-index: 10;
+		}
+
+		#help-overlay.open {
+			display: flex;
+		}
+
+		#help-panel {
+			background: #111;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 12px;
+			padding: 1.5rem 2rem;
+			max-width: 320px;
+		}
+
+		#help-panel h2 {
+			margin-top: 0;
+			font-size: 1.1rem;
+		}
+
+		#help-panel ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			font-size: 0.9rem;
+			line-height: 1.8;
+		}
+
+		#help-panel kbd {
+			display: inline-block;
+			min-width: 1.4em;
+			text-align: center;
+			background: rgba(255, 255, 255, 0.1);
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			border-radius: 4px;
+			padding: 0.1em 0.4em;
+			margin-right: 0.5em;
+			font-family: inherit;
+		}
 	</style>
 </head>
 <body>
@@ -98,8 +145,27 @@
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
+		<button id="help-btn" title="Help (H)">Help</button>
 	</div>
 </section>
+<div id="help-overlay">
+	<div id="help-panel">
+		<h2>Keyboard Shortcuts</h2>
+		<ul>
+			<li><kbd>Space</kbd> Pause / Resume</li>
+			<li><kbd>R</kbd> Reset</li>
+			<li><kbd>B</kbd> Boost</li>
+			<li><kbd>M</kbd> Mute / Unmute</li>
+			<li><kbd>G</kbd> Toggle gravity</li>
+			<li><kbd>S</kbd> Toggle slow-mo</li>
+			<li><kbd>T</kbd> Toggle trail</li>
+			<li><kbd>F</kbd> Fullscreen</li>
+			<li><kbd>H</kbd> Toggle this help</li>
+			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
+			<li>Click the canvas to steer</li>
+		</ul>
+	</div>
+</div>
 
 <script>
 	const canvas = document.querySelector("#my-canvas");
@@ -443,6 +509,15 @@
 		fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
 	});
 
+	const helpBtn = document.querySelector("#help-btn");
+	const helpOverlay = document.querySelector("#help-overlay");
+	const toggleHelp = () => helpOverlay.classList.toggle("open");
+	helpBtn.addEventListener("click", toggleHelp);
+	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
+	helpOverlay.addEventListener("click", (e) => {
+		if (e.target === helpOverlay) toggleHelp();
+	});
+
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {
 		jelly.x = Math.floor(canvas.width / 2);
@@ -505,6 +580,8 @@
 			trailBtn.click();
 		} else if (e.code === "KeyF") {
 			fullscreenBtn.click();
+		} else if (e.code === "KeyH") {
+			toggleHelp();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			const nudge = 30; // px/s added per press, lets players steer without a click
