@@ -110,6 +110,26 @@
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
+	// Fixed set of twinkling stars gives the black backdrop some depth.
+	const stars = Array.from({ length: 80 }, () => ({
+		x: Math.random() * canvas.width,
+		y: Math.random() * canvas.height,
+		radius: Math.random() * 1.5 + 0.5,
+		phase: Math.random() * Math.PI * 2,
+		speed: 0.5 + Math.random() * 1.5
+	}));
+	const drawStars = (time) => {
+		ctx.save();
+		ctx.fillStyle = "#fff";
+		for (const s of stars) {
+			ctx.globalAlpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(time * s.speed + s.phase));
+			ctx.beginPath();
+			ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+			ctx.fill();
+		}
+		ctx.restore();
+	}
+
 	const jelly = {
 		x: Math.floor(canvas.width / 2),
 		y: Math.floor(canvas.height / 2),
@@ -435,6 +455,7 @@
 			lastTime = now;
 			if (!paused) {
 				clear();
+				drawStars(now / 1000);
 				updateJelly(dt);
 				updateParticles(dt);
 				drawJelly();
