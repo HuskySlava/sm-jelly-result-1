@@ -73,3 +73,4 @@
 <2026-09-27-20:01> (Claude): Added a persisted Best Combo stat that tracks and celebrates the longest bounce streak.
 <2026-09-27-20:32> (Claude): Added a glowing collectible orb the jelly can steer into for bonus points and sound cue.
 <2026-09-27-21:02> (Claude): Added a Share button (C) that copies current run stats to the clipboard.
+<2026-09-27-21:35> (Claude): Added an orb-collection streak stat with a persisted best-streak record.

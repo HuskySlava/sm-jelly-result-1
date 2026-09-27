@@ -172,6 +172,8 @@
 	<p id="time-stat">Time: 0.0s</p>
 	<p id="best-time">Best time: 0.0s</p>
 	<p id="orb-stat">Orbs: 0</p>
+	<p id="orb-streak-stat">Orb streak: x0</p>
+	<p id="best-orb-streak">Best orb streak: x0</p>
 	<p id="fps-stat">FPS: 0</p>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
@@ -659,12 +661,30 @@
 		osc.start();
 		osc.stop(audioCtx.currentTime + 0.2);
 	};
+	// Chains orb pickups the same way the wall-bounce combo chains bounces: a gap
+	// longer than the window resets the streak, both here and passively while idling.
+	const orbStreakEl = document.querySelector("#orb-streak-stat");
+	const bestOrbStreakEl = document.querySelector("#best-orb-streak");
+	let orbStreak = 0;
+	let lastOrbElapsed = -Infinity;
+	const orbStreakWindow = 4; // seconds allowed between orb pickups to keep the streak alive
+	let bestOrbStreak = Number(localStorage.getItem("jelly-best-orb-streak")) || 0;
+	bestOrbStreakEl.textContent = `Best orb streak: x${bestOrbStreak}`;
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		if (Math.hypot(cx - orb.x, cy - orb.y) < orb.radius + jelly.w / 2) {
 			orbsCollected++;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
+			orbStreak = (elapsedTime - lastOrbElapsed <= orbStreakWindow) ? orbStreak + 1 : 1;
+			lastOrbElapsed = elapsedTime;
+			orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
+			if (orbStreak > bestOrbStreak) {
+				bestOrbStreak = orbStreak;
+				localStorage.setItem("jelly-best-orb-streak", bestOrbStreak);
+				bestOrbStreakEl.textContent = `Best orb streak: x${bestOrbStreak}`;
+				spawnPopup(orb.x, orb.y - 30, "New Best Streak!", "#ffcc00");
+			}
 			playOrbSound();
 			spawnParticles(orb.x, orb.y, "#ffcc00");
 			spawnPopup(orb.x, orb.y - 10, "+1 Orb!", "#ffcc00");
@@ -725,6 +745,10 @@
 		if (combo > 0 && elapsedTime - lastBounceElapsed > comboWindow) {
 			combo = 0;
 			comboStatEl.textContent = `Combo: x${combo}`;
+		}
+		if (orbStreak > 0 && elapsedTime - lastOrbElapsed > orbStreakWindow) {
+			orbStreak = 0;
+			orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
 		}
 		if (gravityOn) {
 			jelly.velY += gravity * dt;
@@ -919,7 +943,8 @@
 	const shareBtn = document.querySelector("#share-btn");
 	const buildShareText = () => (
 		`Canvas Jelly — Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
-		`Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | Orbs: ${orbsCollected}`
+		`Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
+		`Orbs: ${orbsCollected} (Streak x${orbStreak}, Best x${bestOrbStreak})`
 	);
 	const flashShareBtn = (label) => {
 		shareBtn.textContent = label;
@@ -993,6 +1018,9 @@
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		orbsCollected = 0;
 		orbStatEl.textContent = `Orbs: ${orbsCollected}`;
+		orbStreak = 0;
+		lastOrbElapsed = -Infinity;
+		orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
 		spawnOrb();
 		combo = 0;
 		lastBounceElapsed = -Infinity;
