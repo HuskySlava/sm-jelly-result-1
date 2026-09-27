@@ -658,6 +658,8 @@
 			snapshotBtn.click();
 		} else if (e.code === "KeyH") {
 			toggleHelp();
+		} else if (e.code === "Escape" && helpOverlay.classList.contains("open")) {
+			toggleHelp();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			const nudge = 30; // px/s added per press, lets players steer without a click
