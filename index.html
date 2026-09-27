@@ -217,7 +217,9 @@
 
 	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
 
-	let soundOn = true;
+	// Persist toggle preferences so they survive a page reload instead of
+	// silently resetting to defaults every time.
+	let soundOn = localStorage.getItem("jelly-sound-on") !== "false";
 	let audioCtx = null;
 	const unlockAudio = () => {
 		if (!audioCtx) {
@@ -245,8 +247,11 @@
 		osc.stop(audioCtx.currentTime + 0.15);
 	};
 	const soundBtn = document.querySelector("#sound-btn");
+	soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
+	soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
 	soundBtn.addEventListener("click", () => {
 		soundOn = !soundOn;
+		localStorage.setItem("jelly-sound-on", soundOn);
 		soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
 		soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
 	});
@@ -266,24 +271,30 @@
 	});
 
 	const gravityBtn = document.querySelector("#gravity-btn");
-	let gravityOn = false;
+	let gravityOn = localStorage.getItem("jelly-gravity-on") === "true";
 	const gravity = 400; // px/s^2 downward pull, only applied while gravity mode is on
+	gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
 	gravityBtn.addEventListener("click", () => {
 		gravityOn = !gravityOn;
+		localStorage.setItem("jelly-gravity-on", gravityOn);
 		gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
 	});
 
 	const slowmoBtn = document.querySelector("#slowmo-btn");
-	let slowMoOn = false;
+	let slowMoOn = localStorage.getItem("jelly-slowmo-on") === "true";
+	slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
 	slowmoBtn.addEventListener("click", () => {
 		slowMoOn = !slowMoOn;
+		localStorage.setItem("jelly-slowmo-on", slowMoOn);
 		slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
 	});
 
 	const trailBtn = document.querySelector("#trail-btn");
-	let trailOn = false;
+	let trailOn = localStorage.getItem("jelly-trail-on") === "true";
+	trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
 	trailBtn.addEventListener("click", () => {
 		trailOn = !trailOn;
+		localStorage.setItem("jelly-trail-on", trailOn);
 		trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
 	});
 	// A single faint particle per frame, drifting slower and dying quicker than a
