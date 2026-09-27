@@ -96,6 +96,7 @@
 		<button id="boost-btn" title="Boost (B)">Boost</button>
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
+		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 	</div>
 </section>
 
@@ -209,6 +210,27 @@
 		slowMoOn = !slowMoOn;
 		slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
 	});
+
+	const trailBtn = document.querySelector("#trail-btn");
+	let trailOn = false;
+	trailBtn.addEventListener("click", () => {
+		trailOn = !trailOn;
+		trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
+	});
+	// A single faint particle per frame, drifting slower and dying quicker than a
+	// bounce burst, so the trail reads as a soft wake rather than a firework.
+	const spawnTrailParticle = (x, y, color) => {
+		const angle = Math.random() * Math.PI * 2;
+		const speed = 5 + Math.random() * 15;
+		particles.push({
+			x, y,
+			vx: Math.cos(angle) * speed,
+			vy: Math.sin(angle) * speed,
+			life: 0.3,
+			maxLife: 0.3,
+			color
+		});
+	};
 
 	// Click the canvas to steer the jelly toward that point without changing its speed.
 	canvas.addEventListener("click", (e) => {
@@ -462,6 +484,8 @@
 			gravityBtn.click();
 		} else if (e.code === "KeyS") {
 			slowmoBtn.click();
+		} else if (e.code === "KeyT") {
+			trailBtn.click();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			const nudge = 30; // px/s added per press, lets players steer without a click
@@ -493,6 +517,7 @@
 				clear();
 				drawStars(now / 1000);
 				updateJelly(dt);
+				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
 				drawJelly();
 			}
