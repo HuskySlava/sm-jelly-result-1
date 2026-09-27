@@ -164,7 +164,7 @@
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>H</kbd> Toggle this help</li>
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
-			<li>Click the canvas to steer</li>
+			<li>Click or drag on the canvas to steer</li>
 		</ul>
 	</div>
 </div>
@@ -301,17 +301,31 @@
 		});
 	};
 
-	// Click the canvas to steer the jelly toward that point without changing its speed.
-	canvas.addEventListener("click", (e) => {
+	// Click (or press-and-drag) on the canvas to steer the jelly toward that point
+	// without changing its speed. Dragging re-steers continuously, not just on click.
+	const steerToward = (clientX, clientY) => {
 		const rect = canvas.getBoundingClientRect();
-		const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
-		const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+		const pointX = (clientX - rect.left) * (canvas.width / rect.width);
+		const pointY = (clientY - rect.top) * (canvas.height / rect.height);
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
-		const angle = Math.atan2(clickY - cy, clickX - cx);
+		const angle = Math.atan2(pointY - cy, pointX - cx);
 		const speed = Math.hypot(jelly.velX, jelly.velY);
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
+	};
+	let steering = false;
+	canvas.addEventListener("pointerdown", (e) => {
+		steering = true;
+		steerToward(e.clientX, e.clientY);
+	});
+	// Listen on window (not the canvas) so steering keeps tracking the pointer
+	// even if it drifts off the canvas edge mid-drag.
+	window.addEventListener("pointermove", (e) => {
+		if (steering) steerToward(e.clientX, e.clientY);
+	});
+	window.addEventListener("pointerup", () => {
+		steering = false;
 	});
 
 	const bounceCounter = document.querySelector("#bounce-counter");
