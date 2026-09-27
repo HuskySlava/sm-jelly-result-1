@@ -436,6 +436,11 @@
 	canvas.addEventListener("pointerdown", (e) => {
 		steering = true;
 		steerToward(e.clientX, e.clientY);
+		const rect = canvas.getBoundingClientRect();
+		spawnClickRipple(
+			(e.clientX - rect.left) * (canvas.width / rect.width),
+			(e.clientY - rect.top) * (canvas.height / rect.height)
+		);
 	});
 	// Listen on window (not the canvas) so steering keeps tracking the pointer
 	// even if it drifts off the canvas edge mid-drag.
@@ -524,6 +529,32 @@
 			ctx.globalAlpha = Math.max(r.life / r.maxLife, 0);
 			ctx.strokeStyle = r.color;
 			ctx.lineWidth = 3;
+			ctx.beginPath();
+			ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.restore();
+		}
+	};
+
+	// A quick fading ripple at the tap/click point confirms where a steer landed,
+	// since touch devices have no cursor to show that otherwise.
+	let clickRipples = [];
+	const spawnClickRipple = (x, y) => {
+		clickRipples.push({ x, y, radius: 2, life: 0.35, maxLife: 0.35 });
+	};
+	const updateClickRipples = (dt) => {
+		for (const r of clickRipples) {
+			r.radius += 90 * dt;
+			r.life -= dt;
+		}
+		clickRipples = clickRipples.filter(r => r.life > 0);
+	};
+	const drawClickRipples = () => {
+		for (const r of clickRipples) {
+			ctx.save();
+			ctx.globalAlpha = Math.max(r.life / r.maxLife, 0) * 0.7;
+			ctx.strokeStyle = "#fff";
+			ctx.lineWidth = 2;
 			ctx.beginPath();
 			ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
 			ctx.stroke();
@@ -734,6 +765,7 @@
 		ctx.restore();
 		drawParticles();
 		drawRings();
+		drawClickRipples();
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
 		// whole scene feels lit by it rather than just the sprite itself.
 		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
@@ -790,6 +822,7 @@
 		canvas.style.transform = "";
 		particles = [];
 		rings = [];
+		clickRipples = [];
 		popups = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
@@ -927,6 +960,7 @@
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
 				updateRings(dt);
+				updateClickRipples(dt);
 				updatePopups(dt);
 				drawJelly();
 				drawPopups();
