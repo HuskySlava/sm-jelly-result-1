@@ -168,6 +168,7 @@
 			<li><kbd>H</kbd> Toggle this help</li>
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
 			<li>Click or drag on the canvas to steer</li>
+			<li>Double-click/tap canvas to boost</li>
 		</ul>
 	</div>
 </div>
@@ -389,6 +390,8 @@
 	window.addEventListener("pointerup", () => {
 		steering = false;
 	});
+	// Touch/mouse users have no keyboard, so give them a gesture equivalent to the B shortcut.
+	canvas.addEventListener("dblclick", () => boostBtn.click());
 
 	const bounceCounter = document.querySelector("#bounce-counter");
 	const highScoreEl = document.querySelector("#high-score");
