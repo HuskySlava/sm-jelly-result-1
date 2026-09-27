@@ -164,6 +164,7 @@
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
 	<p id="combo-stat">Combo: x0</p>
+	<p id="best-combo">Best combo: x0</p>
 	<p id="high-score">Best: 0</p>
 	<p id="total-bounces">Total: 0</p>
 	<p id="speed-stat">Speed: 85 px/s</p>
@@ -659,6 +660,11 @@
 	let lastBounceElapsed = -Infinity;
 	const comboWindow = 1.2; // seconds allowed between bounces to keep the combo alive
 
+	// Longest bounce streak ever landed, persisted like top speed/high score so it survives resets/reloads.
+	const bestComboEl = document.querySelector("#best-combo");
+	let bestCombo = Number(localStorage.getItem("jelly-best-combo")) || 0;
+	bestComboEl.textContent = `Best combo: x${bestCombo}`;
+
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
 	const updateJelly = (dt) => {
@@ -724,6 +730,13 @@
 			comboStatEl.textContent = `Combo: x${combo}`;
 			if (combo >= 3 && combo % 3 === 0) {
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 50, `Combo x${combo}!`, "#ff9100");
+			}
+			if (combo > bestCombo) {
+				bestCombo = combo;
+				localStorage.setItem("jelly-best-combo", bestCombo);
+				bestComboEl.textContent = `Best combo: x${bestCombo}`;
+				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#7cff00");
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 70, "New Best Combo!", "#7cff00");
 			}
 			// Every 10th bounce gets an extra multicolor confetti burst so milestones
 			// stand out even on runs that don't beat the best streak.
