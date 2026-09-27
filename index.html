@@ -627,6 +627,25 @@
 		}
 	};
 
+	// A shrinking ring around the jelly shows how much of the combo window is left,
+	// so players can see the streak is about to expire instead of being surprised
+	// when it silently resets to x0.
+	const drawComboTimer = () => {
+		if (combo <= 0) return;
+		const remaining = 1 - (elapsedTime - lastBounceElapsed) / comboWindow;
+		if (remaining <= 0) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const radius = Math.max(jelly.w, jelly.h) * 0.9;
+		ctx.save();
+		ctx.strokeStyle = "#ff9100";
+		ctx.lineWidth = 3;
+		ctx.beginPath();
+		ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * remaining);
+		ctx.stroke();
+		ctx.restore();
+	};
+
 	// A short-lived floating label reinforces "New Best!" moments beyond just the
 	// gold particle burst, since that burst looks identical to a normal bounce's
 	// particles at a glance.
@@ -1238,6 +1257,7 @@
 				updateClickRipples(dt);
 				updatePopups(dt);
 				drawJelly();
+				drawComboTimer();
 				drawPopups();
 			}
 			updateFrame();
