@@ -74,3 +74,4 @@
 <2026-09-27-20:32> (Claude): Added a glowing collectible orb the jelly can steer into for bonus points and sound cue.
 <2026-09-27-21:02> (Claude): Added a Share button (C) that copies current run stats to the clipboard.
 <2026-09-27-21:35> (Claude): Added an orb-collection streak stat with a persisted best-streak record.
+2026-09-27-22:02 (Claude): Added a toggleable wind mode with a corner arrow indicator showing gust direction and strength.
