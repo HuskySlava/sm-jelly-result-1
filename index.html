@@ -420,6 +420,9 @@
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		// clearRect wipes the stars along with the trail; redraw them immediately so a
+		// reset while paused doesn't leave a starless canvas until the next unpause.
+		drawStars(performance.now() / 1000);
 		drawJelly();
 		// Resetting while paused wiped the overlay text; redraw it so the UI stays consistent.
 		if (paused) drawPauseOverlay();

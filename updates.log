@@ -41,3 +41,4 @@
 <2026-09-27-02:31> (Claude): Added a twinkling starfield background behind the bouncing jelly for extra visual depth.
 2026-09-27-03:02 (Claude): Added a toggleable gravity mode (button + G key) that makes the jelly fall and bounce like a ball.
 2026-09-27-03:32 (Claude): Added a Slow-mo toggle (button + S key) that slows physics, bounces, and shake for a cinematic effect.
+<2026-09-27-04:01> (Claude): Fixed bug where resetting while paused wiped the background stars until unpaused.
