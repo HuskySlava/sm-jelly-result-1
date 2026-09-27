@@ -68,3 +68,4 @@
 <2026-09-27-17:02> (Claude): Added a live FPS counter stat next to the other jelly stats.
 2026-09-27-17:32 (Claude): Added a slowly drifting cosmic nebula gradient behind the stars for extra background atmosphere.
 2026-09-27-18:33 (Claude): Fixed pause bug where boost, steering, and arrow nudges could still change velocity while paused.
+<2026-09-27-19:03> (Claude): Added a Zen mode toggle (Z) that hides the title, stats, and controls for a distraction-free view.
