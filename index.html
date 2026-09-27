@@ -389,6 +389,32 @@
 		}
 	};
 
+	// A quick expanding, fading ring at the impact point reinforces the bounce
+	// without competing with the particle burst or screen shake.
+	let rings = [];
+	const spawnRing = (x, y, color) => {
+		rings.push({ x, y, radius: 4, life: 0.4, maxLife: 0.4, color });
+	};
+	const updateRings = (dt) => {
+		for (const r of rings) {
+			r.radius += 220 * dt;
+			r.life -= dt;
+		}
+		rings = rings.filter(r => r.life > 0);
+	};
+	const drawRings = () => {
+		for (const r of rings) {
+			ctx.save();
+			ctx.globalAlpha = Math.max(r.life / r.maxLife, 0);
+			ctx.strokeStyle = r.color;
+			ctx.lineWidth = 3;
+			ctx.beginPath();
+			ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.restore();
+		}
+	};
+
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -452,6 +478,7 @@
 			const isNewRecord = registerBounce();
 			playBounceSound();
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
+			spawnRing(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			// Extra gold burst celebrates beating the best-ever bounce streak, on top of the normal impact particles.
 			if (isNewRecord) spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
 			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
@@ -512,6 +539,7 @@
 		ctx.fill();
 		ctx.restore();
 		drawParticles();
+		drawRings();
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
 		// whole scene feels lit by it rather than just the sprite itself.
 		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
@@ -567,6 +595,7 @@
 		shakeMagnitude = 0;
 		canvas.style.transform = "";
 		particles = [];
+		rings = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		updateSpeedStat();
@@ -662,6 +691,7 @@
 				updateJelly(dt);
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
+				updateRings(dt);
 				drawJelly();
 			}
 			updateFrame();
