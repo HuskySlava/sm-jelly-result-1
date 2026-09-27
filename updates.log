@@ -48,3 +48,4 @@
 2026-09-27-06:02 (Claude): Added a Help overlay (button + H key) listing all keyboard shortcuts.
 2026-09-27-06:31 (Claude): Added a Snapshot button (and P shortcut) to save the canvas as a PNG.
 <2026-09-27-07:01> (Claude): Added press-and-drag steering so holding the pointer continuously redirects the jelly, not just on click.
+<2026-09-27-07:31> (Claude): Fixed the PAUSED overlay text ghost-fading in over several frames after unpausing.

@@ -583,7 +583,15 @@
 		pauseBtn.textContent = paused ? "Resume" : "Pause";
 		pauseBtn.title = paused ? "Resume (Space)" : "Pause (Space)";
 		// Give visual feedback on the canvas itself, not just the button label
-		if (paused) drawPauseOverlay();
+		if (paused) {
+			drawPauseOverlay();
+		} else {
+			// clear() only applies a translucent fade, so without a hard clear here the
+			// "PAUSED" text would ghost-fade in via the trail effect for several frames.
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			drawStars(performance.now() / 1000);
+			drawJelly();
+		}
 	};
 	pauseBtn.addEventListener("click", togglePause);
 	window.addEventListener("keydown", (e) => {
