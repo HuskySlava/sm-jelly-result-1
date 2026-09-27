@@ -58,3 +58,4 @@
 <2026-09-27-11:31> (Claude): Fixed speed/top-speed stat not updating when steering via click-drag.
 <2026-09-27-12:02> (Claude): Added double-click/tap on canvas as a touch-friendly gesture to trigger Boost.
 2026-09-27-12:32 (Claude): Added a persistent lifetime Total bounces counter alongside the existing Best streak stat.
+<2026-09-27-13:02> (Claude): Added a live survival timer stat that tracks elapsed time since the last reset.

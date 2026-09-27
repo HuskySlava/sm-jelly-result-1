@@ -140,6 +140,7 @@
 	<p id="total-bounces">Total: 0</p>
 	<p id="speed-stat">Speed: 85 px/s</p>
 	<p id="top-speed">Top speed: 0 px/s</p>
+	<p id="time-stat">Time: 0.0s</p>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
@@ -494,6 +495,10 @@
 		}
 	};
 
+	// Wall-clock survival time since the last reset, shown alongside the other stats.
+	const timeStatEl = document.querySelector("#time-stat");
+	let elapsedTime = 0;
+
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -689,6 +694,8 @@
 		popups = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		elapsedTime = 0;
+		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		// clearRect wipes the stars along with the trail; redraw them immediately so a
@@ -779,6 +786,10 @@
 			// Scale time itself (not just drawing) so slow-mo also slows physics, bounces, and shake decay.
 			const dt = slowMoOn ? rawDt * 0.25 : rawDt;
 			if (!paused) {
+				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
+				// real elapsed time rather than appearing to pause during slow-mo.
+				elapsedTime += rawDt;
+				timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 				clear();
 				drawStars(now / 1000);
 				maybeSpawnShootingStar();
