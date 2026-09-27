@@ -205,6 +205,49 @@
 		ctx.restore();
 	}
 
+	// Occasional shooting stars streak across the backdrop for extra ambient flair.
+	let shootingStars = [];
+	const maybeSpawnShootingStar = () => {
+		if (Math.random() < 0.004) {
+			const fromLeft = Math.random() < 0.5;
+			shootingStars.push({
+				x: fromLeft ? -20 : canvas.width + 20,
+				y: Math.random() * canvas.height * 0.6,
+				vx: (fromLeft ? 1 : -1) * (400 + Math.random() * 200),
+				vy: 120 + Math.random() * 60,
+				life: 1,
+				maxLife: 1
+			});
+		}
+	};
+	const updateShootingStars = (dt) => {
+		for (const s of shootingStars) {
+			s.x += s.vx * dt;
+			s.y += s.vy * dt;
+			s.life -= dt * 1.2;
+		}
+		shootingStars = shootingStars.filter(s => s.life > 0);
+	};
+	const drawShootingStars = () => {
+		ctx.save();
+		for (const s of shootingStars) {
+			ctx.globalAlpha = Math.max(s.life / s.maxLife, 0);
+			const angle = Math.atan2(s.vy, s.vx);
+			const tailX = s.x - Math.cos(angle) * 40;
+			const tailY = s.y - Math.sin(angle) * 40;
+			const gradient = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+			gradient.addColorStop(0, "#fff");
+			gradient.addColorStop(1, "rgba(255,255,255,0)");
+			ctx.strokeStyle = gradient;
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			ctx.moveTo(s.x, s.y);
+			ctx.lineTo(tailX, tailY);
+			ctx.stroke();
+		}
+		ctx.restore();
+	};
+
 	const jelly = {
 		x: Math.floor(canvas.width / 2),
 		y: Math.floor(canvas.height / 2),
@@ -723,6 +766,9 @@
 			if (!paused) {
 				clear();
 				drawStars(now / 1000);
+				maybeSpawnShootingStar();
+				updateShootingStars(dt);
+				drawShootingStars();
 				updateJelly(dt);
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);

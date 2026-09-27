@@ -54,3 +54,4 @@
 2026-09-27-09:31 (Claude): Added Escape key support to close the keyboard shortcuts help overlay.
 <2026-09-27-10:01> (Claude): Fixed touch-drag steering scrolling the page by disabling default touch-action on the canvas.
 <2026-09-27-10:32> (Claude): Added a floating "New Best!" text popup that appears when the jelly beats its high score.
+<2026-09-27-11:02> (Claude): Added occasional shooting stars streaking across the background for extra ambient flair.
