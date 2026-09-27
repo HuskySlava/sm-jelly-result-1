@@ -77,3 +77,4 @@
 2026-09-27-22:02 (Claude): Added a toggleable wind mode with a corner arrow indicator showing gust direction and strength.
 <2026-09-27-22:32> (Claude): Fixed initial Top speed stat showing 0 while Speed showed 85 px/s on page load.
 <2026-09-27-23:02> (Claude): Added a shrinking ring around the jelly showing remaining time before the bounce combo expires.
+<2026-09-27-23:32> (Claude): Added a Rainbow mode toggle (N) that cycles the jelly's hue continuously instead of only on bounce.

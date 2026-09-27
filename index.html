@@ -185,6 +185,7 @@
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
+		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
@@ -205,6 +206,7 @@
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
+			<li><kbd>N</kbd> Toggle rainbow mode</li>
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>C</kbd> Copy stats to clipboard</li>
@@ -451,6 +453,19 @@
 			canvas.style.transform = "";
 		}
 	});
+	// Lets the jelly continuously cycle hues instead of only recoloring on bounce,
+	// for players who want a constant psychedelic look rather than the occasional flash.
+	const rainbowBtn = document.querySelector("#rainbow-btn");
+	let rainbowOn = localStorage.getItem("jelly-rainbow-on") === "true";
+	rainbowBtn.textContent = rainbowOn ? "Rainbow: On" : "Rainbow: Off";
+	rainbowBtn.classList.toggle("active", rainbowOn);
+	rainbowBtn.addEventListener("click", () => {
+		rainbowOn = !rainbowOn;
+		localStorage.setItem("jelly-rainbow-on", rainbowOn);
+		rainbowBtn.textContent = rainbowOn ? "Rainbow: On" : "Rainbow: Off";
+		rainbowBtn.classList.toggle("active", rainbowOn);
+	});
+
 	// A single faint particle per frame, drifting slower and dying quicker than a
 	// bounce burst, so the trail reads as a soft wake rather than a firework.
 	const spawnTrailParticle = (x, y, color) => {
@@ -791,6 +806,9 @@
 	let shakeMagnitude = 0;
 	const updateJelly = (dt) => {
 		breatheTime += dt;
+		// Continuously cycling hue, rather than the random per-bounce color, so
+		// rainbow mode reads as a constant shimmer instead of occasional flashes.
+		if (rainbowOn) jelly.color = `hsl(${(breatheTime * 90) % 360}, 90%, 65%)`;
 		if (combo > 0 && elapsedTime - lastBounceElapsed > comboWindow) {
 			combo = 0;
 			comboStatEl.textContent = `Combo: x${combo}`;
@@ -851,7 +869,7 @@
 		}
 		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
 		if (bouncedX || bouncedY) {
-			jelly.color = randomColor();
+			if (!rainbowOn) jelly.color = randomColor();
 			const isNewRecord = registerBounce();
 			playBounceSound();
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
@@ -1176,6 +1194,8 @@
 			trailBtn.click();
 		} else if (e.code === "KeyK") {
 			shakeBtn.click();
+		} else if (e.code === "KeyN") {
+			rainbowBtn.click();
 		} else if (e.code === "KeyF") {
 			fullscreenBtn.click();
 		} else if (e.code === "KeyP") {
