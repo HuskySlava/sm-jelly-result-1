@@ -184,6 +184,7 @@
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
+		<button id="share-btn" title="Copy stats (C)">Share</button>
 		<button id="help-btn" title="Help (H)">Help</button>
 		<button id="zen-btn" title="Zen mode (Z)">Zen: Off</button>
 	</div>
@@ -202,6 +203,7 @@
 			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
+			<li><kbd>C</kbd> Copy stats to clipboard</li>
 			<li><kbd>H</kbd> Toggle this help</li>
 			<li><kbd>Z</kbd> Toggle zen mode</li>
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
@@ -912,6 +914,44 @@
 		link.click();
 	});
 
+	// Lets players brag about a run without a screenshot: copies a plain-text
+	// summary of every stat to the clipboard, with a brief label change for feedback.
+	const shareBtn = document.querySelector("#share-btn");
+	const buildShareText = () => (
+		`Canvas Jelly — Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
+		`Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | Orbs: ${orbsCollected}`
+	);
+	const flashShareBtn = (label) => {
+		shareBtn.textContent = label;
+		clearTimeout(flashShareBtn.timer);
+		flashShareBtn.timer = setTimeout(() => { shareBtn.textContent = "Share"; }, 1500);
+	};
+	shareBtn.addEventListener("click", () => {
+		const text = buildShareText();
+		const onCopied = () => {
+			flashShareBtn("Copied!");
+			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Copied!", "#00e5ff");
+		};
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(onCopied).catch(() => flashShareBtn("Copy failed"));
+		} else {
+			// Fallback for browsers/contexts without the async Clipboard API.
+			const textarea = document.createElement("textarea");
+			textarea.value = text;
+			textarea.style.position = "fixed";
+			textarea.style.opacity = "0";
+			document.body.appendChild(textarea);
+			textarea.select();
+			try {
+				document.execCommand("copy");
+				onCopied();
+			} catch {
+				flashShareBtn("Copy failed");
+			}
+			document.body.removeChild(textarea);
+		}
+	});
+
 	const zenBtn = document.querySelector("#zen-btn");
 	let zenOn = localStorage.getItem("jelly-zen-on") === "true";
 	document.body.classList.toggle("zen-mode", zenOn);
@@ -1026,6 +1066,8 @@
 			fullscreenBtn.click();
 		} else if (e.code === "KeyP") {
 			snapshotBtn.click();
+		} else if (e.code === "KeyC") {
+			shareBtn.click();
 		} else if (e.code === "KeyH") {
 			toggleHelp();
 		} else if (e.code === "KeyZ") {
