@@ -337,6 +337,9 @@
 
 	const boostBtn = document.querySelector("#boost-btn");
 	boostBtn.addEventListener("click", () => {
+		// Nothing should be able to change velocity while paused, or the resulting
+		// speed/top-speed popups would fire for a jelly that visibly never moved.
+		if (paused) return;
 		// Kick the jelly off in a random direction at 1.5x its current speed, so
 		// boosting is a deliberate risk/reward move rather than a guaranteed max-speed jump.
 		// Floor at a minimum speed so boost can always recover a jelly that arrow-key
@@ -417,6 +420,8 @@
 	// Click (or press-and-drag) on the canvas to steer the jelly toward that point
 	// without changing its speed. Dragging re-steers continuously, not just on click.
 	const steerToward = (clientX, clientY) => {
+		// See the matching guard in the boost handler: steering must not work while paused.
+		if (paused) return;
 		const rect = canvas.getBoundingClientRect();
 		const pointX = (clientX - rect.left) * (canvas.width / rect.width);
 		const pointY = (clientY - rect.top) * (canvas.height / rect.height);
@@ -434,6 +439,7 @@
 	};
 	let steering = false;
 	canvas.addEventListener("pointerdown", (e) => {
+		if (paused) return;
 		steering = true;
 		steerToward(e.clientX, e.clientY);
 		const rect = canvas.getBoundingClientRect();
@@ -899,6 +905,7 @@
 			toggleHelp();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
+			if (paused) return;
 			const nudge = 30; // px/s added per press, lets players steer without a click
 			if (e.code === "ArrowUp") jelly.velY -= nudge;
 			else if (e.code === "ArrowDown") jelly.velY += nudge;
