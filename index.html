@@ -149,6 +149,7 @@
 	<p id="top-speed">Top speed: 0 px/s</p>
 	<p id="time-stat">Time: 0.0s</p>
 	<p id="best-time">Best time: 0.0s</p>
+	<p id="fps-stat">FPS: 0</p>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
@@ -863,12 +864,21 @@
 
 	let tick = 0;
 	let lastTime = null;
+	// Exponential moving average smooths out single-frame jitter so the readout
+	// doesn't flicker between e.g. 58 and 61 every other frame.
+	const fpsStatEl = document.querySelector("#fps-stat");
+	let fpsSmoothed = 0;
 	const updateFrame = () => {
 		++tick;
 		window.requestAnimationFrame((now) => {
 			// Cap dt so returning from a background tab doesn't teleport the jelly
 			const rawDt = lastTime === null ? 0 : Math.min((now - lastTime) / 1000, 0.1);
 			lastTime = now;
+			if (rawDt > 0) {
+				const instantFps = 1 / rawDt;
+				fpsSmoothed += (instantFps - fpsSmoothed) * 0.1;
+				fpsStatEl.textContent = `FPS: ${Math.round(fpsSmoothed)}`;
+			}
 			// Scale time itself (not just drawing) so slow-mo also slows physics, bounces, and shake decay.
 			const dt = slowMoOn ? rawDt * 0.25 : rawDt;
 			if (!paused) {
