@@ -607,6 +607,14 @@
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Best!", "#ffd700");
 			}
+			// Every 10th bounce gets an extra multicolor confetti burst so milestones
+			// stand out even on runs that don't beat the best streak.
+			if (bounces > 0 && bounces % 10 === 0) {
+				for (let i = 0; i < 4; i++) {
+					spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, randomColor());
+				}
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 30, `${bounces} Bounces!`, randomColor());
+			}
 			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
 			if (shakeOn) {
 				shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);

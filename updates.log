@@ -62,3 +62,4 @@
 2026-09-27-13:31 (Claude): Added persisted 'Best time' stat tracking the longest survival streak across sessions.
 <2026-09-27-14:02> (Claude): Added celebratory particle burst and popup when the jelly hits a new top-speed record.
 <2026-09-27-14:32> (Claude): Added a Shake toggle (button + K shortcut) to let motion-sensitive players disable screen shake.
+2026-09-27-15:02 (Claude): Added multicolor confetti burst and popup celebration every 10 bounces.
