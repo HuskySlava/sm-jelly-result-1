@@ -50,3 +50,4 @@
 <2026-09-27-07:01> (Claude): Added press-and-drag steering so holding the pointer continuously redirects the jelly, not just on click.
 <2026-09-27-07:31> (Claude): Fixed the PAUSED overlay text ghost-fading in over several frames after unpausing.
 <2026-09-27-08:01> (Claude): Persisted sound/gravity/slow-mo/trail toggle settings in localStorage so they survive a page reload.
+<2026-09-27-08:31> (Claude): Fixed click/drag steering getting stuck at zero speed when arrow-key nudges canceled velocity to exactly 0.

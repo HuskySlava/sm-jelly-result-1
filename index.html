@@ -321,7 +321,9 @@
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		const angle = Math.atan2(pointY - cy, pointX - cx);
-		const speed = Math.hypot(jelly.velX, jelly.velY);
+		// Floor at a minimum speed, like boost does: arrow-key nudges can cancel velocity to
+		// exactly 0, and without a floor steering would multiply that 0 forever and never move.
+		const speed = Math.max(Math.hypot(jelly.velX, jelly.velY), 40);
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
 	};
