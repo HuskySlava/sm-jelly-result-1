@@ -103,6 +103,9 @@
 	// Not `{ once: true }`: the context can be suspended again later (e.g. tab
 	// loses focus), so every pointerdown must be able to resume it.
 	document.addEventListener("pointerdown", unlockAudio);
+	// Keyboard-only players (arrows/B/R/M, no click) never fire a pointerdown,
+	// so without this the AudioContext stays null forever and sound never plays.
+	document.addEventListener("keydown", unlockAudio);
 	const playBounceSound = () => {
 		if (!soundOn || !audioCtx) return;
 		const osc = audioCtx.createOscillator();

@@ -35,3 +35,4 @@
 2026-09-26-23:01 (Claude): Fixed a bug where a wall bounce could retrigger every frame forever when velocity hit exactly zero at the boundary.
 <2026-09-26-23:31> (Claude): Gave the jelly a glossy radial-gradient fill and rounded corners instead of a flat square.
 <2026-09-27-00:01> (Claude): Added a subtle idle breathing pulse animation so the jelly feels alive between bounces.
+<2026-09-27-00:31> (Claude): Fixed bounce sound never playing for keyboard-only players by unlocking audio on keydown too.
