@@ -103,3 +103,4 @@
 2026-09-28-11:33 (Claude): Added a Meteor Shower button (U) that bursts a dozen shooting stars across the sky on demand.
 2026-09-28-12:03 (Claude): Added a rare neon-green speed orb that gives an instant velocity kick along the jelly's heading.
 <2026-09-28-12:33> (Claude): Added an autopilot toggle that steers the jelly toward orbs while swerving around the hazard.
+<2026-09-28-13:02> (Claude): Added a toggleable trajectory predictor (X key) showing a dotted line to the jelly's next wall bounce.

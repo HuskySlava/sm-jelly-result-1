@@ -222,6 +222,7 @@
 		<button id="portal-btn" title="Portals (O)">Portals: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
+			<button id="predict-btn" title="Trajectory (X)">Trajectory: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
 		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
@@ -250,6 +251,7 @@
 			<li><kbd>O</kbd> Toggle portals</li>
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
+				<li><kbd>X</kbd> Toggle trajectory predictor</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>N</kbd> Toggle rainbow mode</li>
 			<li><kbd>D</kbd> Cycle backdrop theme</li>
@@ -715,6 +717,19 @@
 		localStorage.setItem("jelly-trail-on", trailOn);
 		trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
 		trailBtn.classList.toggle("active", trailOn);
+	});
+
+	// Shows a dotted line to where the jelly will next hit a wall, so players can
+	// plan a steer ahead of time instead of reacting after the bounce happens.
+	const predictBtn = document.querySelector("#predict-btn");
+	let predictOn = localStorage.getItem("jelly-predict-on") === "true";
+	predictBtn.textContent = predictOn ? "Trajectory: On" : "Trajectory: Off";
+	predictBtn.classList.toggle("active", predictOn);
+	predictBtn.addEventListener("click", () => {
+		predictOn = !predictOn;
+		localStorage.setItem("jelly-predict-on", predictOn);
+		predictBtn.textContent = predictOn ? "Trajectory: On" : "Trajectory: Off";
+		predictBtn.classList.toggle("active", predictOn);
 	});
 
 	// Lets motion-sensitive players disable the camera-shake impact effect
@@ -1635,6 +1650,45 @@
 		ctx.stroke();
 		ctx.restore();
 	};
+	// Straight-line estimate of where the jelly's center will first cross a wall,
+	// using its current velocity only (gravity/wind/magnet/autopilot forces aren't
+	// projected forward, so this is an approximation whenever those are active).
+	const predictNextBounce = () => {
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const vx = jelly.velX, vy = jelly.velY;
+		if (vx === 0 && vy === 0) return null;
+		const minX = jelly.w / 2, maxX = canvas.width - jelly.w / 2;
+		const minY = jelly.h / 2, maxY = canvas.height - jelly.h / 2;
+		let tx = Infinity, ty = Infinity;
+		if (vx > 0) tx = (maxX - cx) / vx;
+		else if (vx < 0) tx = (minX - cx) / vx;
+		if (vy > 0) ty = (maxY - cy) / vy;
+		else if (vy < 0) ty = (minY - cy) / vy;
+		const t = Math.min(tx, ty);
+		if (!isFinite(t) || t < 0) return null;
+		return { x: cx + vx * t, y: cy + vy * t };
+	};
+	const drawTrajectory = () => {
+		const point = predictNextBounce();
+		if (!point) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		ctx.save();
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+		ctx.lineWidth = 2;
+		ctx.setLineDash([6, 8]);
+		ctx.beginPath();
+		ctx.moveTo(cx, cy);
+		ctx.lineTo(point.x, point.y);
+		ctx.stroke();
+		ctx.setLineDash([]);
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+		ctx.beginPath();
+		ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
+	};
 	const drawJelly = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -1689,6 +1743,7 @@
 		drawClickRipples();
 		if (windOn) drawWindIndicator();
 		drawOrbCompass();
+		if (predictOn) drawTrajectory();
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
 		// whole scene feels lit by it rather than just the sprite itself.
 		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
@@ -1910,6 +1965,8 @@
 			slowmoBtn.click();
 		} else if (e.code === "KeyT") {
 			trailBtn.click();
+		} else if (e.code === "KeyX") {
+			predictBtn.click();
 		} else if (e.code === "KeyK") {
 			shakeBtn.click();
 		} else if (e.code === "KeyN") {
