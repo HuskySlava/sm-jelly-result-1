@@ -98,6 +98,31 @@
 			transform: scale(0.95);
 		}
 
+		/* Matches the pill-shaped buttons' look so the volume control reads as part
+		   of the same toolbar instead of a foreign form element. */
+		#volume-control {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.85rem;
+			color: #fff;
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 999px;
+			padding: 0.5rem 1rem;
+			cursor: pointer;
+		}
+
+		#volume-slider {
+			width: 80px;
+			accent-color: #00e5ff;
+			cursor: pointer;
+		}
+
+		body.zen-mode #volume-control {
+			display: none;
+		}
+
 		#help-overlay {
 			display: none;
 			position: fixed;
@@ -272,6 +297,7 @@
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
 		<button id="sound-btn" title="Mute (M)">Sound: On</button>
+		<label id="volume-control" title="Volume">🔊 <input type="range" id="volume-slider" min="0" max="1" step="0.05"></label>
 		<button id="boost-btn" title="Boost (B)">Boost</button>
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
@@ -498,7 +524,7 @@
 		const gain = audioCtx.createGain();
 		osc.type = "sine";
 		osc.frequency.value = 220 + Math.random() * 220;
-		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -514,6 +540,17 @@
 		soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
 		soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
 		soundBtn.classList.toggle("active", soundOn);
+	});
+
+	// Independent of the mute toggle: lets players dial the effect volume in rather
+	// than only choosing between full volume and silence.
+	const volumeSlider = document.querySelector("#volume-slider");
+	let volume = Number(localStorage.getItem("jelly-volume"));
+	if (!Number.isFinite(volume) || volume < 0 || volume > 1) volume = 0.7;
+	volumeSlider.value = volume;
+	volumeSlider.addEventListener("input", () => {
+		volume = Number(volumeSlider.value);
+		localStorage.setItem("jelly-volume", volume);
 	});
 
 	const boostBtn = document.querySelector("#boost-btn");
@@ -635,7 +672,7 @@
 		const gain = audioCtx.createGain();
 		osc.type = "sawtooth";
 		osc.frequency.value = 110;
-		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -723,7 +760,7 @@
 		osc.type = "sine";
 		osc.frequency.setValueAtTime(300, audioCtx.currentTime);
 		osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.15);
-		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -1204,7 +1241,7 @@
 		const gain = audioCtx.createGain();
 		osc.type = "triangle";
 		osc.frequency.value = 660;
-		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -1220,7 +1257,7 @@
 			osc.type = "triangle";
 			osc.frequency.value = freq;
 			const startTime = audioCtx.currentTime + i * 0.08;
-			gain.gain.setValueAtTime(0.15, startTime);
+			gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), startTime);
 			gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
 			osc.connect(gain).connect(audioCtx.destination);
 			osc.start(startTime);
@@ -1236,7 +1273,7 @@
 		osc.type = "sine";
 		osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
 		osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4);
-		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -1251,7 +1288,7 @@
 		osc.type = "square";
 		osc.frequency.setValueAtTime(440, audioCtx.currentTime);
 		osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.25);
-		gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.1 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -1266,7 +1303,7 @@
 		osc.type = "sawtooth";
 		osc.frequency.setValueAtTime(440, audioCtx.currentTime);
 		osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.15);
-		gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+		gain.gain.setValueAtTime(0.12 * Math.max(volume, 0.0001), audioCtx.currentTime);
 		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
 		osc.connect(gain).connect(audioCtx.destination);
 		osc.start();
@@ -1956,7 +1993,7 @@
 			osc.type = "square";
 			osc.frequency.value = 1000;
 			const startTime = audioCtx.currentTime + delay;
-			gain.gain.setValueAtTime(0.1, startTime);
+			gain.gain.setValueAtTime(0.1 * Math.max(volume, 0.0001), startTime);
 			gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.04);
 			osc.connect(gain).connect(audioCtx.destination);
 			osc.start(startTime);

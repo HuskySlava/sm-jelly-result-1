@@ -114,3 +114,4 @@
 2026-09-28-17:02 (Claude): Added a persistent achievements system with 9 milestone badges tracked and celebrated in-game.
 2026-09-28-17:32 (Claude): Added a clickable achievements panel listing locked/unlocked badges instead of just a bare X/Y count.
 <2026-09-28-18:02> (Claude): Added a persistent lifetime "Total orbs" stat, mirroring the existing total-bounces counter.
+<2026-09-28-18:34> (Claude): Added a persisted volume slider that scales every sound effect independent of the mute toggle.
