@@ -185,6 +185,7 @@
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
 		<button id="magnet-btn" title="Magnet (L)">Magnet: Off</button>
 		<button id="hazard-btn" title="Hazard (V)">Hazard: Off</button>
+		<button id="portal-btn" title="Portals (O)">Portals: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
@@ -208,6 +209,7 @@
 			<li><kbd>W</kbd> Toggle wind</li>
 			<li><kbd>L</kbd> Toggle magnet</li>
 			<li><kbd>V</kbd> Toggle hazard</li>
+			<li><kbd>O</kbd> Toggle portals</li>
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
@@ -513,6 +515,86 @@
 		hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
 		hazardBtn.classList.toggle("active", hazardOn);
 		if (hazardOn) spawnHazard();
+	});
+
+	// Twin portals let players fling the jelly across the arena instead of only
+	// bouncing off walls: entering one warps it out the other, velocity intact.
+	const portalBtn = document.querySelector("#portal-btn");
+	let portalOn = localStorage.getItem("jelly-portal-on") === "true";
+	const portalA = { x: 0, y: 0, radius: 14 };
+	const portalB = { x: 0, y: 0, radius: 14 };
+	const spawnPortals = () => {
+		const margin = 80;
+		portalA.x = margin + Math.random() * (canvas.width - margin * 2);
+		portalA.y = margin + Math.random() * (canvas.height - margin * 2);
+		// Keep them far apart, otherwise a same-spot pair would make teleporting pointless.
+		do {
+			portalB.x = margin + Math.random() * (canvas.width - margin * 2);
+			portalB.y = margin + Math.random() * (canvas.height - margin * 2);
+		} while (Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4);
+	};
+	const drawPortals = (time) => {
+		for (const [portal, color] of [[portalA, "#00e5ff"], [portalB, "#d500f9"]]) {
+			ctx.save();
+			const pulse = 1 + Math.sin(time * 4) * 0.2;
+			ctx.shadowColor = color;
+			ctx.shadowBlur = 25;
+			ctx.strokeStyle = color;
+			ctx.lineWidth = 4;
+			ctx.beginPath();
+			ctx.arc(portal.x, portal.y, portal.radius * pulse, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.arc(portal.x, portal.y, portal.radius * pulse * 0.5, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.restore();
+		}
+	};
+	// Rising-then-falling two-note whoosh distinguishes a warp from every other cue.
+	const playPortalSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sine";
+		osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.15);
+		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.2);
+	};
+	// Cooldown (like the hazard hit) stops the jelly bouncing straight back through
+	// the exit portal and re-triggering a teleport every single frame.
+	let lastPortalElapsed = -Infinity;
+	const portalCooldown = 0.6;
+	const checkPortalCollision = () => {
+		if (elapsedTime - lastPortalElapsed <= portalCooldown) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const enter = Math.hypot(cx - portalA.x, cy - portalA.y) < portalA.radius + jelly.w / 2 ? portalA
+			: Math.hypot(cx - portalB.x, cy - portalB.y) < portalB.radius + jelly.w / 2 ? portalB
+			: null;
+		if (!enter) return;
+		const exit = enter === portalA ? portalB : portalA;
+		lastPortalElapsed = elapsedTime;
+		spawnParticles(cx, cy, "#00e5ff");
+		jelly.x = exit.x - jelly.w / 2;
+		jelly.y = exit.y - jelly.h / 2;
+		spawnParticles(exit.x, exit.y, "#d500f9");
+		spawnRing(exit.x, exit.y, "#d500f9");
+		playPortalSound();
+		if (navigator.vibrate) navigator.vibrate(25);
+	};
+	portalBtn.textContent = portalOn ? "Portals: On" : "Portals: Off";
+	portalBtn.classList.toggle("active", portalOn);
+	if (portalOn) spawnPortals();
+	portalBtn.addEventListener("click", () => {
+		portalOn = !portalOn;
+		localStorage.setItem("jelly-portal-on", portalOn);
+		portalBtn.textContent = portalOn ? "Portals: On" : "Portals: Off";
+		portalBtn.classList.toggle("active", portalOn);
+		if (portalOn) spawnPortals();
 	});
 
 	const slowmoBtn = document.querySelector("#slowmo-btn");
@@ -1366,6 +1448,8 @@
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
+		if (portalOn) spawnPortals();
+		lastPortalElapsed = -Infinity;
 		combo = 0;
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
@@ -1449,6 +1533,8 @@
 			magnetBtn.click();
 		} else if (e.code === "KeyV") {
 			hazardBtn.click();
+		} else if (e.code === "KeyO") {
+			portalBtn.click();
 		} else if (e.code === "KeyS") {
 			slowmoBtn.click();
 		} else if (e.code === "KeyT") {
@@ -1537,6 +1623,10 @@
 					updateHazard(dt);
 					drawHazard(now / 1000);
 					checkHazardCollision();
+				}
+				if (portalOn) {
+					drawPortals(now / 1000);
+					checkPortalCollision();
 				}
 				updateJelly(dt);
 				checkOrbCollision();
