@@ -1040,7 +1040,7 @@
 	const bestOrbsEl = document.querySelector("#best-orbs");
 	let bestOrbs = Number(localStorage.getItem("jelly-best-orbs")) || 0;
 	bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false };
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
@@ -1050,6 +1050,9 @@
 	// A rarer violet "shield" orb (mutually exclusive with mega/freeze) grants brief
 	// hazard immunity, giving players a reason to risk a detour near the hazard.
 	const shieldOrbChance = 0.1;
+	// A rarer neon-green "speed" orb (mutually exclusive with the others above) gives an
+	// instant velocity kick along the jelly's current heading, rewarding a tight detour.
+	const speedOrbChance = 0.1;
 	const spawnOrb = () => {
 		const margin = 60;
 		orb.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1057,7 +1060,8 @@
 		orb.isMega = Math.random() < megaOrbChance;
 		orb.isFreeze = !orb.isMega && Math.random() < freezeOrbChance;
 		orb.isShield = !orb.isMega && !orb.isFreeze && Math.random() < shieldOrbChance;
-		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : 10;
+		orb.isSpeed = !orb.isMega && !orb.isFreeze && !orb.isShield && Math.random() < speedOrbChance;
+		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : 10;
 	};
 	spawnOrb();
 	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
@@ -1121,6 +1125,21 @@
 		osc.start();
 		osc.stop(audioCtx.currentTime + 0.25);
 	};
+	// A quick rising sawtooth "zip" (vs. the shield orb's squarer chime) reads as a
+	// burst of speed rather than a protective ward going up.
+	const playSpeedOrbSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sawtooth";
+		osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.15);
+		gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.15);
+	};
 	// Chains orb pickups the same way the wall-bounce combo chains bounces: a gap
 	// longer than the window resets the streak, both here and passively while idling.
 	const orbStreakEl = document.querySelector("#orb-streak-stat");
@@ -1145,8 +1164,9 @@
 			const wasMega = orb.isMega;
 			const wasFreeze = orb.isFreeze;
 			const wasShield = orb.isShield;
+			const wasSpeed = orb.isSpeed;
 			const bonus = wasMega ? 3 : 1;
-			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : "#ffcc00";
+			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 			if (orbsCollected > bestOrbs) {
@@ -1182,6 +1202,19 @@
 				if (navigator.vibrate) navigator.vibrate([60]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Shield Up!", color);
+			} else if (wasSpeed) {
+				// Instant kick along the jelly's current heading (not a random angle, unlike
+				// boost) so grabbing it feels like an acceleration rather than a redirect.
+				// Floor at 40px/s first, like boost does, so a velocity-zeroed jelly still moves.
+				const kickSpeed = Math.min(Math.max(Math.hypot(jelly.velX, jelly.velY), 40) * 1.7, maxSpeed);
+				const angle = Math.atan2(jelly.velY, jelly.velX);
+				jelly.velX = Math.cos(angle) * kickSpeed;
+				jelly.velY = Math.sin(angle) * kickSpeed;
+				updateSpeedStat();
+				playSpeedOrbSound();
+				if (navigator.vibrate) navigator.vibrate([30]);
+				spawnParticles(orb.x, orb.y, color);
+				spawnPopup(orb.x, orb.y - 10, "Speed Up!", color);
 			} else {
 				playOrbSound();
 				if (navigator.vibrate) navigator.vibrate(10);
@@ -1195,8 +1228,9 @@
 	const drawOrb = (time) => {
 		ctx.save();
 		// Freeze orbs pulse slower than the others, hinting at the slow-mo they grant.
-		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : 4)) * 0.15;
-		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : "#ffcc00";
+		// Speed orbs pulse fastest of all, hinting at the burst of speed they grant.
+		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : 4)) * 0.15;
+		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : "#ffcc00";
 		ctx.shadowColor = color;
 		ctx.shadowBlur = orb.isMega ? 30 : 20;
 		ctx.fillStyle = color;
