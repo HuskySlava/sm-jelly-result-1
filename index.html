@@ -219,6 +219,7 @@
 		<p id="best-orb-streak">Best orb streak: x0</p>
 		<p id="score-stat">Score: 0</p>
 		<p id="best-score">Best score: 0</p>
+		<p id="achievements-stat">Achievements: 0/0</p>
 		<p id="fps-stat">FPS: 0</p>
 	</div>
 	<div id="controls">
@@ -1448,6 +1449,41 @@
 		moodStatEl.textContent = mood;
 	};
 
+	// Lifetime achievement badges call out specific milestones the first time they're
+	// reached, since a raw stat number alone (e.g. "Corners: 10") doesn't say "hey, that
+	// one's special" the way a one-time gold popup does. Unlocks persist across resets
+	// and reloads, like the other "best"/"total" stats above.
+	const achievementsStatEl = document.querySelector("#achievements-stat");
+	const ACHIEVEMENTS = [
+		{ id: "first-bounce", name: "First Bounce", check: () => bounces >= 1 },
+		{ id: "century", name: "Century Bouncer", check: () => totalBounces >= 100 },
+		{ id: "combo-10", name: "Combo Master", check: () => combo >= 10 },
+		{ id: "corner-1", name: "Corner Cutter", check: () => cornerBounces >= 1 },
+		{ id: "corner-10", name: "Corner Legend", check: () => cornerBounces >= 10 },
+		{ id: "orb-10", name: "Orb Hunter", check: () => orbsCollected >= 10 },
+		{ id: "orb-streak-5", name: "In The Zone", check: () => orbStreak >= 5 },
+		{ id: "survivor-60", name: "Survivor", check: () => elapsedTime >= 60 },
+		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed }
+	];
+	let unlockedAchievements = new Set(JSON.parse(localStorage.getItem("jelly-achievements") || "[]"));
+	const updateAchievementsStat = () => {
+		achievementsStatEl.textContent = `Achievements: ${unlockedAchievements.size}/${ACHIEVEMENTS.length}`;
+	};
+	updateAchievementsStat();
+	// Checked once per frame (cheap: a handful of number comparisons) rather than wired
+	// into every individual stat update site, so no future stat change can silently skip it.
+	const checkAchievements = () => {
+		for (const a of ACHIEVEMENTS) {
+			if (!unlockedAchievements.has(a.id) && a.check()) {
+				unlockedAchievements.add(a.id);
+				localStorage.setItem("jelly-achievements", JSON.stringify([...unlockedAchievements]));
+				updateAchievementsStat();
+				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 150, `🏆 ${a.name}!`, "#ffd700");
+			}
+		}
+	};
+
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
 	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
@@ -2165,6 +2201,7 @@
 				}
 				updateJelly(dt);
 				checkOrbCollision();
+				checkAchievements();
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
 				updateRings(dt);
