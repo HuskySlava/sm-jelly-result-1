@@ -182,6 +182,7 @@
 		<button id="boost-btn" title="Boost (B)">Boost</button>
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
+		<button id="magnet-btn" title="Magnet (L)">Magnet: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
@@ -203,6 +204,7 @@
 			<li><kbd>M</kbd> Mute / Unmute</li>
 			<li><kbd>G</kbd> Toggle gravity</li>
 			<li><kbd>W</kbd> Toggle wind</li>
+			<li><kbd>L</kbd> Toggle magnet</li>
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
@@ -413,6 +415,20 @@
 		localStorage.setItem("jelly-wind-on", windOn);
 		windBtn.textContent = windOn ? "Wind: On" : "Wind: Off";
 		windBtn.classList.toggle("active", windOn);
+	});
+
+	// Assist mode for players who'd rather chase the score than chase the orb: gently
+	// pulls the jelly toward it instead of requiring precise steering.
+	const magnetBtn = document.querySelector("#magnet-btn");
+	let magnetOn = localStorage.getItem("jelly-magnet-on") === "true";
+	const magnetStrength = 150; // px/s^2 acceleration toward the orb when magnet mode is on
+	magnetBtn.textContent = magnetOn ? "Magnet: On" : "Magnet: Off";
+	magnetBtn.classList.toggle("active", magnetOn);
+	magnetBtn.addEventListener("click", () => {
+		magnetOn = !magnetOn;
+		localStorage.setItem("jelly-magnet-on", magnetOn);
+		magnetBtn.textContent = magnetOn ? "Magnet: On" : "Magnet: Off";
+		magnetBtn.classList.toggle("active", magnetOn);
 	});
 
 	const slowmoBtn = document.querySelector("#slowmo-btn");
@@ -847,6 +863,20 @@
 			}
 			updateSpeedStat();
 		}
+		if (magnetOn) {
+			const cx = jelly.x + jelly.w / 2;
+			const cy = jelly.y + jelly.h / 2;
+			const angle = Math.atan2(orb.y - cy, orb.x - cx);
+			jelly.velX += Math.cos(angle) * magnetStrength * dt;
+			jelly.velY += Math.sin(angle) * magnetStrength * dt;
+			const speed = Math.hypot(jelly.velX, jelly.velY);
+			if (speed > maxSpeed) {
+				const scale = maxSpeed / speed;
+				jelly.velX *= scale;
+				jelly.velY *= scale;
+			}
+			updateSpeedStat();
+		}
 		jelly.x += jelly.velX * dt;
 		jelly.y += jelly.velY * dt;
 		const maxX = canvas.width - jelly.w;
@@ -1220,6 +1250,8 @@
 			gravityBtn.click();
 		} else if (e.code === "KeyW") {
 			windBtn.click();
+		} else if (e.code === "KeyL") {
+			magnetBtn.click();
 		} else if (e.code === "KeyS") {
 			slowmoBtn.click();
 		} else if (e.code === "KeyT") {
