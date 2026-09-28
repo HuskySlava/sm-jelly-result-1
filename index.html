@@ -163,6 +163,7 @@
 		<canvas width="1280" height="720" id="my-canvas"></canvas>
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
+	<p id="corner-stat">Corners: 0</p>
 	<p id="combo-stat">Combo: x0</p>
 	<p id="best-combo">Best combo: x0</p>
 	<p id="high-score">Best: 0</p>
@@ -872,6 +873,10 @@
 		ctx.restore();
 	};
 
+	// Corner bounces (hitting two walls in the same frame) are rarer and harder to
+	// land than a plain wall bounce, so they get their own counter and celebration.
+	const cornerStatEl = document.querySelector("#corner-stat");
+	let cornerBounces = 0;
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -987,6 +992,7 @@
 			bouncedY = true;
 		}
 		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
+		const isCornerHit = bouncedX && bouncedY;
 		if (bouncedX || bouncedY) {
 			if (!rainbowOn) jelly.color = randomColor();
 			const isNewRecord = registerBounce();
@@ -1024,6 +1030,15 @@
 			// Screen shake adds tactile impact feedback; scales with speed so fast hits shake harder.
 			if (shakeOn) {
 				shakeMagnitude = Math.min(shakeMagnitude + 4 + Math.hypot(jelly.velX, jelly.velY) / 30, 14);
+			}
+			// Corner hits are a precision feat (landing on a wall right as it crosses the
+			// perpendicular one), so they get a distinct confetti burst and callout on top
+			// of the normal bounce feedback above.
+			if (isCornerHit) {
+				cornerBounces++;
+				cornerStatEl.textContent = `Corners: ${cornerBounces}`;
+				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#00ff9d");
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 90, "Corner!", "#00ff9d");
 			}
 			// Squash along the axis of impact and stretch the other, like real jelly.
 			if (bouncedX && bouncedY) {
@@ -1188,7 +1203,7 @@
 	const shareBtn = document.querySelector("#share-btn");
 	const buildShareText = () => (
 		`Canvas Jelly — Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
-		`Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
+		`Corners: ${cornerBounces} | Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
 		`Orbs: ${orbsCollected} (Streak x${orbStreak}, Best x${bestOrbStreak})`
 	);
 	const flashShareBtn = (label) => {
@@ -1261,6 +1276,8 @@
 		popups = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
+		cornerBounces = 0;
+		cornerStatEl.textContent = `Corners: ${cornerBounces}`;
 		orbsCollected = 0;
 		orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 		orbStreak = 0;
