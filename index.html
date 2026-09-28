@@ -183,6 +183,7 @@
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
 		<button id="magnet-btn" title="Magnet (L)">Magnet: Off</button>
+		<button id="hazard-btn" title="Hazard (V)">Hazard: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
@@ -205,6 +206,7 @@
 			<li><kbd>G</kbd> Toggle gravity</li>
 			<li><kbd>W</kbd> Toggle wind</li>
 			<li><kbd>L</kbd> Toggle magnet</li>
+			<li><kbd>V</kbd> Toggle hazard</li>
 			<li><kbd>S</kbd> Toggle slow-mo</li>
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
@@ -429,6 +431,85 @@
 		localStorage.setItem("jelly-magnet-on", magnetOn);
 		magnetBtn.textContent = magnetOn ? "Magnet: On" : "Magnet: Off";
 		magnetBtn.classList.toggle("active", magnetOn);
+	});
+
+	// Risk mode for players who want more than passive wall-bouncing: a roaming
+	// hazard orb that punishes contact by resetting the current combo streak.
+	const hazardBtn = document.querySelector("#hazard-btn");
+	let hazardOn = localStorage.getItem("jelly-hazard-on") === "true";
+	const hazard = { x: 0, y: 0, vx: 0, vy: 0, radius: 12 };
+	const spawnHazard = () => {
+		const margin = 60;
+		hazard.x = margin + Math.random() * (canvas.width - margin * 2);
+		hazard.y = margin + Math.random() * (canvas.height - margin * 2);
+		const angle = Math.random() * Math.PI * 2;
+		const speed = 80 + Math.random() * 60;
+		hazard.vx = Math.cos(angle) * speed;
+		hazard.vy = Math.sin(angle) * speed;
+	};
+	const updateHazard = (dt) => {
+		hazard.x += hazard.vx * dt;
+		hazard.y += hazard.vy * dt;
+		const maxX = canvas.width - hazard.radius;
+		const maxY = canvas.height - hazard.radius;
+		if (hazard.x >= maxX && hazard.vx > 0) { hazard.x = maxX; hazard.vx = -Math.abs(hazard.vx); }
+		if (hazard.x <= hazard.radius && hazard.vx < 0) { hazard.x = hazard.radius; hazard.vx = Math.abs(hazard.vx); }
+		if (hazard.y >= maxY && hazard.vy > 0) { hazard.y = maxY; hazard.vy = -Math.abs(hazard.vy); }
+		if (hazard.y <= hazard.radius && hazard.vy < 0) { hazard.y = hazard.radius; hazard.vy = Math.abs(hazard.vy); }
+	};
+	const drawHazard = (time) => {
+		ctx.save();
+		const pulse = 1 + Math.sin(time * 5) * 0.15;
+		ctx.shadowColor = "#ff1744";
+		ctx.shadowBlur = 20;
+		ctx.fillStyle = "#ff1744";
+		ctx.beginPath();
+		ctx.arc(hazard.x, hazard.y, hazard.radius * pulse, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+	};
+	// Low buzzy sawtooth cue distinguishes a hazard hit from the bounce/orb sounds.
+	const playHazardSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sawtooth";
+		osc.frequency.value = 110;
+		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.25);
+	};
+	// Brief immunity window after a hit stops a lingering overlap from resetting
+	// the combo every single frame, mirroring the combo/orb-streak windows above.
+	let lastHazardHitElapsed = -Infinity;
+	const hazardHitCooldown = 1;
+	const checkHazardCollision = () => {
+		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		if (Math.hypot(cx - hazard.x, cy - hazard.y) < hazard.radius + jelly.w / 2) {
+			lastHazardHitElapsed = elapsedTime;
+			if (combo > 0) {
+				combo = 0;
+				comboStatEl.textContent = `Combo: x${combo}`;
+			}
+			playHazardSound();
+			spawnParticles(hazard.x, hazard.y, "#ff1744");
+			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Hazard!", "#ff1744");
+			if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
+		}
+	};
+	hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
+	hazardBtn.classList.toggle("active", hazardOn);
+	if (hazardOn) spawnHazard();
+	hazardBtn.addEventListener("click", () => {
+		hazardOn = !hazardOn;
+		localStorage.setItem("jelly-hazard-on", hazardOn);
+		hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
+		hazardBtn.classList.toggle("active", hazardOn);
+		if (hazardOn) spawnHazard();
 	});
 
 	const slowmoBtn = document.querySelector("#slowmo-btn");
@@ -1186,6 +1267,8 @@
 		lastOrbElapsed = -Infinity;
 		orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
 		spawnOrb();
+		if (hazardOn) spawnHazard();
+		lastHazardHitElapsed = -Infinity;
 		combo = 0;
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
@@ -1252,6 +1335,8 @@
 			windBtn.click();
 		} else if (e.code === "KeyL") {
 			magnetBtn.click();
+		} else if (e.code === "KeyV") {
+			hazardBtn.click();
 		} else if (e.code === "KeyS") {
 			slowmoBtn.click();
 		} else if (e.code === "KeyT") {
@@ -1336,6 +1421,11 @@
 				updateShootingStars(dt);
 				drawShootingStars();
 				drawOrb(now / 1000);
+				if (hazardOn) {
+					updateHazard(dt);
+					drawHazard(now / 1000);
+					checkHazardCollision();
+				}
 				updateJelly(dt);
 				checkOrbCollision();
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
