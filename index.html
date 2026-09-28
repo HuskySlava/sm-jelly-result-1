@@ -207,6 +207,7 @@
 		<div id="snapshot-flash"></div>
 	</div>
 	<div id="stats-panel">
+		<p id="mood-stat">🙂 Chillin'</p>
 		<p id="bounce-counter">Bounces: 0</p>
 		<p id="corner-stat">Corners: 0</p>
 		<p id="best-corners">Best corners: 0</p>
@@ -1430,6 +1431,26 @@
 		}
 	};
 
+	// A short mood readout translates the jelly's current state (combo heat, hazard
+	// proximity, active buffs) into a single at-a-glance line, since the stat grid's
+	// raw numbers don't say how the run "feels" right now.
+	const moodStatEl = document.querySelector("#mood-stat");
+	const updateMood = () => {
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const speed = Math.hypot(jelly.velX, jelly.velY);
+		let mood;
+		if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
+		else if (freezeTimeRemaining > 0) mood = "❄️ Chillin' (literally)";
+		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) mood = "😰 Too close!";
+		else if (combo >= 10) mood = "🤩 Unstoppable!";
+		else if (combo >= 5) mood = "🔥 On a roll!";
+		else if (speed > maxSpeed * 0.85) mood = "😵 Dizzy!";
+		else if (orbStreak >= 3) mood = "✨ In the zone";
+		else mood = "🙂 Chillin'";
+		moodStatEl.textContent = mood;
+	};
+
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
 	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
@@ -1647,6 +1668,7 @@
 		// dies out at the same real-world rate regardless of frame rate.
 		shakeMagnitude *= Math.pow(0.0001, dt);
 		if (shakeMagnitude < 0.05) shakeMagnitude = 0;
+		updateMood();
 	}
 	// Small arrow in the corner shows the current wind direction/strength, since the
 	// push itself is otherwise invisible until the jelly visibly drifts off course.
@@ -1948,6 +1970,7 @@
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
 		updateScoreStat();
+		updateMood();
 		elapsedTime = 0;
 		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 		previousBestTime = bestTime;
