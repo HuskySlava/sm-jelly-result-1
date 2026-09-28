@@ -1422,6 +1422,10 @@
 	pauseBtn.addEventListener("click", togglePause);
 	window.addEventListener("keydown", (e) => {
 		if (e.code === "Space") {
+			// A focused toolbar button also treats Space as its own activation key (fired on
+			// keyup); preventDefault()-ing here would cancel that click and pause the game
+			// instead, so let the button handle it when that's where focus currently is.
+			if (e.target instanceof HTMLButtonElement) return;
 			e.preventDefault();
 			togglePause();
 		} else if (e.code === "KeyR") {
