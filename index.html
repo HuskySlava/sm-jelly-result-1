@@ -205,6 +205,8 @@
 		<p id="best-orbs">Best orbs: 0</p>
 		<p id="orb-streak-stat">Orb streak: x0</p>
 		<p id="best-orb-streak">Best orb streak: x0</p>
+		<p id="score-stat">Score: 0</p>
+		<p id="best-score">Best score: 0</p>
 		<p id="fps-stat">FPS: 0</p>
 	</div>
 	<div id="controls">
@@ -1142,6 +1144,7 @@
 				spawnPopup(orb.x, orb.y - 10, "+1 Orb!", color);
 			}
 			spawnOrb();
+			updateScoreStat();
 		}
 	};
 	const drawOrb = (time) => {
@@ -1251,6 +1254,26 @@
 	const bestComboEl = document.querySelector("#best-combo");
 	let bestCombo = Number(localStorage.getItem("jelly-best-combo")) || 0;
 	bestComboEl.textContent = `Best combo: x${bestCombo}`;
+
+	// Rolls bounces, corner bounces, and orbs into one combined progress number, since
+	// none of the per-stat records alone say whether a run was good overall. Corners are
+	// weighted heaviest (hardest to land), orbs next, plain bounces the least.
+	const scoreStatEl = document.querySelector("#score-stat");
+	const bestScoreEl = document.querySelector("#best-score");
+	let bestScore = Number(localStorage.getItem("jelly-best-score")) || 0;
+	bestScoreEl.textContent = `Best score: ${bestScore}`;
+	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2;
+	const updateScoreStat = () => {
+		const score = computeScore();
+		scoreStatEl.textContent = `Score: ${score}`;
+		if (score > bestScore) {
+			bestScore = score;
+			localStorage.setItem("jelly-best-score", bestScore);
+			bestScoreEl.textContent = `Best score: ${bestScore}`;
+			// Guard against celebrating the trivial 0 > 0 case on a fresh reset.
+			if (score > 0) spawnPopup(jelly.x + jelly.w / 2, jelly.y - 130, "New Best Score!", "#ff5722");
+		}
+	};
 
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
@@ -1418,6 +1441,7 @@
 				jelly.velY *= scale;
 			}
 			updateSpeedStat();
+			updateScoreStat();
 		}
 		// Ease the squash/stretch back to normal every frame, not just on bounce.
 		const ease = 1 - Math.pow(0.001, dt);
@@ -1561,7 +1585,7 @@
 	// summary of every stat to the clipboard, with a brief label change for feedback.
 	const shareBtn = document.querySelector("#share-btn");
 	const buildShareText = () => (
-		`Canvas Jelly — Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
+		`Canvas Jelly — Score: ${computeScore()} (Best ${bestScore}) | Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
 		`Corners: ${cornerBounces} (Best ${bestCorners}) | Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
 		`Orbs: ${orbsCollected} (Best ${bestOrbs}, Streak x${orbStreak}, Best x${bestOrbStreak})`
 	);
@@ -1655,6 +1679,7 @@
 		combo = 0;
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
+		updateScoreStat();
 		elapsedTime = 0;
 		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 		previousBestTime = bestTime;
@@ -1686,7 +1711,7 @@
 		ctx.font = "20px 'Roboto', sans-serif";
 		ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
 		ctx.fillText(
-			`Bounces: ${bounces}  •  Combo: x${combo}  •  Time: ${elapsedTime.toFixed(1)}s`,
+			`Score: ${computeScore()}  •  Bounces: ${bounces}  •  Combo: x${combo}  •  Time: ${elapsedTime.toFixed(1)}s`,
 			canvas.width / 2, canvas.height / 2 + 30
 		);
 		ctx.restore();
