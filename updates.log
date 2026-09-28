@@ -82,3 +82,4 @@
 <2026-09-28-00:32> (Claude): Added a gold compass arrow that always points from the jelly toward the orb.
 <2026-09-28-01:02> (Claude): Added a Magnet toggle (L) that gently pulls the jelly toward the orb.
 <2026-09-28-01:33> (Claude): Added an optional Hazard mode: a roaming red orb that resets your combo streak on contact.
+<2026-09-28-02:02> (Claude): Pause overlay now dims the scene and shows a bounces/combo/time recap for legibility.
