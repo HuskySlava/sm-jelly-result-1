@@ -225,6 +225,7 @@
 		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
 		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
 		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
+		<button id="meteor-btn" title="Meteor shower (U)">Meteor Shower</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
@@ -251,6 +252,7 @@
 			<li><kbd>N</kbd> Toggle rainbow mode</li>
 			<li><kbd>D</kbd> Cycle backdrop theme</li>
 			<li><kbd>J</kbd> Confetti burst</li>
+			<li><kbd>U</kbd> Meteor shower</li>
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>C</kbd> Copy stats to clipboard</li>
@@ -347,6 +349,28 @@
 		}
 		shootingStars = shootingStars.filter(s => s.life > 0);
 	};
+	// On-demand burst of many shooting stars at once (vs. the rare ambient single
+	// streak), staggered off-screen so they arrive over the next second or so
+	// instead of all crossing the canvas in an identical instant line.
+	const meteorBtn = document.querySelector("#meteor-btn");
+	const spawnMeteorShower = () => {
+		for (let i = 0; i < 12; i++) {
+			const fromLeft = Math.random() < 0.5;
+			shootingStars.push({
+				x: fromLeft ? -20 - Math.random() * 300 : canvas.width + 20 + Math.random() * 300,
+				y: Math.random() * canvas.height * 0.7,
+				vx: (fromLeft ? 1 : -1) * (400 + Math.random() * 250),
+				vy: 100 + Math.random() * 80,
+				life: 1,
+				maxLife: 1
+			});
+		}
+	};
+	meteorBtn.addEventListener("click", () => {
+		// Matches the confetti/boost guard: nothing should animate while paused.
+		if (paused) return;
+		spawnMeteorShower();
+	});
 	const drawShootingStars = () => {
 		ctx.save();
 		for (const s of shootingStars) {
@@ -1813,6 +1837,8 @@
 			themeBtn.click();
 		} else if (e.code === "KeyJ") {
 			confettiBtn.click();
+		} else if (e.code === "KeyU") {
+			meteorBtn.click();
 		} else if (e.code === "KeyF") {
 			fullscreenBtn.click();
 		} else if (e.code === "KeyP") {
