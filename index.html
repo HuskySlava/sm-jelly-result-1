@@ -1221,6 +1221,24 @@
 		ctx.restore();
 	};
 
+	// A pulsing teal double ring around the jelly shows a double orb's remaining
+	// bonus-multiplier time, mirroring the shield/freeze/shrink rings so all four timed
+	// buffs stay equally visible.
+	const drawDoubleRing = () => {
+		if (doubleTimeRemaining <= 0) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const pulse = 1 + Math.sin(breatheTime * 7) * 0.1;
+		ctx.save();
+		ctx.globalAlpha = Math.min(doubleTimeRemaining / doubleDuration, 1);
+		ctx.strokeStyle = "#64ffda";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 1.05 * pulse, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
+	};
+
 	// A short-lived floating label reinforces "New Best!" moments beyond just the
 	// gold particle burst, since that burst looks identical to a normal bounce's
 	// particles at a glance.
@@ -1286,7 +1304,7 @@
 	const totalOrbsEl = document.querySelector("#total-orbs");
 	let totalOrbs = Number(localStorage.getItem("jelly-total-orbs")) || 0;
 	totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false };
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
@@ -1302,6 +1320,10 @@
 	// A rarer orange "shrink" orb (mutually exclusive with the others above) temporarily
 	// shrinks the jelly, making it a trickier target for the hazard and a tighter fit through portals.
 	const shrinkOrbChance = 0.1;
+	// A rarer teal "double" orb (mutually exclusive with the others above) doubles the
+	// bonus of every orb picked up while it's active, rewarding a detour to it before
+	// chasing the next few regular orbs.
+	const doubleOrbChance = 0.1;
 	const spawnOrb = () => {
 		const margin = 60;
 		orb.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1311,7 +1333,8 @@
 		orb.isShield = !orb.isMega && !orb.isFreeze && Math.random() < shieldOrbChance;
 		orb.isSpeed = !orb.isMega && !orb.isFreeze && !orb.isShield && Math.random() < speedOrbChance;
 		orb.isShrink = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && Math.random() < shrinkOrbChance;
-		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : 10;
+		orb.isDouble = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && Math.random() < doubleOrbChance;
+		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : orb.isDouble ? 14 : 10;
 	};
 	spawnOrb();
 	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
@@ -1390,6 +1413,23 @@
 		osc.start();
 		osc.stop(audioCtx.currentTime + 0.15);
 	};
+	// Two quick identical chimes (vs. every other orb's single tone) audibly spell out
+	// "double" rather than just a louder version of the regular pickup blip.
+	const playDoubleSound = () => {
+		if (!soundOn || !audioCtx) return;
+		[0, 0.12].forEach((delay) => {
+			const osc = audioCtx.createOscillator();
+			const gain = audioCtx.createGain();
+			osc.type = "triangle";
+			osc.frequency.value = 740;
+			const startTime = audioCtx.currentTime + delay;
+			gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), startTime);
+			gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
+			osc.connect(gain).connect(audioCtx.destination);
+			osc.start(startTime);
+			osc.stop(startTime + 0.18);
+		});
+	};
 	// A quick descending "pop" (vs. the speed orb's rising zip) reads as the jelly
 	// shrinking down rather than speeding up.
 	const playShrinkSound = () => {
@@ -1426,6 +1466,10 @@
 	// decremented the same way as freezeTimeRemaining/shieldTimeRemaining in the main loop below.
 	let shrinkTimeRemaining = 0;
 	const shrinkDuration = 5;
+	// Counts down in real seconds while a double orb's bonus multiplier is active;
+	// decremented the same way as the other timed buffs in the main loop below.
+	let doubleTimeRemaining = 0;
+	const doubleDuration = 6;
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -1435,8 +1479,11 @@
 			const wasShield = orb.isShield;
 			const wasSpeed = orb.isSpeed;
 			const wasShrink = orb.isShrink;
-			const bonus = wasMega ? 3 : 1;
-			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : "#ffcc00";
+			const wasDouble = orb.isDouble;
+			// The double orb itself always awards its flat 1 (it's what starts the buff);
+			// only orbs picked up while the buff is already running get multiplied.
+			const bonus = (wasMega ? 3 : 1) * (!wasDouble && doubleTimeRemaining > 0 ? 2 : 1);
+			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : wasDouble ? "#64ffda" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 			totalOrbs += bonus;
@@ -1462,7 +1509,7 @@
 				if (navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 40]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnParticles(orb.x, orb.y, color);
-				spawnPopup(orb.x, orb.y - 10, "Mega Orb! +3", color);
+				spawnPopup(orb.x, orb.y - 10, `Mega Orb! +${bonus}`, color);
 			} else if (wasFreeze) {
 				freezeTimeRemaining = freezeDuration;
 				playFreezeSound();
@@ -1494,11 +1541,17 @@
 				if (navigator.vibrate) navigator.vibrate([60]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Shrink!", color);
+			} else if (wasDouble) {
+				doubleTimeRemaining = doubleDuration;
+				playDoubleSound();
+				if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+				spawnParticles(orb.x, orb.y, color);
+				spawnPopup(orb.x, orb.y - 10, "Double Orbs!", color);
 			} else {
 				playOrbSound();
 				if (navigator.vibrate) navigator.vibrate(10);
 				spawnParticles(orb.x, orb.y, color);
-				spawnPopup(orb.x, orb.y - 10, "+1 Orb!", color);
+				spawnPopup(orb.x, orb.y - 10, bonus > 1 ? `+${bonus} Orb!` : "+1 Orb!", color);
 			}
 			spawnOrb();
 			updateScoreStat();
@@ -1508,8 +1561,11 @@
 		ctx.save();
 		// Freeze orbs pulse slower than the others, hinting at the slow-mo they grant.
 		// Speed orbs pulse fastest of all, hinting at the burst of speed they grant.
-		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : orb.isShrink ? 5 : 4)) * 0.15;
-		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : "#ffcc00";
+		// Double orbs pulse in a quick double-beat pattern, echoing the two-chime pickup sound.
+		const pulse = orb.isDouble
+			? 1 + (Math.abs(Math.sin(time * 6)) > 0.85 ? 0.2 : 0)
+			: 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : orb.isShrink ? 5 : 4)) * 0.15;
+		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : orb.isDouble ? "#64ffda" : "#ffcc00";
 		ctx.shadowColor = color;
 		ctx.shadowBlur = orb.isMega ? 30 : 20;
 		ctx.fillStyle = color;
@@ -1649,6 +1705,7 @@
 		if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
 		else if (freezeTimeRemaining > 0) mood = "❄️ Chillin' (literally)";
 		else if (shrinkTimeRemaining > 0) mood = "🐣 Tiny!";
+		else if (doubleTimeRemaining > 0) mood = "✖️2️⃣ Double bonus!";
 		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) mood = "😰 Too close!";
 		else if (combo >= 10) mood = "🤩 Unstoppable!";
 		else if (combo >= 5) mood = "🔥 On a roll!";
@@ -2268,6 +2325,7 @@
 		freezeTimeRemaining = 0;
 		shieldTimeRemaining = 0;
 		shrinkTimeRemaining = 0;
+		doubleTimeRemaining = 0;
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
@@ -2445,6 +2503,7 @@
 				if (freezeActive) freezeTimeRemaining = Math.max(freezeTimeRemaining - rawDt, 0);
 				if (shieldTimeRemaining > 0) shieldTimeRemaining = Math.max(shieldTimeRemaining - rawDt, 0);
 				if (shrinkTimeRemaining > 0) shrinkTimeRemaining = Math.max(shrinkTimeRemaining - rawDt, 0);
+				if (doubleTimeRemaining > 0) doubleTimeRemaining = Math.max(doubleTimeRemaining - rawDt, 0);
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
@@ -2495,6 +2554,7 @@
 				drawShieldRing();
 				drawFreezeRing();
 				drawShrinkRing();
+				drawDoubleRing();
 				drawPopups();
 				drawConfetti();
 			}
