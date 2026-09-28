@@ -112,3 +112,4 @@
 <2026-09-28-16:01> (Claude): Fixed the Bounces stat pill rendering dimmer than the others by removing a leftover CSS rule that opacity-faded it.
 <2026-09-28-16:32> (Claude): Fixed celebratory text popups (combo/record callouts) spawning off-canvas and invisible when the jelly bounces near the top wall.
 2026-09-28-17:02 (Claude): Added a persistent achievements system with 9 milestone badges tracked and celebrated in-game.
+2026-09-28-17:32 (Claude): Added a clickable achievements panel listing locked/unlocked badges instead of just a bare X/Y count.
