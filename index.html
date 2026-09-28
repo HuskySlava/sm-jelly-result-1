@@ -139,10 +139,33 @@
 			font-family: inherit;
 		}
 
+		#stats-panel {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+			gap: 0.4rem 0.6rem;
+			width: 100%;
+			max-width: 620px;
+			margin: 0.85rem 0;
+		}
+
+		#stats-panel p {
+			margin: 0;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 8px;
+			padding: 0.45rem 0.5rem;
+			font-size: 0.78rem;
+			letter-spacing: 0.02em;
+			text-align: center;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
 		/* Zen mode strips away the title/stats/controls for a distraction-free view of
 		   the jelly, leaving only a dimmed re-toggle button so there's always a way back. */
 		body.zen-mode #canvas-section > h1,
-		body.zen-mode #canvas-section > p {
+		body.zen-mode #stats-panel {
 			display: none;
 		}
 
@@ -166,22 +189,24 @@
 	<div class="canvas-container">
 		<canvas width="1280" height="720" id="my-canvas"></canvas>
 	</div>
-	<p id="bounce-counter">Bounces: 0</p>
-	<p id="corner-stat">Corners: 0</p>
-	<p id="best-corners">Best corners: 0</p>
-	<p id="combo-stat">Combo: x0</p>
-	<p id="best-combo">Best combo: x0</p>
-	<p id="high-score">Best: 0</p>
-	<p id="total-bounces">Total: 0</p>
-	<p id="speed-stat">Speed: 85 px/s</p>
-	<p id="top-speed">Top speed: 0 px/s</p>
-	<p id="time-stat">Time: 0.0s</p>
-	<p id="best-time">Best time: 0.0s</p>
-	<p id="orb-stat">Orbs: 0</p>
-	<p id="best-orbs">Best orbs: 0</p>
-	<p id="orb-streak-stat">Orb streak: x0</p>
-	<p id="best-orb-streak">Best orb streak: x0</p>
-	<p id="fps-stat">FPS: 0</p>
+	<div id="stats-panel">
+		<p id="bounce-counter">Bounces: 0</p>
+		<p id="corner-stat">Corners: 0</p>
+		<p id="best-corners">Best corners: 0</p>
+		<p id="combo-stat">Combo: x0</p>
+		<p id="best-combo">Best combo: x0</p>
+		<p id="high-score">Best: 0</p>
+		<p id="total-bounces">Total: 0</p>
+		<p id="speed-stat">Speed: 85 px/s</p>
+		<p id="top-speed">Top speed: 0 px/s</p>
+		<p id="time-stat">Time: 0.0s</p>
+		<p id="best-time">Best time: 0.0s</p>
+		<p id="orb-stat">Orbs: 0</p>
+		<p id="best-orbs">Best orbs: 0</p>
+		<p id="orb-streak-stat">Orb streak: x0</p>
+		<p id="best-orb-streak">Best orb streak: x0</p>
+		<p id="fps-stat">FPS: 0</p>
+	</div>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
