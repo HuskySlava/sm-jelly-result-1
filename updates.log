@@ -116,3 +116,4 @@
 <2026-09-28-18:02> (Claude): Added a persistent lifetime "Total orbs" stat, mirroring the existing total-bounces counter.
 <2026-09-28-18:34> (Claude): Added a persisted volume slider that scales every sound effect independent of the mute toggle.
 2026-09-28-19:02 (Claude): Added 'Orb Collector' achievement unlocked at 50 lifetime orbs collected.
+2026-09-28-19:32 (Claude): Added a persisted Top-5 leaderboard panel recording each run's score on Reset.

@@ -215,6 +215,55 @@
 			opacity: 0.4;
 		}
 
+		#leaderboard-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.75);
+			align-items: center;
+			justify-content: center;
+			z-index: 10;
+		}
+
+		#leaderboard-overlay.open {
+			display: flex;
+		}
+
+		#leaderboard-panel {
+			background: #111;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 12px;
+			padding: 1.5rem 2rem;
+			max-width: 320px;
+			max-height: 85vh;
+			overflow-y: auto;
+		}
+
+		#leaderboard-panel h2 {
+			margin-top: 0;
+			font-size: 1.1rem;
+		}
+
+		#leaderboard-panel ol {
+			list-style: decimal;
+			padding-left: 1.4rem;
+			margin: 0;
+			font-size: 0.9rem;
+			line-height: 1.8;
+		}
+
+		#leaderboard-panel li span {
+			opacity: 0.6;
+			font-size: 0.8rem;
+			margin-left: 0.4em;
+		}
+
+		#leaderboard-panel p.empty {
+			opacity: 0.6;
+			font-size: 0.9rem;
+			margin: 0;
+		}
+
 		#achievements-stat {
 			cursor: pointer;
 		}
@@ -316,6 +365,7 @@
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
+		<button id="leaderboard-btn" title="Leaderboard (Y)">Leaderboard</button>
 		<button id="help-btn" title="Help (H)">Help</button>
 		<button id="zen-btn" title="Zen mode (Z)">Zen: Off</button>
 	</div>
@@ -324,6 +374,12 @@
 	<div id="achievements-panel">
 		<h2>Achievements</h2>
 		<ul id="achievements-list"></ul>
+	</div>
+</div>
+<div id="leaderboard-overlay">
+	<div id="leaderboard-panel">
+		<h2>Leaderboard — Top 5</h2>
+		<div id="leaderboard-list"></div>
 	</div>
 </div>
 <div id="help-overlay">
@@ -351,6 +407,7 @@
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>C</kbd> Copy stats to clipboard</li>
+			<li><kbd>Y</kbd> Toggle leaderboard</li>
 			<li><kbd>H</kbd> Toggle this help</li>
 			<li><kbd>Z</kbd> Toggle zen mode</li>
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
@@ -1601,6 +1658,42 @@
 		}
 	};
 
+	// Top 5 highest-scoring runs ever, persisted like the other lifetime stats, so a
+	// player can see how a run stacks up against their own history, not just the
+	// single "best score" number.
+	const leaderboardBtn = document.querySelector("#leaderboard-btn");
+	const leaderboardOverlay = document.querySelector("#leaderboard-overlay");
+	const leaderboardList = document.querySelector("#leaderboard-list");
+	let leaderboard = JSON.parse(localStorage.getItem("jelly-leaderboard") || "[]");
+	const renderLeaderboardList = () => {
+		if (leaderboard.length === 0) {
+			leaderboardList.innerHTML = `<p class="empty">No runs recorded yet — play a round, then Reset to save it.</p>`;
+			return;
+		}
+		leaderboardList.innerHTML = `<ol>${leaderboard.map(entry =>
+			`<li>${entry.score} pts <span>${entry.date}</span></li>`
+		).join("")}</ol>`;
+	};
+	const toggleLeaderboard = () => {
+		renderLeaderboardList();
+		leaderboardOverlay.classList.toggle("open");
+	};
+	leaderboardBtn.addEventListener("click", toggleLeaderboard);
+	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
+	leaderboardOverlay.addEventListener("click", (e) => {
+		if (e.target === leaderboardOverlay) toggleLeaderboard();
+	});
+	// Called right before Reset wipes the run's stats, so a completed run's score
+	// gets a chance to land on the board instead of being lost with no record.
+	const recordRunForLeaderboard = () => {
+		const score = computeScore();
+		if (score <= 0) return;
+		leaderboard.push({ score, date: new Date().toLocaleDateString() });
+		leaderboard.sort((a, b) => b.score - a.score);
+		leaderboard = leaderboard.slice(0, 5);
+		localStorage.setItem("jelly-leaderboard", JSON.stringify(leaderboard));
+	};
+
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
 	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
@@ -2084,6 +2177,7 @@
 
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {
+		recordRunForLeaderboard();
 		jelly.x = Math.floor(canvas.width / 2);
 		jelly.y = Math.floor(canvas.height / 2);
 		jelly.velX = 60;
@@ -2233,6 +2327,8 @@
 			snapshotBtn.click();
 		} else if (e.code === "KeyC") {
 			shareBtn.click();
+		} else if (e.code === "KeyY") {
+			leaderboardBtn.click();
 		} else if (e.code === "KeyH") {
 			toggleHelp();
 		} else if (e.code === "KeyZ") {
@@ -2241,6 +2337,8 @@
 			toggleHelp();
 		} else if (e.code === "Escape" && achievementsOverlay.classList.contains("open")) {
 			toggleAchievements();
+		} else if (e.code === "Escape" && leaderboardOverlay.classList.contains("open")) {
+			toggleLeaderboard();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			e.preventDefault();
 			if (paused) return;
