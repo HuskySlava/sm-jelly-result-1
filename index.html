@@ -529,8 +529,8 @@
 	// bouncing off walls: entering one warps it out the other, velocity intact.
 	const portalBtn = document.querySelector("#portal-btn");
 	let portalOn = localStorage.getItem("jelly-portal-on") === "true";
-	const portalA = { x: 0, y: 0, radius: 14 };
-	const portalB = { x: 0, y: 0, radius: 14 };
+	const portalA = { x: 0, y: 0, radius: 14, color: "#00e5ff" };
+	const portalB = { x: 0, y: 0, radius: 14, color: "#d500f9" };
 	const spawnPortals = () => {
 		const margin = 80;
 		portalA.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -542,12 +542,12 @@
 		} while (Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4);
 	};
 	const drawPortals = (time) => {
-		for (const [portal, color] of [[portalA, "#00e5ff"], [portalB, "#d500f9"]]) {
+		for (const portal of [portalA, portalB]) {
 			ctx.save();
 			const pulse = 1 + Math.sin(time * 4) * 0.2;
-			ctx.shadowColor = color;
+			ctx.shadowColor = portal.color;
 			ctx.shadowBlur = 25;
-			ctx.strokeStyle = color;
+			ctx.strokeStyle = portal.color;
 			ctx.lineWidth = 4;
 			ctx.beginPath();
 			ctx.arc(portal.x, portal.y, portal.radius * pulse, 0, Math.PI * 2);
@@ -586,11 +586,11 @@
 		if (!enter) return;
 		const exit = enter === portalA ? portalB : portalA;
 		lastPortalElapsed = elapsedTime;
-		spawnParticles(cx, cy, "#00e5ff");
+		spawnParticles(cx, cy, enter.color);
 		jelly.x = exit.x - jelly.w / 2;
 		jelly.y = exit.y - jelly.h / 2;
-		spawnParticles(exit.x, exit.y, "#d500f9");
-		spawnRing(exit.x, exit.y, "#d500f9");
+		spawnParticles(exit.x, exit.y, exit.color);
+		spawnRing(exit.x, exit.y, exit.color);
 		playPortalSound();
 		if (navigator.vibrate) navigator.vibrate(25);
 	};
