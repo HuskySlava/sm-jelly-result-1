@@ -2561,6 +2561,10 @@
 		} else if (e.code === "Escape" && leaderboardOverlay.classList.contains("open")) {
 			toggleLeaderboard();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+			// Mirrors the Space-key button guard above: the volume slider (and any other
+			// input) natively uses arrow keys for its own purpose, so don't hijack them
+			// into a jelly nudge while one is focused.
+			if (e.target instanceof HTMLInputElement) return;
 			e.preventDefault();
 			if (paused) return;
 			const nudge = 30; // px/s added per press, lets players steer without a click
