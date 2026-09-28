@@ -107,3 +107,4 @@
 <2026-09-28-13:32> (Claude): Added a pulsing icy ring showing the freeze orb's remaining slow-mo duration, mirroring the shield ring.
 <2026-09-28-14:02> (Claude): Throttled the unthrottled top-speed localStorage write that fired every frame during gravity free-fall.
 <2026-09-28-14:32> (Claude): Fixed bug where the game kept running in the background tab, silently resetting combos/streaks; now auto-pauses on tab hide.
+<2026-09-28-15:03> (Claude): Added a camera-flash overlay and shutter sound when taking a snapshot.

@@ -31,6 +31,22 @@
 			justify-content: center;
 		}
 
+		.canvas-container {
+			position: relative;
+		}
+
+		/* Camera-flash overlay for the Snapshot button: a plain white div faded via CSS
+		   is simpler and more reliable than trying to flash the canvas itself, since it
+		   works the same whether the game is paused or running. */
+		#snapshot-flash {
+			position: absolute;
+			inset: 0;
+			background: #fff;
+			opacity: 0;
+			pointer-events: none;
+			border-radius: 8px;
+		}
+
 		canvas {
 			display: block;
 			max-width: 100vw;
@@ -188,6 +204,7 @@
 	<h1>Canvas Jelly</h1>
 	<div class="canvas-container">
 		<canvas width="1280" height="720" id="my-canvas"></canvas>
+		<div id="snapshot-flash"></div>
 	</div>
 	<div id="stats-panel">
 		<p id="bounce-counter">Bounces: 0</p>
@@ -1796,12 +1813,40 @@
 		fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
 	});
 
+	// Percussive double-click (vs. every other cue's single tone) mimics a camera shutter.
+	const playSnapshotSound = () => {
+		if (!soundOn || !audioCtx) return;
+		[0, 0.06].forEach((delay) => {
+			const osc = audioCtx.createOscillator();
+			const gain = audioCtx.createGain();
+			osc.type = "square";
+			osc.frequency.value = 1000;
+			const startTime = audioCtx.currentTime + delay;
+			gain.gain.setValueAtTime(0.1, startTime);
+			gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.04);
+			osc.connect(gain).connect(audioCtx.destination);
+			osc.start(startTime);
+			osc.stop(startTime + 0.04);
+		});
+	};
+
 	const snapshotBtn = document.querySelector("#snapshot-btn");
+	const snapshotFlash = document.querySelector("#snapshot-flash");
 	snapshotBtn.addEventListener("click", () => {
 		const link = document.createElement("a");
 		link.download = `canvas-jelly-${Date.now()}.png`;
 		link.href = canvas.toDataURL("image/png");
 		link.click();
+		playSnapshotSound();
+		if (navigator.vibrate) navigator.vibrate(20);
+		// Snap straight to bright, then transition back down, so it reads as an
+		// instant flash rather than a slow fade-in.
+		snapshotFlash.style.transition = "none";
+		snapshotFlash.style.opacity = "0.85";
+		requestAnimationFrame(() => {
+			snapshotFlash.style.transition = "opacity 0.4s ease";
+			snapshotFlash.style.opacity = "0";
+		});
 	});
 
 	// Lets players brag about a run without a screenshot: copies a plain-text
