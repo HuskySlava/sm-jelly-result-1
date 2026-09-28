@@ -223,6 +223,7 @@
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
+		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
 		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
@@ -248,6 +249,7 @@
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>N</kbd> Toggle rainbow mode</li>
+			<li><kbd>D</kbd> Cycle backdrop theme</li>
 			<li><kbd>J</kbd> Confetti burst</li>
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
@@ -274,11 +276,22 @@
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
+	// Cycles the backdrop's color palette without touching gameplay: each theme just
+	// shifts the nebula's hue drift and the star tint, so players can pick a look
+	// that suits them (or just for variety) independent of every other toggle.
+	const themes = [
+		{ name: "Nebula", hueOffset: 0, starColor: "#ffffff" },
+		{ name: "Sunset", hueOffset: 300, starColor: "#ffe0b3" },
+		{ name: "Ocean", hueOffset: 180, starColor: "#bfefff" },
+		{ name: "Aurora", hueOffset: 120, starColor: "#c8ffcf" }
+	];
+	let themeIndex = Number(localStorage.getItem("jelly-theme-index")) || 0;
+
 	// Slowly drifting cosmic nebula glow behind the stars, so the black backdrop
 	// isn't perfectly flat. Low alpha keeps it from washing out the trail effect.
 	const drawNebula = (time) => {
 		ctx.save();
-		const hue1 = (time * 6) % 360;
+		const hue1 = (time * 6 + themes[themeIndex].hueOffset) % 360;
 		const hue2 = (hue1 + 60) % 360;
 		const cx = canvas.width * (0.5 + 0.15 * Math.sin(time * 0.05));
 		const cy = canvas.height * (0.5 + 0.15 * Math.cos(time * 0.04));
@@ -301,7 +314,7 @@
 	}));
 	const drawStars = (time) => {
 		ctx.save();
-		ctx.fillStyle = "#fff";
+		ctx.fillStyle = themes[themeIndex].starColor;
 		for (const s of stars) {
 			ctx.globalAlpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(time * s.speed + s.phase));
 			ctx.beginPath();
@@ -689,6 +702,14 @@
 		localStorage.setItem("jelly-rainbow-on", rainbowOn);
 		rainbowBtn.textContent = rainbowOn ? "Rainbow: On" : "Rainbow: Off";
 		rainbowBtn.classList.toggle("active", rainbowOn);
+	});
+
+	const themeBtn = document.querySelector("#theme-btn");
+	themeBtn.textContent = `Theme: ${themes[themeIndex].name}`;
+	themeBtn.addEventListener("click", () => {
+		themeIndex = (themeIndex + 1) % themes.length;
+		localStorage.setItem("jelly-theme-index", themeIndex);
+		themeBtn.textContent = `Theme: ${themes[themeIndex].name}`;
 	});
 
 	// A single faint particle per frame, drifting slower and dying quicker than a
@@ -1770,6 +1791,8 @@
 			shakeBtn.click();
 		} else if (e.code === "KeyN") {
 			rainbowBtn.click();
+		} else if (e.code === "KeyD") {
+			themeBtn.click();
 		} else if (e.code === "KeyJ") {
 			confettiBtn.click();
 		} else if (e.code === "KeyF") {
