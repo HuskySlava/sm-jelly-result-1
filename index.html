@@ -555,6 +555,8 @@
 		scaleY: 1
 	}
 	const maxSpeed = 240; // px per second, shared cap for bounce speedup and boosts
+	const jellyBaseSize = jelly.w; // resting width/height the shrink orb's effect eases back toward
+	const jellyShrinkSize = 11; // px, target width/height while a shrink orb's effect is active
 
 	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
 
@@ -1201,6 +1203,24 @@
 		ctx.restore();
 	};
 
+	// A pulsing orange ring around the jelly shows a shrink orb's remaining
+	// small-size time, mirroring the shield/freeze rings so all three timed
+	// buffs stay equally visible instead of the size change alone explaining itself.
+	const drawShrinkRing = () => {
+		if (shrinkTimeRemaining <= 0) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const pulse = 1 + Math.sin(breatheTime * 5) * 0.1;
+		ctx.save();
+		ctx.globalAlpha = Math.min(shrinkTimeRemaining / shrinkDuration, 1);
+		ctx.strokeStyle = "#ff8c00";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 1.2 * pulse, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
+	};
+
 	// A short-lived floating label reinforces "New Best!" moments beyond just the
 	// gold particle burst, since that burst looks identical to a normal bounce's
 	// particles at a glance.
@@ -1266,7 +1286,7 @@
 	const totalOrbsEl = document.querySelector("#total-orbs");
 	let totalOrbs = Number(localStorage.getItem("jelly-total-orbs")) || 0;
 	totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false };
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
@@ -1279,6 +1299,9 @@
 	// A rarer neon-green "speed" orb (mutually exclusive with the others above) gives an
 	// instant velocity kick along the jelly's current heading, rewarding a tight detour.
 	const speedOrbChance = 0.1;
+	// A rarer orange "shrink" orb (mutually exclusive with the others above) temporarily
+	// shrinks the jelly, making it a trickier target for the hazard and a tighter fit through portals.
+	const shrinkOrbChance = 0.1;
 	const spawnOrb = () => {
 		const margin = 60;
 		orb.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1287,7 +1310,8 @@
 		orb.isFreeze = !orb.isMega && Math.random() < freezeOrbChance;
 		orb.isShield = !orb.isMega && !orb.isFreeze && Math.random() < shieldOrbChance;
 		orb.isSpeed = !orb.isMega && !orb.isFreeze && !orb.isShield && Math.random() < speedOrbChance;
-		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : 10;
+		orb.isShrink = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && Math.random() < shrinkOrbChance;
+		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : 10;
 	};
 	spawnOrb();
 	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
@@ -1366,6 +1390,21 @@
 		osc.start();
 		osc.stop(audioCtx.currentTime + 0.15);
 	};
+	// A quick descending "pop" (vs. the speed orb's rising zip) reads as the jelly
+	// shrinking down rather than speeding up.
+	const playShrinkSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sine";
+		osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.2);
+		gain.gain.setValueAtTime(0.12 * Math.max(volume, 0.0001), audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.2);
+	};
 	// Chains orb pickups the same way the wall-bounce combo chains bounces: a gap
 	// longer than the window resets the streak, both here and passively while idling.
 	const orbStreakEl = document.querySelector("#orb-streak-stat");
@@ -1383,6 +1422,10 @@
 	// decremented the same way as freezeTimeRemaining in the main loop below.
 	let shieldTimeRemaining = 0;
 	const shieldDuration = 4;
+	// Counts down in real seconds while a shrink orb's size reduction is active;
+	// decremented the same way as freezeTimeRemaining/shieldTimeRemaining in the main loop below.
+	let shrinkTimeRemaining = 0;
+	const shrinkDuration = 5;
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -1391,8 +1434,9 @@
 			const wasFreeze = orb.isFreeze;
 			const wasShield = orb.isShield;
 			const wasSpeed = orb.isSpeed;
+			const wasShrink = orb.isShrink;
 			const bonus = wasMega ? 3 : 1;
-			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : "#ffcc00";
+			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 			totalOrbs += bonus;
@@ -1444,6 +1488,12 @@
 				if (navigator.vibrate) navigator.vibrate([30]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Speed Up!", color);
+			} else if (wasShrink) {
+				shrinkTimeRemaining = shrinkDuration;
+				playShrinkSound();
+				if (navigator.vibrate) navigator.vibrate([60]);
+				spawnParticles(orb.x, orb.y, color);
+				spawnPopup(orb.x, orb.y - 10, "Shrink!", color);
 			} else {
 				playOrbSound();
 				if (navigator.vibrate) navigator.vibrate(10);
@@ -1458,8 +1508,8 @@
 		ctx.save();
 		// Freeze orbs pulse slower than the others, hinting at the slow-mo they grant.
 		// Speed orbs pulse fastest of all, hinting at the burst of speed they grant.
-		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : 4)) * 0.15;
-		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : "#ffcc00";
+		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : orb.isShrink ? 5 : 4)) * 0.15;
+		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : "#ffcc00";
 		ctx.shadowColor = color;
 		ctx.shadowBlur = orb.isMega ? 30 : 20;
 		ctx.fillStyle = color;
@@ -1598,6 +1648,7 @@
 		let mood;
 		if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
 		else if (freezeTimeRemaining > 0) mood = "❄️ Chillin' (literally)";
+		else if (shrinkTimeRemaining > 0) mood = "🐣 Tiny!";
 		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) mood = "😰 Too close!";
 		else if (combo >= 10) mood = "🤩 Unstoppable!";
 		else if (combo >= 5) mood = "🔥 On a roll!";
@@ -1907,6 +1958,11 @@
 		const ease = 1 - Math.pow(0.001, dt);
 		jelly.scaleX += (1 - jelly.scaleX) * ease;
 		jelly.scaleY += (1 - jelly.scaleY) * ease;
+		// Smoothly grow/shrink toward the shrink orb's target size, mirroring the
+		// squash/stretch easing above so the size change reads as squishy, not a snap-cut.
+		const targetSize = shrinkTimeRemaining > 0 ? jellyShrinkSize : jellyBaseSize;
+		jelly.w += (targetSize - jelly.w) * ease;
+		jelly.h += (targetSize - jelly.h) * ease;
 		// Cap the growth so a long combo makes the jelly noticeably chunkier without
 		// ever letting it swell large enough to dominate the arena.
 		const targetComboScale = 1 + Math.min(combo, 15) * 0.025;
@@ -2189,6 +2245,8 @@
 		jelly.color = "#fff";
 		jelly.scaleX = 1;
 		jelly.scaleY = 1;
+		jelly.w = jellyBaseSize;
+		jelly.h = jellyBaseSize;
 		comboScale = 1;
 		shakeMagnitude = 0;
 		canvas.style.transform = "";
@@ -2209,6 +2267,7 @@
 		orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
 		freezeTimeRemaining = 0;
 		shieldTimeRemaining = 0;
+		shrinkTimeRemaining = 0;
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
@@ -2385,6 +2444,7 @@
 			if (!paused) {
 				if (freezeActive) freezeTimeRemaining = Math.max(freezeTimeRemaining - rawDt, 0);
 				if (shieldTimeRemaining > 0) shieldTimeRemaining = Math.max(shieldTimeRemaining - rawDt, 0);
+				if (shrinkTimeRemaining > 0) shrinkTimeRemaining = Math.max(shrinkTimeRemaining - rawDt, 0);
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
@@ -2434,6 +2494,7 @@
 				drawComboTimer();
 				drawShieldRing();
 				drawFreezeRing();
+				drawShrinkRing();
 				drawPopups();
 				drawConfetti();
 			}
