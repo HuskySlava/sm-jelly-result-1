@@ -97,3 +97,4 @@
 <2026-09-28-08:01> (Claude): Fixed portal particle colors that were hardcoded backwards, now matching each portal's actual cyan/magenta color.
 <2026-09-28-08:33> (Claude): Added a rare icy freeze orb that grants a brief automatic slow-mo bonus on pickup.
 2026-09-28-09:01 (Claude): Grouped the 15 stat lines into a responsive grid panel with card styling for a cleaner look.
+2026-09-28-09:35 (Claude): Added a rare shield orb that grants temporary hazard immunity with matching sound and visuals.
