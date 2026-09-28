@@ -108,6 +108,10 @@
 			border-radius: 12px;
 			padding: 1.5rem 2rem;
 			max-width: 320px;
+			/* The shortcut list is long enough to exceed short viewports (e.g. mobile
+			   landscape); without this the overlay clips it with no way to scroll. */
+			max-height: 85vh;
+			overflow-y: auto;
 		}
 
 		#help-panel h2 {

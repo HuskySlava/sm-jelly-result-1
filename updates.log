@@ -92,3 +92,4 @@
 <2026-09-28-05:32> (Claude): Jelly now visually grows bigger the longer the bounce combo streak runs, easing back on reset.
 <2026-09-28-06:02> (Claude): Added a persisted "Best orbs" record stat, matching the other best-stat trackers.
 <2026-09-28-06:34> (Claude): Added a Confetti button (J) that fires a decorative, gravity-affected confetti burst from the jelly.
+2026-09-28-07:01 (Claude): Fixed help panel overflowing off-screen on short viewports by adding max-height and scroll.
