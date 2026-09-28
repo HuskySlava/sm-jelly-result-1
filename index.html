@@ -168,6 +168,7 @@
 	</div>
 	<p id="bounce-counter">Bounces: 0</p>
 	<p id="corner-stat">Corners: 0</p>
+	<p id="best-corners">Best corners: 0</p>
 	<p id="combo-stat">Combo: x0</p>
 	<p id="best-combo">Best combo: x0</p>
 	<p id="high-score">Best: 0</p>
@@ -1100,6 +1101,11 @@
 	// land than a plain wall bounce, so they get their own counter and celebration.
 	const cornerStatEl = document.querySelector("#corner-stat");
 	let cornerBounces = 0;
+	// Longest corner-bounce count ever landed in a single run, persisted like the
+	// other "best" stats (combo, speed, time, orbs) so corners has a record to chase too.
+	const bestCornersEl = document.querySelector("#best-corners");
+	let bestCorners = Number(localStorage.getItem("jelly-best-corners")) || 0;
+	bestCornersEl.textContent = `Best corners: ${bestCorners}`;
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
@@ -1270,6 +1276,12 @@
 				cornerStatEl.textContent = `Corners: ${cornerBounces}`;
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#00ff9d");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 90, "Corner!", "#00ff9d");
+				if (cornerBounces > bestCorners) {
+					bestCorners = cornerBounces;
+					localStorage.setItem("jelly-best-corners", bestCorners);
+					bestCornersEl.textContent = `Best corners: ${bestCorners}`;
+					spawnPopup(jelly.x + jelly.w / 2, jelly.y - 110, "New Best Corners!", "#00ff9d");
+				}
 			}
 			// Squash along the axis of impact and stretch the other, like real jelly.
 			if (bouncedX && bouncedY) {
@@ -1439,7 +1451,7 @@
 	const shareBtn = document.querySelector("#share-btn");
 	const buildShareText = () => (
 		`Canvas Jelly — Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
-		`Corners: ${cornerBounces} | Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
+		`Corners: ${cornerBounces} (Best ${bestCorners}) | Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
 		`Orbs: ${orbsCollected} (Best ${bestOrbs}, Streak x${orbStreak}, Best x${bestOrbStreak})`
 	);
 	const flashShareBtn = (label) => {
