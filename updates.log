@@ -106,3 +106,4 @@
 <2026-09-28-13:02> (Claude): Added a toggleable trajectory predictor (X key) showing a dotted line to the jelly's next wall bounce.
 <2026-09-28-13:32> (Claude): Added a pulsing icy ring showing the freeze orb's remaining slow-mo duration, mirroring the shield ring.
 <2026-09-28-14:02> (Claude): Throttled the unthrottled top-speed localStorage write that fired every frame during gravity free-fall.
+<2026-09-28-14:32> (Claude): Fixed bug where the game kept running in the background tab, silently resetting combos/streaks; now auto-pauses on tab hide.

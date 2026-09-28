@@ -1961,6 +1961,12 @@
 		}
 	};
 	pauseBtn.addEventListener("click", togglePause);
+	// Backgrounding the tab left the game fully running (physics, hazard hits, combo
+	// decay, audio) with only the frame's dt capped, so combos/streaks could silently
+	// vanish and hazard hits could register while the player wasn't even watching.
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden && !paused) togglePause();
+	});
 	window.addEventListener("keydown", (e) => {
 		if (e.code === "Space") {
 			// A focused toolbar button also treats Space as its own activation key (fired on
