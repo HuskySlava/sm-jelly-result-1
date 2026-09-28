@@ -497,6 +497,8 @@
 				comboStatEl.textContent = `Combo: x${combo}`;
 			}
 			playHazardSound();
+			// Sharper, longer buzz than a bounce so a hazard hit is felt as a penalty, not progress.
+			if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
 			spawnParticles(hazard.x, hazard.y, "#ff1744");
 			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Hazard!", "#ff1744");
 			if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
@@ -918,11 +920,13 @@
 			}
 			if (wasMega) {
 				playMegaOrbSound();
+				if (navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 40]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Mega Orb! +3", color);
 			} else {
 				playOrbSound();
+				if (navigator.vibrate) navigator.vibrate(10);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "+1 Orb!", color);
 			}
@@ -1066,6 +1070,9 @@
 			if (!rainbowOn) jelly.color = randomColor();
 			const isNewRecord = registerBounce();
 			playBounceSound();
+			// Touch players feel the impact even with sound muted; corners get a
+			// distinct triple-pulse pattern instead of the single-pulse plain bounce.
+			if (navigator.vibrate) navigator.vibrate(isCornerHit ? [15, 30, 15] : 12);
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			spawnRing(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			if (bouncedX) spawnEdgeFlash(jelly.x <= 0 ? "left" : "right", jelly.color);
