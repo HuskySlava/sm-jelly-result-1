@@ -191,6 +191,7 @@
 		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
+		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
@@ -215,6 +216,7 @@
 			<li><kbd>T</kbd> Toggle trail</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>N</kbd> Toggle rainbow mode</li>
+			<li><kbd>J</kbd> Confetti burst</li>
 			<li><kbd>F</kbd> Fullscreen</li>
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>C</kbd> Copy stats to clipboard</li>
@@ -1040,6 +1042,56 @@
 		ctx.restore();
 	};
 
+	// A celebratory confetti burst players can trigger on demand, distinct from the
+	// automatic bounce/orb particle bursts: bigger, rotating rectangles with gravity,
+	// purely decorative and with no effect on gameplay.
+	const confettiBtn = document.querySelector("#confetti-btn");
+	let confetti = [];
+	const spawnConfetti = (x, y) => {
+		for (let i = 0; i < 50; i++) {
+			const angle = Math.random() * Math.PI * 2;
+			const speed = 100 + Math.random() * 260;
+			const life = 0.8 + Math.random() * 0.6;
+			confetti.push({
+				x, y,
+				// Slight upward bias so the burst reads as a launch, not just an outward pop.
+				vx: Math.cos(angle) * speed,
+				vy: Math.sin(angle) * speed - 120,
+				rot: Math.random() * Math.PI * 2,
+				vrot: (Math.random() - 0.5) * 12,
+				size: 4 + Math.random() * 5,
+				life, maxLife: life,
+				color: randomColor()
+			});
+		}
+	};
+	const updateConfetti = (dt) => {
+		for (const c of confetti) {
+			c.vy += 300 * dt; // gravity pulls the confetti back down
+			c.x += c.vx * dt;
+			c.y += c.vy * dt;
+			c.rot += c.vrot * dt;
+			c.life -= dt;
+		}
+		confetti = confetti.filter(c => c.life > 0);
+	};
+	const drawConfetti = () => {
+		for (const c of confetti) {
+			ctx.save();
+			ctx.globalAlpha = Math.max(c.life / c.maxLife, 0);
+			ctx.translate(c.x, c.y);
+			ctx.rotate(c.rot);
+			ctx.fillStyle = c.color;
+			ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size);
+			ctx.restore();
+		}
+	};
+	confettiBtn.addEventListener("click", () => {
+		// Matches the boost/steer guard: nothing should animate while paused.
+		if (paused) return;
+		spawnConfetti(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2);
+	});
+
 	// Corner bounces (hitting two walls in the same frame) are rarer and harder to
 	// land than a plain wall bounce, so they get their own counter and celebration.
 	const cornerStatEl = document.querySelector("#corner-stat");
@@ -1456,6 +1508,7 @@
 		edgeFlashes = [];
 		clickRipples = [];
 		popups = [];
+		confetti = [];
 		bounces = 0;
 		bounceCounter.textContent = `Bounces: ${bounces}`;
 		cornerBounces = 0;
@@ -1563,6 +1616,8 @@
 			shakeBtn.click();
 		} else if (e.code === "KeyN") {
 			rainbowBtn.click();
+		} else if (e.code === "KeyJ") {
+			confettiBtn.click();
 		} else if (e.code === "KeyF") {
 			fullscreenBtn.click();
 		} else if (e.code === "KeyP") {
@@ -1656,9 +1711,11 @@
 				updateEdgeFlashes(dt);
 				updateClickRipples(dt);
 				updatePopups(dt);
+				updateConfetti(dt);
 				drawJelly();
 				drawComboTimer();
 				drawPopups();
+				drawConfetti();
 			}
 			updateFrame();
 		});
