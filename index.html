@@ -366,6 +366,7 @@
 		<p id="top-speed">Top speed: 0 px/s</p>
 		<p id="time-stat">Time: 0.0s</p>
 		<p id="best-time">Best time: 0.0s</p>
+		<p id="total-time">Total time: 0.0s</p>
 		<p id="orb-stat">Orbs: 0</p>
 		<p id="best-orbs">Best orbs: 0</p>
 		<p id="total-orbs">Total orbs: 0</p>
@@ -1340,9 +1341,17 @@
 	// indefinitely. Throttle like the speed record does, and flush on unload so the exact
 	// final value is never lost to the throttle window.
 	let lastBestTimeSaveTime = -Infinity;
+	// Unlike "Best time" (the longest single-run streak), this counts every second
+	// ever played across all sessions and resets, and never goes down — mirrors the
+	// totalBounces/totalOrbs lifetime counters above.
+	const totalTimeEl = document.querySelector("#total-time");
+	let totalPlayTime = Number(localStorage.getItem("jelly-total-time")) || 0;
+	totalTimeEl.textContent = `Total time: ${totalPlayTime.toFixed(1)}s`;
+	let lastTotalTimeSaveTime = -Infinity;
 	window.addEventListener("beforeunload", () => {
 		localStorage.setItem("jelly-best-time", bestTime);
 		localStorage.setItem("jelly-top-speed", topSpeed);
+		localStorage.setItem("jelly-total-time", totalPlayTime);
 	});
 
 	// A glowing collectible orb spawns at a random spot; steering the jelly onto it
@@ -2599,6 +2608,12 @@
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
 				timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
+				totalPlayTime += rawDt;
+				totalTimeEl.textContent = `Total time: ${totalPlayTime.toFixed(1)}s`;
+				if (now - lastTotalTimeSaveTime > 1000) {
+					lastTotalTimeSaveTime = now;
+					localStorage.setItem("jelly-total-time", totalPlayTime);
+				}
 				if (elapsedTime > bestTime) {
 					bestTime = elapsedTime;
 					if (now - lastBestTimeSaveTime > 1000) {
