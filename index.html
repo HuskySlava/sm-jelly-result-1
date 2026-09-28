@@ -943,16 +943,20 @@
 	const bestOrbsEl = document.querySelector("#best-orbs");
 	let bestOrbs = Number(localStorage.getItem("jelly-best-orbs")) || 0;
 	bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false };
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
+	// A rarer icy "freeze" orb (mutually exclusive with mega) grants a brief
+	// automatic slow-mo window on pickup, rewarding players for detouring to it.
+	const freezeOrbChance = 0.1;
 	const spawnOrb = () => {
 		const margin = 60;
 		orb.x = margin + Math.random() * (canvas.width - margin * 2);
 		orb.y = margin + Math.random() * (canvas.height - margin * 2);
 		orb.isMega = Math.random() < megaOrbChance;
-		orb.radius = orb.isMega ? 16 : 10;
+		orb.isFreeze = !orb.isMega && Math.random() < freezeOrbChance;
+		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : 10;
 	};
 	spawnOrb();
 	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
@@ -986,6 +990,21 @@
 			osc.stop(startTime + 0.2);
 		});
 	};
+	// A descending glassy sine sweep (vs. the normal orb's flat blip) reads as
+	// "time slowing down" rather than a regular collect.
+	const playFreezeSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sine";
+		osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4);
+		gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.4);
+	};
 	// Chains orb pickups the same way the wall-bounce combo chains bounces: a gap
 	// longer than the window resets the streak, both here and passively while idling.
 	const orbStreakEl = document.querySelector("#orb-streak-stat");
@@ -995,13 +1014,18 @@
 	const orbStreakWindow = 4; // seconds allowed between orb pickups to keep the streak alive
 	let bestOrbStreak = Number(localStorage.getItem("jelly-best-orb-streak")) || 0;
 	bestOrbStreakEl.textContent = `Best orb streak: x${bestOrbStreak}`;
+	// Counts down in real seconds while a freeze orb's bonus slow-mo is active;
+	// see the dt calculation in the main loop below.
+	let freezeTimeRemaining = 0;
+	const freezeDuration = 3;
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		if (Math.hypot(cx - orb.x, cy - orb.y) < orb.radius + jelly.w / 2) {
 			const wasMega = orb.isMega;
+			const wasFreeze = orb.isFreeze;
 			const bonus = wasMega ? 3 : 1;
-			const color = wasMega ? "#ff2df5" : "#ffcc00";
+			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 			if (orbsCollected > bestOrbs) {
@@ -1025,6 +1049,12 @@
 				spawnParticles(orb.x, orb.y, color);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Mega Orb! +3", color);
+			} else if (wasFreeze) {
+				freezeTimeRemaining = freezeDuration;
+				playFreezeSound();
+				if (navigator.vibrate) navigator.vibrate([60]);
+				spawnParticles(orb.x, orb.y, color);
+				spawnPopup(orb.x, orb.y - 10, "Freeze! Slow-mo", color);
 			} else {
 				playOrbSound();
 				if (navigator.vibrate) navigator.vibrate(10);
@@ -1036,8 +1066,9 @@
 	};
 	const drawOrb = (time) => {
 		ctx.save();
-		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : 4)) * 0.15;
-		const color = orb.isMega ? "#ff2df5" : "#ffcc00";
+		// Freeze orbs pulse slower than the others, hinting at the slow-mo they grant.
+		const pulse = 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : 4)) * 0.15;
+		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : "#ffcc00";
 		ctx.shadowColor = color;
 		ctx.shadowBlur = orb.isMega ? 30 : 20;
 		ctx.fillStyle = color;
@@ -1534,6 +1565,7 @@
 		orbStreak = 0;
 		lastOrbElapsed = -Infinity;
 		orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
+		freezeTimeRemaining = 0;
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
@@ -1682,8 +1714,11 @@
 				fpsStatEl.textContent = `FPS: ${Math.round(fpsSmoothed)}`;
 			}
 			// Scale time itself (not just drawing) so slow-mo also slows physics, bounces, and shake decay.
-			const dt = slowMoOn ? rawDt * 0.25 : rawDt;
+			// A freeze orb pickup grants the same slow-mo multiplier temporarily, without touching the toggle.
+			const freezeActive = freezeTimeRemaining > 0;
+			const dt = (slowMoOn || freezeActive) ? rawDt * 0.25 : rawDt;
 			if (!paused) {
+				if (freezeActive) freezeTimeRemaining = Math.max(freezeTimeRemaining - rawDt, 0);
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
