@@ -1017,6 +1017,24 @@
 		ctx.restore();
 	};
 
+	// A pulsing icy ring around the jelly shows a freeze orb's remaining slow-mo
+	// time, mirroring the shield ring so both timed buffs are equally visible
+	// instead of freeze only announcing itself once via the pickup popup.
+	const drawFreezeRing = () => {
+		if (freezeTimeRemaining <= 0) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const pulse = 1 + Math.sin(breatheTime * 4) * 0.1;
+		ctx.save();
+		ctx.globalAlpha = Math.min(freezeTimeRemaining / freezeDuration, 1);
+		ctx.strokeStyle = "#7df9ff";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.9 * pulse, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
+	};
+
 	// A short-lived floating label reinforces "New Best!" moments beyond just the
 	// gold particle burst, since that burst looks identical to a normal bounce's
 	// particles at a glance.
@@ -2078,6 +2096,7 @@
 				drawJelly();
 				drawComboTimer();
 				drawShieldRing();
+				drawFreezeRing();
 				drawPopups();
 				drawConfetti();
 			}
