@@ -714,6 +714,42 @@
 		}
 	};
 
+	// A brief glow along whichever wall the jelly just struck makes it obvious which
+	// edge was hit, since the particle burst/ring alone don't call out a specific side.
+	let edgeFlashes = [];
+	const spawnEdgeFlash = (side, color) => {
+		edgeFlashes.push({ side, color, life: 0.35, maxLife: 0.35 });
+	};
+	const updateEdgeFlashes = (dt) => {
+		for (const f of edgeFlashes) f.life -= dt;
+		edgeFlashes = edgeFlashes.filter(f => f.life > 0);
+	};
+	const drawEdgeFlashes = () => {
+		for (const f of edgeFlashes) {
+			ctx.save();
+			ctx.globalAlpha = Math.max(f.life / f.maxLife, 0) * 0.6;
+			const thickness = 40;
+			let gradient;
+			if (f.side === "left") {
+				gradient = ctx.createLinearGradient(0, 0, thickness, 0);
+			} else if (f.side === "right") {
+				gradient = ctx.createLinearGradient(canvas.width, 0, canvas.width - thickness, 0);
+			} else if (f.side === "top") {
+				gradient = ctx.createLinearGradient(0, 0, 0, thickness);
+			} else {
+				gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - thickness);
+			}
+			gradient.addColorStop(0, f.color);
+			gradient.addColorStop(1, "rgba(0,0,0,0)");
+			ctx.fillStyle = gradient;
+			if (f.side === "left") ctx.fillRect(0, 0, thickness, canvas.height);
+			else if (f.side === "right") ctx.fillRect(canvas.width - thickness, 0, thickness, canvas.height);
+			else if (f.side === "top") ctx.fillRect(0, 0, canvas.width, thickness);
+			else ctx.fillRect(0, canvas.height - thickness, canvas.width, thickness);
+			ctx.restore();
+		}
+	};
+
 	// A quick fading ripple at the tap/click point confirms where a steer landed,
 	// since touch devices have no cursor to show that otherwise.
 	let clickRipples = [];
@@ -1032,6 +1068,8 @@
 			playBounceSound();
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			spawnRing(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
+			if (bouncedX) spawnEdgeFlash(jelly.x <= 0 ? "left" : "right", jelly.color);
+			if (bouncedY) spawnEdgeFlash(jelly.y <= 0 ? "top" : "bottom", jelly.color);
 			// Extra gold burst celebrates beating the best-ever bounce streak, on top of the normal impact particles.
 			if (isNewRecord) {
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
@@ -1192,6 +1230,7 @@
 			ctx.fill();
 		}
 		ctx.restore();
+		drawEdgeFlashes();
 		drawParticles();
 		drawRings();
 		drawClickRipples();
@@ -1305,6 +1344,7 @@
 		canvas.style.transform = "";
 		particles = [];
 		rings = [];
+		edgeFlashes = [];
 		clickRipples = [];
 		popups = [];
 		bounces = 0;
@@ -1492,6 +1532,7 @@
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 				updateParticles(dt);
 				updateRings(dt);
+				updateEdgeFlashes(dt);
 				updateClickRipples(dt);
 				updatePopups(dt);
 				drawJelly();
