@@ -217,6 +217,7 @@
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
 		<button id="magnet-btn" title="Magnet (L)">Magnet: Off</button>
+			<button id="autopilot-btn" title="Autopilot (I)">Autopilot: Off</button>
 		<button id="hazard-btn" title="Hazard (V)">Hazard: Off</button>
 		<button id="portal-btn" title="Portals (O)">Portals: Off</button>
 		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
@@ -244,6 +245,7 @@
 			<li><kbd>G</kbd> Toggle gravity</li>
 			<li><kbd>W</kbd> Toggle wind</li>
 			<li><kbd>L</kbd> Toggle magnet</li>
+				<li><kbd>I</kbd> Toggle autopilot</li>
 			<li><kbd>V</kbd> Toggle hazard</li>
 			<li><kbd>O</kbd> Toggle portals</li>
 			<li><kbd>S</kbd> Toggle slow-mo</li>
@@ -506,6 +508,22 @@
 		localStorage.setItem("jelly-magnet-on", magnetOn);
 		magnetBtn.textContent = magnetOn ? "Magnet: On" : "Magnet: Off";
 		magnetBtn.classList.toggle("active", magnetOn);
+	});
+
+	// Hands-off mode that steers the jelly on its own: chases the orb like magnet
+	// mode, but also swerves away from the hazard when one is active, so it plays
+	// like a tiny self-driving demo rather than just a stronger magnet.
+	const autopilotBtn = document.querySelector("#autopilot-btn");
+	let autopilotOn = localStorage.getItem("jelly-autopilot-on") === "true";
+	const autopilotStrength = 180; // px/s^2 steering acceleration when autopilot is on
+	const autopilotAvoidRadius = 120; // px, distance at which it starts swerving away from the hazard
+	autopilotBtn.textContent = autopilotOn ? "Autopilot: On" : "Autopilot: Off";
+	autopilotBtn.classList.toggle("active", autopilotOn);
+	autopilotBtn.addEventListener("click", () => {
+		autopilotOn = !autopilotOn;
+		localStorage.setItem("jelly-autopilot-on", autopilotOn);
+		autopilotBtn.textContent = autopilotOn ? "Autopilot: On" : "Autopilot: Off";
+		autopilotBtn.classList.toggle("active", autopilotOn);
 	});
 
 	// Risk mode for players who want more than passive wall-bouncing: a roaming
@@ -1418,6 +1436,33 @@
 			}
 			updateSpeedStat();
 		}
+		if (autopilotOn) {
+			const cx = jelly.x + jelly.w / 2;
+			const cy = jelly.y + jelly.h / 2;
+			let steerX = orb.x - cx;
+			let steerY = orb.y - cy;
+			// Blend in a swerve away from the hazard, weighted stronger the closer it
+			// gets, so avoidance overrides the pull toward the orb when danger is close.
+			if (hazardOn) {
+				const hazardDist = Math.hypot(hazard.x - cx, hazard.y - cy);
+				if (hazardDist < autopilotAvoidRadius) {
+					const avoidAngle = Math.atan2(cy - hazard.y, cx - hazard.x);
+					const avoidWeight = (autopilotAvoidRadius - hazardDist) * 3;
+					steerX += Math.cos(avoidAngle) * avoidWeight;
+					steerY += Math.sin(avoidAngle) * avoidWeight;
+				}
+			}
+			const angle = Math.atan2(steerY, steerX);
+			jelly.velX += Math.cos(angle) * autopilotStrength * dt;
+			jelly.velY += Math.sin(angle) * autopilotStrength * dt;
+			const speed = Math.hypot(jelly.velX, jelly.velY);
+			if (speed > maxSpeed) {
+				const scale = maxSpeed / speed;
+				jelly.velX *= scale;
+				jelly.velY *= scale;
+			}
+			updateSpeedStat();
+		}
 		jelly.x += jelly.velX * dt;
 		jelly.y += jelly.velY * dt;
 		const maxX = canvas.width - jelly.w;
@@ -1855,6 +1900,8 @@
 			windBtn.click();
 		} else if (e.code === "KeyL") {
 			magnetBtn.click();
+		} else if (e.code === "KeyI") {
+			autopilotBtn.click();
 		} else if (e.code === "KeyV") {
 			hazardBtn.click();
 		} else if (e.code === "KeyO") {
