@@ -1560,7 +1560,8 @@
 		{ id: "orb-10", name: "Orb Hunter", check: () => orbsCollected >= 10 },
 		{ id: "orb-streak-5", name: "In The Zone", check: () => orbStreak >= 5 },
 		{ id: "survivor-60", name: "Survivor", check: () => elapsedTime >= 60 },
-		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed }
+		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed },
+		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50 }
 	];
 	let unlockedAchievements = new Set(JSON.parse(localStorage.getItem("jelly-achievements") || "[]"));
 	const updateAchievementsStat = () => {
