@@ -698,6 +698,14 @@
 	// run instead of every frame while elapsedTime keeps climbing past the (constantly updated) bestTime.
 	let previousBestTime = bestTime;
 	let beatBestTimeThisRun = false;
+	// elapsedTime (and thus a beaten record) grows every single frame for the rest of the
+	// run, so writing to localStorage unthrottled would mean up to 60 synchronous writes/sec
+	// indefinitely. Throttle like the speed record does, and flush on unload so the exact
+	// final value is never lost to the throttle window.
+	let lastBestTimeSaveTime = -Infinity;
+	window.addEventListener("beforeunload", () => {
+		localStorage.setItem("jelly-best-time", bestTime);
+	});
 
 	// A glowing collectible orb spawns at a random spot; steering the jelly onto it
 	// scores a bonus distinct from the wall-bounce combo, giving players a second
@@ -1252,7 +1260,10 @@
 				timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 				if (elapsedTime > bestTime) {
 					bestTime = elapsedTime;
-					localStorage.setItem("jelly-best-time", bestTime);
+					if (now - lastBestTimeSaveTime > 1000) {
+						lastBestTimeSaveTime = now;
+						localStorage.setItem("jelly-best-time", bestTime);
+					}
 					bestTimeEl.textContent = `Best time: ${bestTime.toFixed(1)}s`;
 					// Only celebrate when there was an actual prior record to beat, so a
 					// brand-new player (previousBestTime 0) doesn't get "New Best Time!" at 0.1s.
