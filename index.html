@@ -147,11 +147,41 @@
 			   landscape); without this the overlay clips it with no way to scroll. */
 			max-height: 85vh;
 			overflow-y: auto;
+			position: relative;
 		}
 
 		#help-panel h2 {
 			margin-top: 0;
 			font-size: 1.1rem;
+			padding-right: 1.8rem;
+		}
+
+		/* Explicit close affordance for the modal panels below: clicking the dimmed
+		   backdrop or pressing Escape both work, but neither is visible from inside
+		   the panel itself, so touch/mouse users can be left unsure how to dismiss it. */
+		.overlay-close {
+			position: absolute;
+			top: 0.9rem;
+			right: 0.9rem;
+			width: 26px;
+			height: 26px;
+			border-radius: 50%;
+			border: 1px solid rgba(255, 255, 255, 0.25);
+			background: rgba(255, 255, 255, 0.08);
+			color: #fff;
+			font-size: 1rem;
+			line-height: 1;
+			padding: 0;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background 0.15s ease, border-color 0.15s ease;
+		}
+
+		.overlay-close:hover {
+			background: rgba(255, 255, 255, 0.18);
+			border-color: rgba(255, 255, 255, 0.45);
 		}
 
 		#help-panel ul {
@@ -196,11 +226,13 @@
 			max-width: 320px;
 			max-height: 85vh;
 			overflow-y: auto;
+			position: relative;
 		}
 
 		#achievements-panel h2 {
 			margin-top: 0;
 			font-size: 1.1rem;
+			padding-right: 1.8rem;
 		}
 
 		#achievements-panel ul {
@@ -237,11 +269,13 @@
 			max-width: 320px;
 			max-height: 85vh;
 			overflow-y: auto;
+			position: relative;
 		}
 
 		#leaderboard-panel h2 {
 			margin-top: 0;
 			font-size: 1.1rem;
+			padding-right: 1.8rem;
 		}
 
 		#leaderboard-panel ol {
@@ -372,18 +406,21 @@
 </section>
 <div id="achievements-overlay">
 	<div id="achievements-panel">
+		<button class="overlay-close" id="achievements-close" aria-label="Close">&times;</button>
 		<h2>Achievements</h2>
 		<ul id="achievements-list"></ul>
 	</div>
 </div>
 <div id="leaderboard-overlay">
 	<div id="leaderboard-panel">
+		<button class="overlay-close" id="leaderboard-close" aria-label="Close">&times;</button>
 		<h2>Leaderboard — Top 5</h2>
 		<div id="leaderboard-list"></div>
 	</div>
 </div>
 <div id="help-overlay">
 	<div id="help-panel">
+		<button class="overlay-close" id="help-close" aria-label="Close">&times;</button>
 		<h2>Keyboard Shortcuts</h2>
 		<ul>
 			<li><kbd>Space</kbd> Pause / Resume</li>
@@ -1756,6 +1793,7 @@
 	achievementsOverlay.addEventListener("click", (e) => {
 		if (e.target === achievementsOverlay) toggleAchievements();
 	});
+	document.querySelector("#achievements-close").addEventListener("click", toggleAchievements);
 	// Checked once per frame (cheap: a handful of number comparisons) rather than wired
 	// into every individual stat update site, so no future stat change can silently skip it.
 	const checkAchievements = () => {
@@ -1795,6 +1833,7 @@
 	leaderboardOverlay.addEventListener("click", (e) => {
 		if (e.target === leaderboardOverlay) toggleLeaderboard();
 	});
+	document.querySelector("#leaderboard-close").addEventListener("click", toggleLeaderboard);
 	// Called right before Reset wipes the run's stats, so a completed run's score
 	// gets a chance to land on the board instead of being lost with no record.
 	const recordRunForLeaderboard = () => {
@@ -2291,6 +2330,7 @@
 	helpOverlay.addEventListener("click", (e) => {
 		if (e.target === helpOverlay) toggleHelp();
 	});
+	document.querySelector("#help-close").addEventListener("click", toggleHelp);
 
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {

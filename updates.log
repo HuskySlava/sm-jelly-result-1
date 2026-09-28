@@ -120,3 +120,4 @@
 <2026-09-28-20:02> (Claude): Live score now mirrors into the browser tab title so it's visible even when unfocused.
 <2026-09-28-20:35> (Claude): Added a rare orange shrink orb that temporarily shrinks the jelly, with a matching ring, sound, and mood readout.
 <2026-09-28-21:04> (Claude): Added a rare teal Double Orb that temporarily doubles the bonus from every orb picked up.
+<2026-09-28-21:32> (Claude): Added a visible close (×) button to the Help, Achievements, and Leaderboard modal panels.
