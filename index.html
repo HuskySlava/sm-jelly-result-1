@@ -1571,9 +1571,13 @@
 	let bestScore = Number(localStorage.getItem("jelly-best-score")) || 0;
 	bestScoreEl.textContent = `Best score: ${bestScore}`;
 	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2;
+	// Mirrors the score into the tab title so it stays visible even when this
+	// tab isn't focused (e.g. playing while switching between windows).
+	const defaultTitle = document.title;
 	const updateScoreStat = () => {
 		const score = computeScore();
 		scoreStatEl.textContent = `Score: ${score}`;
+		document.title = score > 0 ? `🪼 ${score} — ${defaultTitle}` : defaultTitle;
 		if (score > bestScore) {
 			bestScore = score;
 			localStorage.setItem("jelly-best-score", bestScore);
