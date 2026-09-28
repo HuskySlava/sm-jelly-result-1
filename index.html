@@ -173,6 +173,7 @@
 	<p id="time-stat">Time: 0.0s</p>
 	<p id="best-time">Best time: 0.0s</p>
 	<p id="orb-stat">Orbs: 0</p>
+	<p id="best-orbs">Best orbs: 0</p>
 	<p id="orb-streak-stat">Orb streak: x0</p>
 	<p id="best-orb-streak">Best orb streak: x0</p>
 	<p id="fps-stat">FPS: 0</p>
@@ -930,6 +931,11 @@
 	// objective to chase between bounces.
 	const orbStatEl = document.querySelector("#orb-stat");
 	let orbsCollected = 0;
+	// Highest orb count ever reached in a single run, persisted like the other
+	// "best" stats (combo, speed, time, orb streak) so every run has a record to chase.
+	const bestOrbsEl = document.querySelector("#best-orbs");
+	let bestOrbs = Number(localStorage.getItem("jelly-best-orbs")) || 0;
+	bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
 	const orb = { x: 0, y: 0, radius: 10, isMega: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
@@ -991,6 +997,12 @@
 			const color = wasMega ? "#ff2df5" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
+			if (orbsCollected > bestOrbs) {
+				bestOrbs = orbsCollected;
+				localStorage.setItem("jelly-best-orbs", bestOrbs);
+				bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
+				spawnPopup(orb.x, orb.y - 50, "New Best Orbs!", "#ffcc00");
+			}
 			orbStreak = (elapsedTime - lastOrbElapsed <= orbStreakWindow) ? orbStreak + 1 : 1;
 			lastOrbElapsed = elapsedTime;
 			orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
@@ -1372,7 +1384,7 @@
 	const buildShareText = () => (
 		`Canvas Jelly — Bounces: ${bounces} (Best ${highScore}) | Combo: x${combo} (Best x${bestCombo}) | ` +
 		`Corners: ${cornerBounces} | Top speed: ${topSpeed} px/s | Time: ${elapsedTime.toFixed(1)}s (Best ${bestTime.toFixed(1)}s) | ` +
-		`Orbs: ${orbsCollected} (Streak x${orbStreak}, Best x${bestOrbStreak})`
+		`Orbs: ${orbsCollected} (Best ${bestOrbs}, Streak x${orbStreak}, Best x${bestOrbStreak})`
 	);
 	const flashShareBtn = (label) => {
 		shareBtn.textContent = label;
