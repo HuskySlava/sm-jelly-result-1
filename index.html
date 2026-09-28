@@ -394,6 +394,7 @@
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
 		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
+		<button id="shape-btn" title="Shape (Q)">Shape: Blob</button>
 		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
 		<button id="meteor-btn" title="Meteor shower (U)">Meteor Shower</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
@@ -439,6 +440,7 @@
 			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>N</kbd> Toggle rainbow mode</li>
 			<li><kbd>D</kbd> Cycle backdrop theme</li>
+			<li><kbd>Q</kbd> Cycle jelly shape</li>
 			<li><kbd>J</kbd> Confetti burst</li>
 			<li><kbd>U</kbd> Meteor shower</li>
 			<li><kbd>F</kbd> Fullscreen</li>
@@ -970,6 +972,18 @@
 		themeIndex = (themeIndex + 1) % themes.length;
 		localStorage.setItem("jelly-theme-index", themeIndex);
 		themeBtn.textContent = `Theme: ${themes[themeIndex].name}`;
+	});
+
+	// Lets players pick the jelly's silhouette independent of every other toggle,
+	// mirroring the theme cycle above but for the sprite's body instead of the backdrop.
+	const shapes = ["Blob", "Circle", "Diamond", "Star"];
+	let shapeIndex = Number(localStorage.getItem("jelly-shape-index")) || 0;
+	const shapeBtn = document.querySelector("#shape-btn");
+	shapeBtn.textContent = `Shape: ${shapes[shapeIndex]}`;
+	shapeBtn.addEventListener("click", () => {
+		shapeIndex = (shapeIndex + 1) % shapes.length;
+		localStorage.setItem("jelly-shape-index", shapeIndex);
+		shapeBtn.textContent = `Shape: ${shapes[shapeIndex]}`;
 	});
 
 	// A single faint particle per frame, drifting slower and dying quicker than a
@@ -2159,6 +2173,37 @@
 		ctx.stroke();
 		ctx.restore();
 	};
+	// Fills the current shape's outline in local (translated/scaled/rotated) coordinates
+	// centered on the jelly, so every shape drops into the same gradient/glow/face pipeline.
+	const drawJellyBody = () => {
+		const shape = shapes[shapeIndex];
+		ctx.beginPath();
+		if (shape === "Circle") {
+			ctx.ellipse(0, 0, jelly.w / 2, jelly.h / 2, 0, 0, Math.PI * 2);
+		} else if (shape === "Diamond") {
+			ctx.moveTo(0, -jelly.h / 2);
+			ctx.lineTo(jelly.w / 2, 0);
+			ctx.lineTo(0, jelly.h / 2);
+			ctx.lineTo(-jelly.w / 2, 0);
+			ctx.closePath();
+		} else if (shape === "Star") {
+			const spikes = 5;
+			const outerR = jelly.w / 2;
+			const innerR = outerR * 0.45;
+			for (let i = 0; i < spikes * 2; i++) {
+				const r = i % 2 === 0 ? outerR : innerR;
+				const angle = (Math.PI / spikes) * i - Math.PI / 2;
+				const px = Math.cos(angle) * r;
+				const py = Math.sin(angle) * r * (jelly.h / jelly.w);
+				if (i === 0) ctx.moveTo(px, py);
+				else ctx.lineTo(px, py);
+			}
+			ctx.closePath();
+		} else {
+			ctx.roundRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h, jelly.w / 3);
+		}
+		ctx.fill();
+	};
 	const drawJelly = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -2176,9 +2221,7 @@
 		gradient.addColorStop(0.45, jelly.color);
 		gradient.addColorStop(1, jelly.color);
 		ctx.fillStyle = gradient;
-		ctx.beginPath();
-		ctx.roundRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h, jelly.w / 3);
-		ctx.fill();
+		drawJellyBody();
 		// A tiny face gives the jelly personality; pupils shift toward its
 		// velocity direction so it looks like it's watching where it's headed.
 		ctx.shadowBlur = 0;
@@ -2484,6 +2527,8 @@
 			rainbowBtn.click();
 		} else if (e.code === "KeyD") {
 			themeBtn.click();
+		} else if (e.code === "KeyQ") {
+			shapeBtn.click();
 		} else if (e.code === "KeyJ") {
 			confettiBtn.click();
 		} else if (e.code === "KeyU") {
