@@ -110,3 +110,4 @@
 <2026-09-28-15:03> (Claude): Added a camera-flash overlay and shutter sound when taking a snapshot.
 <2026-09-28-15:33> (Claude): Added a live mood stat that reads combo heat, hazard proximity, and active buffs as a fun status line.
 <2026-09-28-16:01> (Claude): Fixed the Bounces stat pill rendering dimmer than the others by removing a leftover CSS rule that opacity-faded it.
+<2026-09-28-16:32> (Claude): Fixed celebratory text popups (combo/record callouts) spawning off-canvas and invisible when the jelly bounces near the top wall.

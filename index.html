@@ -1059,7 +1059,10 @@
 	// particles at a glance.
 	let popups = [];
 	const spawnPopup = (x, y, text, color) => {
-		popups.push({ x, y, text, color, vy: -40, life: 1, maxLife: 1 });
+		// Popups are always placed above their anchor point (e.g. jelly.y - 130 for a
+		// stacked celebration), so near the top wall that lands off-canvas and the text
+		// is invisible for its entire life. Clamp so it always spawns on-screen.
+		popups.push({ x, y: Math.max(y, 20), text, color, vy: -40, life: 1, maxLife: 1 });
 	};
 	const updatePopups = (dt) => {
 		for (const p of popups) {
