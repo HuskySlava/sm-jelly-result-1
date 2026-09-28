@@ -260,6 +260,7 @@
 		<p id="best-time">Best time: 0.0s</p>
 		<p id="orb-stat">Orbs: 0</p>
 		<p id="best-orbs">Best orbs: 0</p>
+		<p id="total-orbs">Total orbs: 0</p>
 		<p id="orb-streak-stat">Orb streak: x0</p>
 		<p id="best-orb-streak">Best orb streak: x0</p>
 		<p id="score-stat">Score: 0</p>
@@ -1166,6 +1167,11 @@
 	const bestOrbsEl = document.querySelector("#best-orbs");
 	let bestOrbs = Number(localStorage.getItem("jelly-best-orbs")) || 0;
 	bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
+	// Unlike "Best orbs" (the most collected in a single run), this counts every
+	// orb ever collected across all sessions and resets, and never goes down.
+	const totalOrbsEl = document.querySelector("#total-orbs");
+	let totalOrbs = Number(localStorage.getItem("jelly-total-orbs")) || 0;
+	totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
 	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
@@ -1295,6 +1301,9 @@
 			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
+			totalOrbs += bonus;
+			localStorage.setItem("jelly-total-orbs", totalOrbs);
+			totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
 			if (orbsCollected > bestOrbs) {
 				bestOrbs = orbsCollected;
 				localStorage.setItem("jelly-best-orbs", bestOrbs);
