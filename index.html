@@ -970,6 +970,29 @@
 		ctx.stroke();
 		ctx.restore();
 	};
+	// Small fixed-length arrow in the opposite corner from the wind indicator, always
+	// pointing at the current orb, so players can find it even when it's off-screen
+	// from their attention (or the trail/rainbow effects make the canvas busy).
+	const drawOrbCompass = () => {
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const angle = Math.atan2(orb.y - cy, orb.x - cx);
+		const hubX = canvas.width - 40, hubY = 40, len = 24;
+		const tipX = hubX + Math.cos(angle) * len / 2;
+		const tipY = hubY + Math.sin(angle) * len / 2;
+		ctx.save();
+		ctx.strokeStyle = "rgba(255, 204, 0, 0.6)";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(hubX - Math.cos(angle) * len / 2, hubY - Math.sin(angle) * len / 2);
+		ctx.lineTo(tipX, tipY);
+		ctx.moveTo(tipX, tipY);
+		ctx.lineTo(tipX + Math.cos(angle + Math.PI * 0.8) * 6, tipY + Math.sin(angle + Math.PI * 0.8) * 6);
+		ctx.moveTo(tipX, tipY);
+		ctx.lineTo(tipX + Math.cos(angle - Math.PI * 0.8) * 6, tipY + Math.sin(angle - Math.PI * 0.8) * 6);
+		ctx.stroke();
+		ctx.restore();
+	};
 	const drawJelly = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -1014,6 +1037,7 @@
 		drawRings();
 		drawClickRipples();
 		if (windOn) drawWindIndicator();
+		drawOrbCompass();
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
 		// whole scene feels lit by it rather than just the sprite itself.
 		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
