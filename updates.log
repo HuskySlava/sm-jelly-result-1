@@ -89,3 +89,4 @@
 <2026-09-28-04:03> (Claude): Fixed a bug where pressing Space on a focused toolbar button paused the game instead of activating the button.
 <2026-09-28-04:32> (Claude): Added haptic vibration feedback on bounces, hazard hits, and orb pickups for mobile/touch players.
 2026-09-28-05:03 (Claude): Added twin portal mode (O key) that teleports the jelly between two warp points, preserving velocity.
+<2026-09-28-05:32> (Claude): Jelly now visually grows bigger the longer the bounce combo streak runs, easing back on reset.

@@ -1069,6 +1069,9 @@
 
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
+	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
+	// hot streak is visible at a glance, not just readable in the stats text.
+	let comboScale = 1;
 	const updateJelly = (dt) => {
 		breatheTime += dt;
 		// Continuously cycling hue, rather than the random per-bounce color, so
@@ -1229,6 +1232,10 @@
 		const ease = 1 - Math.pow(0.001, dt);
 		jelly.scaleX += (1 - jelly.scaleX) * ease;
 		jelly.scaleY += (1 - jelly.scaleY) * ease;
+		// Cap the growth so a long combo makes the jelly noticeably chunkier without
+		// ever letting it swell large enough to dominate the arena.
+		const targetComboScale = 1 + Math.min(combo, 15) * 0.025;
+		comboScale += (targetComboScale - comboScale) * ease;
 		// Decay multiplicatively by dt (not a fixed per-frame amount) so the shake
 		// dies out at the same real-world rate regardless of frame rate.
 		shakeMagnitude *= Math.pow(0.0001, dt);
@@ -1286,7 +1293,7 @@
 		ctx.translate(cx, cy);
 		// Subtle idle breathing so the jelly feels alive even between bounces.
 		const breathe = 1 + Math.sin(breatheTime * 3) * 0.04;
-		ctx.scale(jelly.scaleX * breathe, jelly.scaleY * breathe);
+		ctx.scale(jelly.scaleX * breathe * comboScale, jelly.scaleY * breathe * comboScale);
 		ctx.shadowColor = jelly.color;
 		ctx.shadowBlur = 20;
 		// Glossy radial gradient + rounded corners make it read as squishy jelly
@@ -1429,6 +1436,7 @@
 		jelly.color = "#fff";
 		jelly.scaleX = 1;
 		jelly.scaleY = 1;
+		comboScale = 1;
 		shakeMagnitude = 0;
 		canvas.style.transform = "";
 		particles = [];
