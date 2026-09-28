@@ -845,14 +845,21 @@
 	// Under gravity, speed climbs every single frame while falling, so celebrating
 	// every new record would spam particles/popups; throttle to one every 500ms.
 	let lastSpeedRecordTime = -Infinity;
+	// The record itself can also be beaten every single frame in that scenario, so the
+	// localStorage write needs its own throttle (like bestTime's below), otherwise a
+	// gravity free-fall means up to 60 synchronous writes/sec until it hits maxSpeed.
+	let lastTopSpeedSaveTime = -Infinity;
 	const updateSpeedStat = () => {
 		const speed = Math.round(Math.hypot(jelly.velX, jelly.velY));
 		speedStatEl.textContent = `Speed: ${speed} px/s`;
 		if (speed > topSpeed) {
 			topSpeed = speed;
-			localStorage.setItem("jelly-top-speed", topSpeed);
 			topSpeedEl.textContent = `Top speed: ${topSpeed} px/s`;
 			const now = performance.now();
+			if (now - lastTopSpeedSaveTime > 500) {
+				lastTopSpeedSaveTime = now;
+				localStorage.setItem("jelly-top-speed", topSpeed);
+			}
 			if (now - lastSpeedRecordTime > 500) {
 				lastSpeedRecordTime = now;
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#00e5ff");
@@ -1079,6 +1086,7 @@
 	let lastBestTimeSaveTime = -Infinity;
 	window.addEventListener("beforeunload", () => {
 		localStorage.setItem("jelly-best-time", bestTime);
+		localStorage.setItem("jelly-top-speed", topSpeed);
 	});
 
 	// A glowing collectible orb spawns at a random spot; steering the jelly onto it
