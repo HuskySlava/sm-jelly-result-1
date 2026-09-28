@@ -1301,8 +1301,18 @@
 	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
 	// hot streak is visible at a glance, not just readable in the stats text.
 	let comboScale = 1;
+	// Occasional blink gives the jelly's face a bit more life than permanently-open eyes.
+	let nextBlinkTime = 2 + Math.random() * 3;
+	let blinkStart = -Infinity;
+	const blinkDuration = 0.15;
 	const updateJelly = (dt) => {
 		breatheTime += dt;
+		if (blinkStart === -Infinity && breatheTime >= nextBlinkTime) {
+			blinkStart = breatheTime;
+		} else if (blinkStart !== -Infinity && breatheTime - blinkStart > blinkDuration) {
+			blinkStart = -Infinity;
+			nextBlinkTime = breatheTime + 2 + Math.random() * 3;
+		}
 		// Continuously cycling hue, rather than the random per-bounce color, so
 		// rainbow mode reads as a constant shimmer instead of occasional flashes.
 		if (rainbowOn) jelly.color = `hsl(${(breatheTime * 90) % 360}, 90%, 65%)`;
@@ -1549,17 +1559,25 @@
 		const pupilR = eyeR * 0.5;
 		const pupilShift = eyeR * 0.4;
 		const lookAngle = Math.atan2(jelly.velY, jelly.velX);
+		// Squash the eyes vertically to near-zero mid-blink, then let them spring back open.
+		const blinkScale = blinkStart !== -Infinity
+			? Math.max(0.05, 1 - Math.sin(((breatheTime - blinkStart) / blinkDuration) * Math.PI))
+			: 1;
 		for (const side of [-1, 1]) {
 			const eyeX = side * jelly.w / 5;
 			const eyeY = -jelly.h / 8;
+			ctx.save();
+			ctx.translate(eyeX, eyeY);
+			ctx.scale(1, blinkScale);
 			ctx.beginPath();
 			ctx.fillStyle = "#fff";
-			ctx.arc(eyeX, eyeY, eyeR, 0, Math.PI * 2);
+			ctx.arc(0, 0, eyeR, 0, Math.PI * 2);
 			ctx.fill();
 			ctx.beginPath();
 			ctx.fillStyle = "#1a1a1a";
-			ctx.arc(eyeX + Math.cos(lookAngle) * pupilShift, eyeY + Math.sin(lookAngle) * pupilShift, pupilR, 0, Math.PI * 2);
+			ctx.arc(Math.cos(lookAngle) * pupilShift, Math.sin(lookAngle) * pupilShift, pupilR, 0, Math.PI * 2);
 			ctx.fill();
+			ctx.restore();
 		}
 		ctx.restore();
 		drawEdgeFlashes();
