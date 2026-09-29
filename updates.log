@@ -157,3 +157,4 @@
 <2026-09-29-15:32> (Claude): Added a new pink/purple "Vaporwave" backdrop theme to the theme cycle button.
 2026-09-29-17:03 (Claude): Clicking directly on the jelly now pets it, with hearts, a chirp, and a haptic buzz.
 <2026-09-29-17:32> (Claude): Added a new Lava backdrop theme to the theme cycler for extra visual variety.
+<2026-09-29-18:32> (Claude): Extended the jelly's ambient glow to the page title text, so it now lights up in sync with the jelly's color.

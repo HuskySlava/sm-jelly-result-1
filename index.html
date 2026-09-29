@@ -32,6 +32,13 @@
 			justify-content: center;
 		}
 
+		/* Echoes the jelly's own glow (already mirrored onto the canvas box-shadow and
+		   favicon) onto the title text too, so the whole page reads as lit by the jelly
+		   instead of just the canvas. */
+		#canvas-section h1 {
+			transition: text-shadow 0.3s ease;
+		}
+
 		.canvas-container {
 			position: relative;
 		}
@@ -518,6 +525,7 @@
 <script>
 	const canvas = document.querySelector("#my-canvas");
 	const ctx = canvas.getContext("2d")
+	const titleEl = document.querySelector("#canvas-section h1");
 
 
 	const clear = () => {
@@ -2770,6 +2778,9 @@
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
 		// whole scene feels lit by it rather than just the sprite itself.
 		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
+		// Extends that same glow to the page title, so the whole page (not just the
+		// canvas) reads as lit by the jelly's current color.
+		titleEl.style.textShadow = `0 0 18px ${jelly.color}`;
 		// Nudge the whole canvas element via CSS transform rather than the drawing
 		// context, so the shake doesn't leave unclear trail edges behind.
 		if (shakeMagnitude > 0) {
