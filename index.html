@@ -870,6 +870,10 @@
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
 		jelly.color = getBounceColor();
+		// Every other place that assigns jelly.color (bounce, color picker, reset,
+		// initial load) mirrors it into the favicon; boost was missing this, so the
+		// tab icon could stay stuck on a stale color indefinitely between wall hits.
+		if (!rainbowOn) updateFavicon(jelly.color);
 		updateSpeedStat();
 		lastInteractionElapsed = elapsedTime;
 	});
