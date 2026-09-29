@@ -1903,6 +1903,24 @@
 		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50 },
 		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10 }
 	];
+	// A triumphant ascending three-note chime marks an achievement unlock; every other
+	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
+	// but unlocking used to be silent, relying on the particles/popup alone.
+	const playAchievementSound = () => {
+		if (!soundOn || !audioCtx) return;
+		[523.25, 659.25, 783.99].forEach((freq, i) => {
+			const osc = audioCtx.createOscillator();
+			const gain = audioCtx.createGain();
+			osc.type = "triangle";
+			osc.frequency.value = freq;
+			const startTime = audioCtx.currentTime + i * 0.1;
+			gain.gain.setValueAtTime(0.15 * Math.max(volume, 0.0001), startTime);
+			gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+			osc.connect(gain).connect(audioCtx.destination);
+			osc.start(startTime);
+			osc.stop(startTime + 0.25);
+		});
+	};
 	let unlockedAchievements = new Set(JSON.parse(localStorage.getItem("jelly-achievements") || "[]"));
 	const updateAchievementsStat = () => {
 		achievementsStatEl.textContent = `Achievements: ${unlockedAchievements.size}/${ACHIEVEMENTS.length}`;
@@ -1936,6 +1954,8 @@
 				unlockedAchievements.add(a.id);
 				localStorage.setItem("jelly-achievements", JSON.stringify([...unlockedAchievements]));
 				updateAchievementsStat();
+				playAchievementSound();
+				if (navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 60]);
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 150, `🏆 ${a.name}!`, "#ffd700");
 			}
