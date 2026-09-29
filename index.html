@@ -2520,6 +2520,7 @@
 
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {
+		cancelResumeCountdown();
 		recordRunForLeaderboard();
 		jelly.x = Math.floor(canvas.width / 2);
 		jelly.y = Math.floor(canvas.height / 2);
@@ -2602,23 +2603,73 @@
 
 	let paused = false;
 	const pauseBtn = document.querySelector("#pause-btn");
+	// Resuming used to drop the player straight back into full-speed physics, which
+	// felt jarring (and unfair near a hazard/wall). A brief on-canvas countdown gives
+	// a beat to get oriented before the jelly starts moving again; the game stays
+	// fully paused (no physics, no input effects) for the countdown's duration.
+	let countdownActive = false;
+	let countdownValue = 0;
+	let countdownTimer = null;
+	const drawCountdownOverlay = () => {
+		ctx.save();
+		ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+		ctx.font = "bold 64px 'Roboto', sans-serif";
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText(countdownValue > 0 ? String(countdownValue) : "Go!", canvas.width / 2, canvas.height / 2);
+		ctx.restore();
+	};
+	const cancelResumeCountdown = () => {
+		if (!countdownActive) return;
+		clearTimeout(countdownTimer);
+		countdownTimer = null;
+		countdownActive = false;
+		pauseBtn.disabled = false;
+	};
+	const startResumeCountdown = () => {
+		countdownActive = true;
+		pauseBtn.disabled = true;
+		countdownValue = 3;
+		const step = () => {
+			drawCountdownOverlay();
+			if (countdownValue > 0) {
+				countdownValue--;
+				countdownTimer = setTimeout(step, 500);
+			} else {
+				countdownTimer = setTimeout(() => {
+					countdownActive = false;
+					pauseBtn.disabled = false;
+					paused = false;
+					pauseBtn.textContent = "Pause";
+					pauseBtn.title = "Pause (Space)";
+					pauseBtn.classList.remove("active");
+					// clear() only applies a translucent fade, so without a hard clear here the
+					// countdown text would ghost-fade in via the trail effect for several frames.
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					drawNebula(performance.now() / 1000);
+					drawStars(performance.now() / 1000);
+					drawOrb(performance.now() / 1000);
+					drawJelly();
+				}, 400);
+			}
+		};
+		step();
+	};
 	const togglePause = () => {
-		paused = !paused;
-		pauseBtn.textContent = paused ? "Resume" : "Pause";
-		pauseBtn.title = paused ? "Resume (Space)" : "Pause (Space)";
-		pauseBtn.classList.toggle("active", paused);
-		// Give visual feedback on the canvas itself, not just the button label
+		// Ignore repeat presses (Space, button) while a resume countdown is already running.
+		if (countdownActive) return;
 		if (paused) {
-			drawPauseOverlay();
-		} else {
-			// clear() only applies a translucent fade, so without a hard clear here the
-			// "PAUSED" text would ghost-fade in via the trail effect for several frames.
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			drawNebula(performance.now() / 1000);
-			drawStars(performance.now() / 1000);
-			drawOrb(performance.now() / 1000);
-			drawJelly();
+			startResumeCountdown();
+			return;
 		}
+		paused = true;
+		pauseBtn.textContent = "Resume";
+		pauseBtn.title = "Resume (Space)";
+		pauseBtn.classList.add("active");
+		// Give visual feedback on the canvas itself, not just the button label
+		drawPauseOverlay();
 	};
 	pauseBtn.addEventListener("click", togglePause);
 	// Backgrounding the tab left the game fully running (physics, hazard hits, combo
