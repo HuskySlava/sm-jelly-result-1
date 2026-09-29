@@ -447,6 +447,7 @@
 		<button id="snow-btn" title="Snow (A)">Snow: Off</button>
 		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
 		<button id="shape-btn" title="Shape (Q)">Shape: Blob</button>
+		<button id="hat-btn" title="Cosmetic headwear, cycles through a few silly hats">Hat: None</button>
 		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
 		<button id="meteor-btn" title="Meteor shower (U)">Meteor Shower</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
@@ -1213,6 +1214,18 @@
 		shapeIndex = (shapeIndex + 1) % shapes.length;
 		localStorage.setItem("jelly-shape-index", shapeIndex);
 		shapeBtn.textContent = `Shape: ${shapes[shapeIndex]}`;
+	});
+
+	// Purely cosmetic headwear, independent of shape/theme/color, so players can mix
+	// and match a silly hat onto any body shape rather than it being tied to one look.
+	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow"];
+	let hatIndex = Number(localStorage.getItem("jelly-hat-index")) || 0;
+	const hatBtn = document.querySelector("#hat-btn");
+	hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
+	hatBtn.addEventListener("click", () => {
+		hatIndex = (hatIndex + 1) % hats.length;
+		localStorage.setItem("jelly-hat-index", hatIndex);
+		hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
 	});
 
 	// A single faint particle per frame, drifting slower and dying quicker than a
@@ -2731,6 +2744,64 @@
 			ctx.stroke();
 		}
 	};
+	// Drawn in the same translated/scaled local space as the face, positioned above the
+	// head so it stays perched correctly no matter the current body shape or size.
+	const drawHat = () => {
+		const hat = hats[hatIndex];
+		if (hat === "None") return;
+		const w = jelly.w;
+		const topY = -jelly.h / 2;
+		ctx.save();
+		if (hat === "Top Hat") {
+			ctx.fillStyle = "#1a1a1a";
+			ctx.fillRect(-w / 2.2, topY - w * 0.05, w / 1.1, w * 0.12);
+			ctx.fillRect(-w / 4, topY - w * 0.55, w / 2, w * 0.55);
+		} else if (hat === "Halo") {
+			ctx.strokeStyle = "#ffe066";
+			ctx.lineWidth = Math.max(2, w / 14);
+			ctx.shadowColor = "#ffe066";
+			ctx.shadowBlur = 10;
+			ctx.beginPath();
+			ctx.ellipse(0, topY - w * 0.28, w * 0.32, w * 0.1, 0, 0, Math.PI * 2);
+			ctx.stroke();
+		} else if (hat === "Crown") {
+			ctx.fillStyle = "#ffd700";
+			const base = topY - w * 0.02, peak = topY - w * 0.4, side = w * 0.4;
+			ctx.beginPath();
+			ctx.moveTo(-side, base);
+			ctx.lineTo(-side, peak + w * 0.15);
+			ctx.lineTo(-side * 0.5, base - w * 0.1);
+			ctx.lineTo(0, peak);
+			ctx.lineTo(side * 0.5, base - w * 0.1);
+			ctx.lineTo(side, peak + w * 0.15);
+			ctx.lineTo(side, base);
+			ctx.closePath();
+			ctx.fill();
+			ctx.fillStyle = "#ff2df5";
+			ctx.beginPath();
+			ctx.arc(0, base - w * 0.05, w * 0.05, 0, Math.PI * 2);
+			ctx.fill();
+		} else if (hat === "Bow") {
+			ctx.fillStyle = "#ff6fae";
+			const cy = topY - w * 0.05;
+			ctx.beginPath();
+			ctx.moveTo(0, cy);
+			ctx.lineTo(-w * 0.3, cy - w * 0.18);
+			ctx.lineTo(-w * 0.3, cy + w * 0.18);
+			ctx.closePath();
+			ctx.fill();
+			ctx.beginPath();
+			ctx.moveTo(0, cy);
+			ctx.lineTo(w * 0.3, cy - w * 0.18);
+			ctx.lineTo(w * 0.3, cy + w * 0.18);
+			ctx.closePath();
+			ctx.fill();
+			ctx.beginPath();
+			ctx.arc(0, cy, w * 0.08, 0, Math.PI * 2);
+			ctx.fill();
+		}
+		ctx.restore();
+	};
 	const drawJelly = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -2783,6 +2854,7 @@
 			ctx.restore();
 		}
 		drawMouth();
+		drawHat();
 		ctx.restore();
 		drawEdgeFlashes();
 		drawParticles();

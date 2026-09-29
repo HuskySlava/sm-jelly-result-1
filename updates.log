@@ -162,3 +162,5 @@
 <2026-09-29-20:03> (Claude): Added an Age stat showing how many days it's been since this jelly was first opened.
 <2026-09-29-20:35> (Claude): Fixed bug where backgrounding the tab mid-resume-countdown silently unpaused the game instead of staying paused.
 <2026-09-29-21:03> (Claude): Fixed bug where boosting changed the jelly's color but left the tab favicon stuck on the stale color.
+
+<2026-09-29-21:33> (Claude): Added a cosmetic hat toggle (top hat, halo, crown, bow) drawn on the jelly.
