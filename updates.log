@@ -134,3 +134,4 @@
 2026-09-29-03:04 (Claude): Added a 3-2-1-Go countdown before resuming from pause instead of resuming instantly.
 2026-09-29-03:32 (Claude): Fixed pause-resume countdown so digits redraw cleanly instead of ghosting through each other.
 2026-09-29-04:02 (Claude): Added a triumphant chime sound effect when unlocking an achievement, matching every other event's audio cue.
+<2026-09-29-04:34> (Claude): Added an idle/napping state - mood readout and droopy eyes when the jelly goes untouched for 8+ seconds.

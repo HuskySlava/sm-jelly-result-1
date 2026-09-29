@@ -714,6 +714,7 @@
 		jelly.velY = Math.sin(angle) * speed;
 		jelly.color = getBounceColor();
 		updateSpeedStat();
+		lastInteractionElapsed = elapsedTime;
 	});
 
 	const gravityBtn = document.querySelector("#gravity-btn");
@@ -1068,6 +1069,7 @@
 		// Steering can floor a stalled (0-velocity) jelly up to 40px/s, so the
 		// speed/top-speed stats need refreshing here too, not just on bounce/boost/nudge.
 		updateSpeedStat();
+		lastInteractionElapsed = elapsedTime;
 	};
 	let steering = false;
 	canvas.addEventListener("pointerdown", (e) => {
@@ -1862,6 +1864,12 @@
 		}
 	};
 
+	// Tracks the last time the player actively steered/boosted/nudged the jelly, so a
+	// long stretch of pure idling can be called out (mood + droopy eyes) instead of
+	// looking identical to a player who's simply holding steady.
+	let lastInteractionElapsed = 0;
+	const idleThreshold = 8; // seconds of no input before the jelly is considered "asleep"
+
 	// A short mood readout translates the jelly's current state (combo heat, hazard
 	// proximity, active buffs) into a single at-a-glance line, since the stat grid's
 	// raw numbers don't say how the run "feels" right now.
@@ -1881,6 +1889,7 @@
 		else if (combo >= 5) mood = "🔥 On a roll!";
 		else if (speed > maxSpeed * 0.85) mood = "😵 Dizzy!";
 		else if (orbStreak >= 3) mood = "✨ In the zone";
+		else if (elapsedTime - lastInteractionElapsed > idleThreshold) mood = "😴 Napping...";
 		else mood = "🙂 Chillin'";
 		moodStatEl.textContent = mood;
 	};
@@ -2387,9 +2396,12 @@
 		const pupilShift = eyeR * 0.4;
 		const lookAngle = Math.atan2(jelly.velY, jelly.velX);
 		// Squash the eyes vertically to near-zero mid-blink, then let them spring back open.
+		// A long idle stretch (no steer/boost/nudge) keeps them droopy instead of fully
+		// open, so "napping" reads as a visible pose, not just mood-readout text.
+		const isIdle = elapsedTime - lastInteractionElapsed > idleThreshold;
 		const blinkScale = blinkStart !== -Infinity
 			? Math.max(0.05, 1 - Math.sin(((breatheTime - blinkStart) / blinkDuration) * Math.PI))
-			: 1;
+			: isIdle ? 0.2 : 1;
 		for (const side of [-1, 1]) {
 			const eyeX = side * jelly.w / 5;
 			const eyeY = -jelly.h / 8;
@@ -2582,6 +2594,7 @@
 		combo = 0;
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
+		lastInteractionElapsed = 0;
 		updateScoreStat();
 		updateMood();
 		elapsedTime = 0;
@@ -2787,6 +2800,7 @@
 				jelly.velY *= scale;
 			}
 			updateSpeedStat();
+			lastInteractionElapsed = elapsedTime;
 		}
 	});
 
