@@ -139,3 +139,4 @@
 <2026-09-29-05:31> (Claude): Fixed Portal Master achievement bug: portal teleport count now persists across reloads instead of resetting to 0.
 <2026-09-29-06:02> (Claude): Snapshot downloads now stamp a score/bounces/time caption onto the saved PNG.
 2026-09-29-06:33 (Claude): Added a soft cinematic vignette that darkens the canvas edges every frame.
+2026-09-29-07:03 (Claude): Added a pulsing red screen-edge warning that intensifies as the jelly nears the hazard.

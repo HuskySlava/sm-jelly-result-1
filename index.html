@@ -828,6 +828,24 @@
 		ctx.fill();
 		ctx.restore();
 	};
+	// Pulsing red glow around the canvas edges warns of hazard proximity, giving the
+	// "😰 Too close!" mood readout a matching on-canvas visual instead of leaving
+	// hazard danger as the only buff/threat state with no dedicated screen cue.
+	const dangerProximity = 100; // px, distance at which the warning starts appearing
+	const drawDangerWarning = (time) => {
+		if (!hazardOn) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const dist = Math.hypot(cx - hazard.x, cy - hazard.y);
+		if (dist >= dangerProximity) return;
+		const intensity = (1 - dist / dangerProximity) * (0.5 + Math.sin(time * 10) * 0.5);
+		ctx.save();
+		ctx.globalAlpha = intensity * 0.5;
+		ctx.strokeStyle = "#ff1744";
+		ctx.lineWidth = 16;
+		ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+		ctx.restore();
+	};
 	// Low buzzy sawtooth cue distinguishes a hazard hit from the bounce/orb sounds.
 	const playHazardSound = () => {
 		if (!soundOn || !audioCtx) return;
@@ -2959,6 +2977,7 @@
 				drawPopups();
 				drawConfetti();
 				drawVignette();
+				drawDangerWarning(now / 1000);
 			}
 			updateFrame();
 		});
