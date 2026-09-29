@@ -1338,6 +1338,26 @@
 		ctx.restore();
 	};
 
+	// A flickering pale ring around the jelly shows a ghost orb's remaining wall-phasing
+	// time, mirroring the shield/freeze/shrink/double rings so all five timed buffs
+	// stay equally visible.
+	const drawGhostRing = () => {
+		if (ghostTimeRemaining <= 0) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const pulse = 1 + Math.sin(breatheTime * 9) * 0.15;
+		ctx.save();
+		ctx.globalAlpha = Math.min(ghostTimeRemaining / ghostDuration, 1);
+		ctx.strokeStyle = "#e0e0ff";
+		ctx.setLineDash([4, 4]);
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.8 * pulse, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.setLineDash([]);
+		ctx.restore();
+	};
+
 	// A short-lived floating label reinforces "New Best!" moments beyond just the
 	// gold particle burst, since that burst looks identical to a normal bounce's
 	// particles at a glance.
@@ -1411,7 +1431,7 @@
 	const totalOrbsEl = document.querySelector("#total-orbs");
 	let totalOrbs = Number(localStorage.getItem("jelly-total-orbs")) || 0;
 	totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false };
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false, isGhost: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
@@ -1431,6 +1451,11 @@
 	// bonus of every orb picked up while it's active, rewarding a detour to it before
 	// chasing the next few regular orbs.
 	const doubleOrbChance = 0.1;
+	// A rarer pale "ghost" orb (mutually exclusive with the others above) lets the jelly
+	// phase through the walls instead of bouncing, wrapping around to the opposite edge
+	// like a classic screen-wrap arcade game, rewarding a detour with a taste of a
+	// different movement mode instead of another stat buff.
+	const ghostOrbChance = 0.1;
 	const spawnOrb = () => {
 		const margin = 60;
 		orb.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1441,7 +1466,8 @@
 		orb.isSpeed = !orb.isMega && !orb.isFreeze && !orb.isShield && Math.random() < speedOrbChance;
 		orb.isShrink = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && Math.random() < shrinkOrbChance;
 		orb.isDouble = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && Math.random() < doubleOrbChance;
-		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : orb.isDouble ? 14 : 10;
+		orb.isGhost = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && !orb.isDouble && Math.random() < ghostOrbChance;
+		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : orb.isDouble ? 14 : orb.isGhost ? 14 : 10;
 	};
 	spawnOrb();
 	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
@@ -1537,6 +1563,22 @@
 			osc.stop(startTime + 0.18);
 		});
 	};
+	// A wavering "woo-woo" sweep (rises then falls, vs. every other orb's single
+	// direction sweep) reads as a spooky phase-shift rather than any other buff.
+	const playGhostSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sine";
+		osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.15);
+		osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.35);
+		gain.gain.setValueAtTime(0.12 * Math.max(volume, 0.0001), audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.35);
+	};
 	// A quick descending "pop" (vs. the speed orb's rising zip) reads as the jelly
 	// shrinking down rather than speeding up.
 	const playShrinkSound = () => {
@@ -1577,6 +1619,10 @@
 	// decremented the same way as the other timed buffs in the main loop below.
 	let doubleTimeRemaining = 0;
 	const doubleDuration = 6;
+	// Counts down in real seconds while a ghost orb's wall-phasing is active;
+	// decremented the same way as the other timed buffs in the main loop below.
+	let ghostTimeRemaining = 0;
+	const ghostDuration = 4;
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -1587,10 +1633,11 @@
 			const wasSpeed = orb.isSpeed;
 			const wasShrink = orb.isShrink;
 			const wasDouble = orb.isDouble;
+			const wasGhost = orb.isGhost;
 			// The double orb itself always awards its flat 1 (it's what starts the buff);
 			// only orbs picked up while the buff is already running get multiplied.
 			const bonus = (wasMega ? 3 : 1) * (!wasDouble && doubleTimeRemaining > 0 ? 2 : 1);
-			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : wasDouble ? "#64ffda" : "#ffcc00";
+			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : wasDouble ? "#64ffda" : wasGhost ? "#e0e0ff" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 			totalOrbs += bonus;
@@ -1654,6 +1701,12 @@
 				if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Double Orbs!", color);
+			} else if (wasGhost) {
+				ghostTimeRemaining = ghostDuration;
+				playGhostSound();
+				if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+				spawnParticles(orb.x, orb.y, color);
+				spawnPopup(orb.x, orb.y - 10, "Ghost Mode!", color);
 			} else {
 				playOrbSound();
 				if (navigator.vibrate) navigator.vibrate(10);
@@ -1669,10 +1722,14 @@
 		// Freeze orbs pulse slower than the others, hinting at the slow-mo they grant.
 		// Speed orbs pulse fastest of all, hinting at the burst of speed they grant.
 		// Double orbs pulse in a quick double-beat pattern, echoing the two-chime pickup sound.
+		// Ghost orbs flicker erratically (vs. every other orb's smooth pulse), hinting at
+		// the intangible, wall-phasing buff they grant.
 		const pulse = orb.isDouble
 			? 1 + (Math.abs(Math.sin(time * 6)) > 0.85 ? 0.2 : 0)
+			: orb.isGhost
+			? 0.85 + Math.abs(Math.sin(time * 11)) * 0.3
 			: 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : orb.isShrink ? 5 : 4)) * 0.15;
-		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : orb.isDouble ? "#64ffda" : "#ffcc00";
+		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : orb.isDouble ? "#64ffda" : orb.isGhost ? "#e0e0ff" : "#ffcc00";
 		ctx.shadowColor = color;
 		ctx.shadowBlur = orb.isMega ? 30 : 20;
 		ctx.fillStyle = color;
@@ -1809,7 +1866,8 @@
 		const cy = jelly.y + jelly.h / 2;
 		const speed = Math.hypot(jelly.velX, jelly.velY);
 		let mood;
-		if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
+		if (ghostTimeRemaining > 0) mood = "👻 Phasing!";
+		else if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
 		else if (freezeTimeRemaining > 0) mood = "❄️ Chillin' (literally)";
 		else if (shrinkTimeRemaining > 0) mood = "🐣 Tiny!";
 		else if (doubleTimeRemaining > 0) mood = "✖️2️⃣ Double bonus!";
@@ -2013,6 +2071,15 @@
 		const maxY = canvas.height - jelly.h;
 		let bouncedX = false;
 		let bouncedY = false;
+		if (ghostTimeRemaining > 0) {
+			// While ghosted, the jelly ignores walls entirely and wraps around to the
+			// opposite edge once it's fully off-screen, like a classic screen-wrap
+			// arcade game, instead of bouncing.
+			if (jelly.x > canvas.width) jelly.x = -jelly.w;
+			else if (jelly.x < -jelly.w) jelly.x = canvas.width;
+			if (jelly.y > canvas.height) jelly.y = -jelly.h;
+			else if (jelly.y < -jelly.h) jelly.y = canvas.height;
+		} else {
 		// Require velocity into the wall before flipping it, otherwise a nudge that lands
 		// a component on exactly 0 at the boundary re-triggers the bounce every frame forever.
 		if (jelly.x >= maxX && jelly.velX > 0){
@@ -2034,6 +2101,7 @@
 			jelly.y = 0;
 			jelly.velY = Math.abs(jelly.velY);
 			bouncedY = true;
+		}
 		}
 		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
 		const isCornerHit = bouncedX && bouncedY;
@@ -2265,6 +2333,9 @@
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		ctx.save();
+		// Fading toward translucent while ghosted visually sells "passing through
+		// walls" instead of the wrap-around alone looking like an unexplained teleport.
+		ctx.globalAlpha = ghostTimeRemaining > 0 ? 0.5 : 1;
 		ctx.translate(cx, cy);
 		// Subtle idle breathing so the jelly feels alive even between bounces.
 		const breathe = 1 + Math.sin(breatheTime * 3) * 0.04;
@@ -2472,6 +2543,7 @@
 		shieldTimeRemaining = 0;
 		shrinkTimeRemaining = 0;
 		doubleTimeRemaining = 0;
+		ghostTimeRemaining = 0;
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
@@ -2672,6 +2744,7 @@
 				if (shieldTimeRemaining > 0) shieldTimeRemaining = Math.max(shieldTimeRemaining - rawDt, 0);
 				if (shrinkTimeRemaining > 0) shrinkTimeRemaining = Math.max(shrinkTimeRemaining - rawDt, 0);
 				if (doubleTimeRemaining > 0) doubleTimeRemaining = Math.max(doubleTimeRemaining - rawDt, 0);
+				if (ghostTimeRemaining > 0) ghostTimeRemaining = Math.max(ghostTimeRemaining - rawDt, 0);
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
@@ -2729,6 +2802,7 @@
 				drawFreezeRing();
 				drawShrinkRing();
 				drawDoubleRing();
+				drawGhostRing();
 				drawPopups();
 				drawConfetti();
 			}
