@@ -683,7 +683,12 @@
 	const colorPicker = document.querySelector("#color-picker");
 	const colorResetBtn = document.querySelector("#color-reset-btn");
 	let customColor = localStorage.getItem("jelly-custom-color");
-	if (customColor) colorPicker.value = customColor;
+	if (customColor) {
+		colorPicker.value = customColor;
+		// Without this, a saved custom color only took effect after the first bounce,
+		// so the jelly would visibly start out white on every reload until then.
+		jelly.color = customColor;
+	}
 	const getBounceColor = () => customColor || randomColor();
 	colorPicker.addEventListener("input", () => {
 		customColor = colorPicker.value;
