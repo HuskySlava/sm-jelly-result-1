@@ -3088,8 +3088,13 @@
 		jelly.y = Math.floor(canvas.height / 2);
 		jelly.velX = 60;
 		jelly.velY = 60;
-		jelly.color = customColor || "#fff";
-		updateFavicon(jelly.color);
+		// Matches the guard on every other color-assignment site (bounce, color picker,
+		// boost, 🎲 reset): rainbow mode must keep overriding this, otherwise Reset visibly
+		// snaps the tab favicon back to white/custom until the jelly's next wall bounce.
+		if (!rainbowOn) {
+			jelly.color = customColor || "#fff";
+			updateFavicon(jelly.color);
+		}
 		jelly.scaleX = 1;
 		jelly.scaleY = 1;
 		jelly.w = jellyBaseSize;
