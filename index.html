@@ -736,7 +736,10 @@
 	// Independent of the mute toggle: lets players dial the effect volume in rather
 	// than only choosing between full volume and silence.
 	const volumeSlider = document.querySelector("#volume-slider");
-	let volume = Number(localStorage.getItem("jelly-volume"));
+	// Number(null) is 0, not NaN, so a never-set key would otherwise slip past the
+	// range check below and silently default new players to muted instead of 0.7.
+	const storedVolume = localStorage.getItem("jelly-volume");
+	let volume = storedVolume === null ? 0.7 : Number(storedVolume);
 	if (!Number.isFinite(volume) || volume < 0 || volume > 1) volume = 0.7;
 	volumeSlider.value = volume;
 	volumeSlider.addEventListener("input", () => {
