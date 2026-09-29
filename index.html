@@ -793,6 +793,12 @@
 	colorPicker.addEventListener("input", () => {
 		customColor = colorPicker.value;
 		localStorage.setItem("jelly-custom-color", customColor);
+		// Without this, picking a color did nothing visible until the jelly's next
+		// bounce, making the picker feel unresponsive in the meantime.
+		if (!rainbowOn) {
+			jelly.color = customColor;
+			updateFavicon(jelly.color);
+		}
 	});
 	colorResetBtn.addEventListener("click", () => {
 		customColor = null;
