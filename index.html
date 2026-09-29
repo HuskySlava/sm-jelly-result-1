@@ -1118,7 +1118,7 @@
 
 	// Lets players pick the jelly's silhouette independent of every other toggle,
 	// mirroring the theme cycle above but for the sprite's body instead of the backdrop.
-	const shapes = ["Blob", "Circle", "Diamond", "Star"];
+	const shapes = ["Blob", "Circle", "Diamond", "Star", "Heart"];
 	let shapeIndex = Number(localStorage.getItem("jelly-shape-index")) || 0;
 	const shapeBtn = document.querySelector("#shape-btn");
 	shapeBtn.textContent = `Shape: ${shapes[shapeIndex]}`;
@@ -2552,6 +2552,18 @@
 				if (i === 0) ctx.moveTo(px, py);
 				else ctx.lineTo(px, py);
 			}
+			ctx.closePath();
+		} else if (shape === "Heart") {
+			// Classic two-lobe bezier heart, anchored on the dip between the lobes so it
+			// sits in the same bounding box as every other shape here.
+			const w = jelly.w, h = jelly.h;
+			const topY = -h / 2;
+			const topCurveHeight = h * 0.3;
+			ctx.moveTo(0, topY + topCurveHeight);
+			ctx.bezierCurveTo(0, topY, -w / 2, topY, -w / 2, topY + topCurveHeight);
+			ctx.bezierCurveTo(-w / 2, topY + (h + topCurveHeight) / 2, 0, topY + (h + topCurveHeight) / 2, 0, topY + h);
+			ctx.bezierCurveTo(0, topY + (h + topCurveHeight) / 2, w / 2, topY + (h + topCurveHeight) / 2, w / 2, topY + topCurveHeight);
+			ctx.bezierCurveTo(w / 2, topY, 0, topY, 0, topY + topCurveHeight);
 			ctx.closePath();
 		} else {
 			ctx.roundRect(-jelly.w / 2, -jelly.h / 2, jelly.w, jelly.h, jelly.w / 3);
