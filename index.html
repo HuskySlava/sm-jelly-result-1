@@ -1869,6 +1869,9 @@
 	// looking identical to a player who's simply holding steady.
 	let lastInteractionElapsed = 0;
 	const idleThreshold = 8; // seconds of no input before the jelly is considered "asleep"
+	// Floating "z z z" popups reinforce the idle "napping" mood/droopy-eyes state with an
+	// on-canvas cue, instead of that state only being readable in the mood-stat text.
+	let nextZzzElapsed = Infinity;
 
 	// A short mood readout translates the jelly's current state (combo heat, hazard
 	// proximity, active buffs) into a single at-a-glance line, since the stat grid's
@@ -2246,6 +2249,17 @@
 		// dies out at the same real-world rate regardless of frame rate.
 		shakeMagnitude *= Math.pow(0.0001, dt);
 		if (shakeMagnitude < 0.05) shakeMagnitude = 0;
+		// A slow drip of sleepy "z z z" popups while napping, starting a beat after idling
+		// begins and repeating periodically for as long as it continues.
+		if (elapsedTime - lastInteractionElapsed > idleThreshold) {
+			if (nextZzzElapsed === Infinity) nextZzzElapsed = elapsedTime + 1;
+			if (elapsedTime >= nextZzzElapsed) {
+				spawnPopup(jelly.x + jelly.w / 2 + 10, jelly.y - 20, "z z z", "#b3c6ff");
+				nextZzzElapsed = elapsedTime + 2.5;
+			}
+		} else {
+			nextZzzElapsed = Infinity;
+		}
 		updateMood();
 	}
 	// Small arrow in the corner shows the current wind direction/strength, since the
@@ -2595,6 +2609,7 @@
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
 		lastInteractionElapsed = 0;
+		nextZzzElapsed = Infinity;
 		updateScoreStat();
 		updateMood();
 		elapsedTime = 0;
