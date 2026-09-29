@@ -2582,6 +2582,22 @@
 		}
 	});
 
+	// Classic Konami code easter egg: entering the sequence triggers a bonus
+	// celebration, a nod for players who try old cheat codes out of habit.
+	const konamiSequence = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "KeyB", "KeyA"];
+	let konamiProgress = 0;
+	window.addEventListener("keydown", (e) => {
+		konamiProgress = e.code === konamiSequence[konamiProgress] ? konamiProgress + 1 : (e.code === konamiSequence[0] ? 1 : 0);
+		if (konamiProgress === konamiSequence.length) {
+			konamiProgress = 0;
+			if (paused) return;
+			spawnMeteorShower();
+			spawnConfetti(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2);
+			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "🎮 Konami Code!", "#ff2df5");
+			if (navigator.vibrate) navigator.vibrate([30, 30, 30, 30, 60]);
+		}
+	});
+
 	let tick = 0;
 	let lastTime = null;
 	// Exponential moving average smooths out single-frame jitter so the readout
