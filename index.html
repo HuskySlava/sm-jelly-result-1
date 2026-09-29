@@ -2274,6 +2274,7 @@
 	};
 	const toggleAchievements = () => {
 		renderAchievementsList();
+		if (!achievementsOverlay.classList.contains("open")) closeOtherOverlays(achievementsOverlay);
 		achievementsOverlay.classList.toggle("open");
 	};
 	achievementsStatEl.addEventListener("click", toggleAchievements);
@@ -2316,6 +2317,7 @@
 	};
 	const toggleLeaderboard = () => {
 		renderLeaderboardList();
+		if (!leaderboardOverlay.classList.contains("open")) closeOtherOverlays(leaderboardOverlay);
 		leaderboardOverlay.classList.toggle("open");
 	};
 	leaderboardBtn.addEventListener("click", toggleLeaderboard);
@@ -3072,7 +3074,18 @@
 
 	const helpBtn = document.querySelector("#help-btn");
 	const helpOverlay = document.querySelector("#help-overlay");
-	const toggleHelp = () => helpOverlay.classList.toggle("open");
+	// The three overlay panels (achievements, leaderboard, help) all share the same fixed,
+	// centered positioning, so opening one while another is already up used to stack them
+	// silently on top of each other instead of ever showing just one at a time.
+	const closeOtherOverlays = (keep) => {
+		for (const overlay of [achievementsOverlay, leaderboardOverlay, helpOverlay]) {
+			if (overlay !== keep) overlay.classList.remove("open");
+		}
+	};
+	const toggleHelp = () => {
+		if (!helpOverlay.classList.contains("open")) closeOtherOverlays(helpOverlay);
+		helpOverlay.classList.toggle("open");
+	};
 	helpBtn.addEventListener("click", toggleHelp);
 	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
 	helpOverlay.addEventListener("click", (e) => {
