@@ -427,6 +427,7 @@
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
 		<button id="leaderboard-btn" title="Leaderboard (Y)">Leaderboard</button>
+		<button id="clear-stats-btn" title="Clear all saved stats &amp; achievements (E)">Clear Stats</button>
 		<button id="help-btn" title="Help (H)">Help</button>
 		<button id="zen-btn" title="Zen mode (Z)">Zen: Off</button>
 	</div>
@@ -473,6 +474,7 @@
 			<li><kbd>P</kbd> Save snapshot</li>
 			<li><kbd>C</kbd> Copy stats to clipboard</li>
 			<li><kbd>Y</kbd> Toggle leaderboard</li>
+			<li><kbd>E</kbd> Clear all saved stats</li>
 			<li><kbd>H</kbd> Toggle this help</li>
 			<li><kbd>Z</kbd> Toggle zen mode</li>
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
@@ -2046,6 +2048,16 @@
 		localStorage.setItem("jelly-leaderboard", JSON.stringify(leaderboard));
 	};
 
+	// Every "best"/"total" stat and achievement persists in localStorage with no way to
+	// undo that short of clearing browser storage by hand; this gives players an explicit,
+	// confirmed in-app way to wipe the slate and start their lifetime stats from zero.
+	const clearStatsBtn = document.querySelector("#clear-stats-btn");
+	clearStatsBtn.addEventListener("click", () => {
+		if (!confirm("Clear all saved data — stats, records, achievements, and toggle preferences? This can't be undone.")) return;
+		localStorage.clear();
+		location.reload();
+	});
+
 	let breatheTime = 0;
 	let shakeMagnitude = 0;
 	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
@@ -2860,6 +2872,8 @@
 			shareBtn.click();
 		} else if (e.code === "KeyY") {
 			leaderboardBtn.click();
+		} else if (e.code === "KeyE") {
+			clearStatsBtn.click();
 		} else if (e.code === "KeyH") {
 			toggleHelp();
 		} else if (e.code === "KeyZ") {
