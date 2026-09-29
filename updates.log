@@ -140,3 +140,4 @@
 <2026-09-29-06:02> (Claude): Snapshot downloads now stamp a score/bounces/time caption onto the saved PNG.
 2026-09-29-06:33 (Claude): Added a soft cinematic vignette that darkens the canvas edges every frame.
 2026-09-29-07:03 (Claude): Added a pulsing red screen-edge warning that intensifies as the jelly nears the hazard.
+<2026-09-29-07:33> (Claude): Magnet mode now shows a pulsing dashed line pulling the jelly toward the orb.

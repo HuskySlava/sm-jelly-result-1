@@ -2342,6 +2342,25 @@
 		ctx.stroke();
 		ctx.restore();
 	};
+	// Visualizes magnet mode's invisible pull as a pulsing dashed line from the jelly to the
+	// orb, since wind already has its own on-canvas arrow but magnet's effect was otherwise
+	// only felt through motion, with nothing on screen to explain it.
+	const drawMagnetField = () => {
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		ctx.save();
+		ctx.strokeStyle = "rgba(255, 64, 129, 0.5)";
+		ctx.lineWidth = 2;
+		ctx.setLineDash([10, 10]);
+		// Animates the dashes flowing from the orb toward the jelly, echoing the pull direction.
+		ctx.lineDashOffset = -breatheTime * 60;
+		ctx.beginPath();
+		ctx.moveTo(cx, cy);
+		ctx.lineTo(orb.x, orb.y);
+		ctx.stroke();
+		ctx.setLineDash([]);
+		ctx.restore();
+	};
 	// Straight-line estimate of where the jelly's center will first cross a wall,
 	// using its current velocity only (gravity/wind/magnet/autopilot forces aren't
 	// projected forward, so this is an approximation whenever those are active).
@@ -2473,6 +2492,7 @@
 		drawRings();
 		drawClickRipples();
 		if (windOn) drawWindIndicator();
+		if (magnetOn) drawMagnetField();
 		drawOrbCompass();
 		if (predictOn) drawTrajectory();
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
