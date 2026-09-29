@@ -3137,7 +3137,22 @@
 	// decay, audio) with only the frame's dt capped, so combos/streaks could silently
 	// vanish and hazard hits could register while the player wasn't even watching.
 	document.addEventListener("visibilitychange", () => {
-		if (document.hidden && !paused) togglePause();
+		if (!document.hidden) return;
+		// A countdown leaves `paused` true for its whole duration (by design, to block
+		// input), but its setTimeout chain keeps ticking in a backgrounded tab and its
+		// final step unconditionally resumes — so without this branch, tabbing away
+		// mid-countdown silently unpaused the game while the player wasn't watching,
+		// defeating the very auto-pause this listener exists to guarantee.
+		if (countdownActive) {
+			cancelResumeCountdown();
+			paused = true;
+			pauseBtn.textContent = "Resume";
+			pauseBtn.title = "Resume (Space)";
+			pauseBtn.classList.add("active");
+			drawPauseOverlay();
+		} else if (!paused) {
+			togglePause();
+		}
 	});
 	window.addEventListener("keydown", (e) => {
 		if (e.code === "Space") {

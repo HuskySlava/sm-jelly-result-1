@@ -160,3 +160,4 @@
 <2026-09-29-18:32> (Claude): Extended the jelly's ambient glow to the page title text, so it now lights up in sync with the jelly's color.
 <2026-09-29-19:03> (Claude): Added a Copy Image button to copy the captioned snapshot straight to the clipboard.
 <2026-09-29-20:03> (Claude): Added an Age stat showing how many days it's been since this jelly was first opened.
+<2026-09-29-20:35> (Claude): Fixed bug where backgrounding the tab mid-resume-countdown silently unpaused the game instead of staying paused.
