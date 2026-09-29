@@ -1225,16 +1225,43 @@
 		updateSpeedStat();
 		lastInteractionElapsed = elapsedTime;
 	};
+	// A soft double chirp mirrors an affectionate pet tap, distinct from every other
+	// cue (percussive bounce, triangle orb blip, etc).
+	const playPetSound = () => {
+		if (!soundOn || !audioCtx) return;
+		[880, 1180].forEach((freq, i) => {
+			const osc = audioCtx.createOscillator();
+			const gain = audioCtx.createGain();
+			osc.type = "sine";
+			osc.frequency.value = freq;
+			const startTime = audioCtx.currentTime + i * 0.09;
+			gain.gain.setValueAtTime(0.12 * Math.max(volume, 0.0001), startTime);
+			gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.12);
+			osc.connect(gain).connect(audioCtx.destination);
+			osc.start(startTime);
+			osc.stop(startTime + 0.12);
+		});
+	};
 	let steering = false;
 	canvas.addEventListener("pointerdown", (e) => {
 		if (paused) return;
 		steering = true;
 		steerToward(e.clientX, e.clientY);
 		const rect = canvas.getBoundingClientRect();
-		spawnClickRipple(
-			(e.clientX - rect.left) * (canvas.width / rect.width),
-			(e.clientY - rect.top) * (canvas.height / rect.height)
-		);
+		const pointX = (e.clientX - rect.left) * (canvas.width / rect.width);
+		const pointY = (e.clientY - rect.top) * (canvas.height / rect.height);
+		spawnClickRipple(pointX, pointY);
+		// Tapping directly on the jelly's own body (vs. anywhere else on the canvas) reads
+		// as petting it rather than steering, so it gets its own affectionate hearts and
+		// chirp on top of the plain steer ripple every other click already gets.
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		if (Math.hypot(pointX - cx, pointY - cy) < Math.max(jelly.w, jelly.h) * 0.7) {
+			spawnParticles(cx, cy, "#ff6fae");
+			spawnPopup(cx, cy - jelly.h, "💛", "#ff6fae");
+			playPetSound();
+			if (navigator.vibrate) navigator.vibrate(15);
+		}
 	});
 	// Listen on window (not the canvas) so steering keeps tracking the pointer
 	// even if it drifts off the canvas edge mid-drag.
