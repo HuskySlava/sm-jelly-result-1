@@ -2059,7 +2059,8 @@
 		{ id: "survivor-60", name: "Survivor", check: () => elapsedTime >= 60 },
 		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed },
 		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50 },
-		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10 }
+		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10 },
+		{ id: "survivor-300", name: "Marathoner", check: () => elapsedTime >= 300 }
 	];
 	// A triumphant ascending three-note chime marks an achievement unlock; every other
 	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
