@@ -2486,10 +2486,29 @@
 
 	const snapshotBtn = document.querySelector("#snapshot-btn");
 	const snapshotFlash = document.querySelector("#snapshot-flash");
+	// Stamp a stat line onto a copy of the canvas before export, so a saved snapshot
+	// carries its own score/bounces/time caption instead of being a bare, uncaptioned image.
+	const buildSnapshotDataUrl = () => {
+		const exportCanvas = document.createElement("canvas");
+		exportCanvas.width = canvas.width;
+		exportCanvas.height = canvas.height;
+		const exportCtx = exportCanvas.getContext("2d");
+		exportCtx.drawImage(canvas, 0, 0);
+		exportCtx.font = "bold 22px 'Roboto', sans-serif";
+		exportCtx.textAlign = "left";
+		exportCtx.shadowColor = "rgba(0, 0, 0, 0.85)";
+		exportCtx.shadowBlur = 6;
+		exportCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+		exportCtx.fillText(
+			`Canvas Jelly — Score: ${computeScore()}  •  Bounces: ${bounces}  •  Time: ${elapsedTime.toFixed(1)}s`,
+			20, exportCanvas.height - 20
+		);
+		return exportCanvas.toDataURL("image/png");
+	};
 	snapshotBtn.addEventListener("click", () => {
 		const link = document.createElement("a");
 		link.download = `canvas-jelly-${Date.now()}.png`;
-		link.href = canvas.toDataURL("image/png");
+		link.href = buildSnapshotDataUrl();
 		link.click();
 		playSnapshotSound();
 		if (navigator.vibrate) navigator.vibrate(20);
