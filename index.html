@@ -6,6 +6,7 @@
 		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Canvas Jelly</title>
+	<link rel="icon" id="favicon" href="">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -800,6 +801,23 @@
 		// it's still active even though bounces have gone back to fully random colors.
 		colorPicker.value = "#ffffff";
 	});
+
+	// Mirrors the jelly's current color into the browser tab's favicon, so a glance at
+	// a background tab shows the same hue as the jelly itself instead of a static icon.
+	const faviconCanvas = document.createElement("canvas");
+	faviconCanvas.width = 32;
+	faviconCanvas.height = 32;
+	const faviconCtx = faviconCanvas.getContext("2d");
+	const faviconLink = document.querySelector("#favicon");
+	const updateFavicon = (color) => {
+		faviconCtx.clearRect(0, 0, 32, 32);
+		faviconCtx.beginPath();
+		faviconCtx.arc(16, 16, 13, 0, Math.PI * 2);
+		faviconCtx.fillStyle = color;
+		faviconCtx.fill();
+		faviconLink.href = faviconCanvas.toDataURL("image/png");
+	};
+	updateFavicon(jelly.color);
 
 	const boostBtn = document.querySelector("#boost-btn");
 	boostBtn.addEventListener("click", () => {
@@ -2335,6 +2353,7 @@
 		const isCornerHit = bouncedX && bouncedY;
 		if (bouncedX || bouncedY) {
 			if (!rainbowOn) jelly.color = getBounceColor();
+			updateFavicon(jelly.color);
 			const isNewRecord = registerBounce();
 			playBounceSound();
 			// Touch players feel the impact even with sound muted; corners get a
@@ -2816,6 +2835,7 @@
 		jelly.velX = 60;
 		jelly.velY = 60;
 		jelly.color = customColor || "#fff";
+		updateFavicon(jelly.color);
 		jelly.scaleX = 1;
 		jelly.scaleY = 1;
 		jelly.w = jellyBaseSize;
