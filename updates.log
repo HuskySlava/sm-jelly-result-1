@@ -147,3 +147,4 @@
 <2026-09-29-10:04> (Claude): Added a Grow orb power-up that temporarily enlarges the jelly, mirroring the existing Shrink orb.
 <2026-09-29-10:32> (Claude): Added a new 'Marathoner' achievement that unlocks after surviving 5 minutes in one run.
 <2026-09-29-11:02> (Claude): Added a new Heart shape option to the jelly's shape-cycling toggle.
+<2026-09-29-12:02> (Claude): Added a particle burst to match the popup when beating the best score record, matching every other stat celebration.
