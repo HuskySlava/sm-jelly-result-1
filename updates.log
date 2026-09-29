@@ -144,3 +144,4 @@
 <2026-09-29-08:03> (Claude): Added a Clear Stats button (and E shortcut) to wipe all saved lifetime stats and achievements.
 <2026-09-29-08:33> (Claude): Added a toggleable ambient falling-snow backdrop effect (Snow button / A key).
 <2026-09-29-09:32> (Claude): Fixed the color-picker swatch not resetting when clicking Random after picking a custom jelly color.
+<2026-09-29-10:04> (Claude): Added a Grow orb power-up that temporarily enlarges the jelly, mirroring the existing Shrink orb.

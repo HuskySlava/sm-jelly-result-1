@@ -689,6 +689,7 @@
 	const maxSpeed = 240; // px per second, shared cap for bounce speedup and boosts
 	const jellyBaseSize = jelly.w; // resting width/height the shrink orb's effect eases back toward
 	const jellyShrinkSize = 11; // px, target width/height while a shrink orb's effect is active
+	const jellyGrowSize = 32; // px, target width/height while a grow orb's effect is active
 
 	const randomColor = () => `hsl(${Math.floor(Math.random() * 360)}, 90%, 65%)`;
 
@@ -1419,6 +1420,23 @@
 		ctx.restore();
 	};
 
+	// A pulsing golden ring around the jelly shows a grow orb's remaining
+	// big-size time, the mirror of the shrink ring, so both size buffs are equally visible.
+	const drawGrowRing = () => {
+		if (growTimeRemaining <= 0) return;
+		const cx = jelly.x + jelly.w / 2;
+		const cy = jelly.y + jelly.h / 2;
+		const pulse = 1 + Math.sin(breatheTime * 4) * 0.1;
+		ctx.save();
+		ctx.globalAlpha = Math.min(growTimeRemaining / growDuration, 1);
+		ctx.strokeStyle = "#ffea00";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.7 * pulse, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
+	};
+
 	// A pulsing teal double ring around the jelly shows a double orb's remaining
 	// bonus-multiplier time, mirroring the shield/freeze/shrink rings so all four timed
 	// buffs stay equally visible.
@@ -1530,7 +1548,7 @@
 	const totalOrbsEl = document.querySelector("#total-orbs");
 	let totalOrbs = Number(localStorage.getItem("jelly-total-orbs")) || 0;
 	totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false, isGhost: false };
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false, isGhost: false, isGrow: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
@@ -1555,6 +1573,10 @@
 	// like a classic screen-wrap arcade game, rewarding a detour with a taste of a
 	// different movement mode instead of another stat buff.
 	const ghostOrbChance = 0.1;
+	// A rarer golden "grow" orb (mutually exclusive with the others above) temporarily
+	// enlarges the jelly, the mirror of the shrink orb: easier to land bounces with,
+	// but a fatter target for the hazard while it's active.
+	const growOrbChance = 0.1;
 	const spawnOrb = () => {
 		const margin = 60;
 		orb.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1566,7 +1588,8 @@
 		orb.isShrink = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && Math.random() < shrinkOrbChance;
 		orb.isDouble = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && Math.random() < doubleOrbChance;
 		orb.isGhost = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && !orb.isDouble && Math.random() < ghostOrbChance;
-		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : orb.isDouble ? 14 : orb.isGhost ? 14 : 10;
+		orb.isGrow = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && !orb.isDouble && !orb.isGhost && Math.random() < growOrbChance;
+		orb.radius = orb.isMega ? 16 : orb.isFreeze ? 14 : orb.isShield ? 14 : orb.isSpeed ? 14 : orb.isShrink ? 14 : orb.isDouble ? 14 : orb.isGhost ? 14 : orb.isGrow ? 14 : 10;
 	};
 	spawnOrb();
 	// Higher-pitched triangle wave (vs. the bounce's sine blip) so orb pickups
@@ -1693,6 +1716,21 @@
 		osc.start();
 		osc.stop(audioCtx.currentTime + 0.2);
 	};
+	// A slow ascending "swell" (the mirror of the shrink orb's descending pop) reads as
+	// the jelly puffing up rather than shrinking down.
+	const playGrowSound = () => {
+		if (!soundOn || !audioCtx) return;
+		const osc = audioCtx.createOscillator();
+		const gain = audioCtx.createGain();
+		osc.type = "sine";
+		osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.3);
+		gain.gain.setValueAtTime(0.12 * Math.max(volume, 0.0001), audioCtx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+		osc.connect(gain).connect(audioCtx.destination);
+		osc.start();
+		osc.stop(audioCtx.currentTime + 0.3);
+	};
 	// Chains orb pickups the same way the wall-bounce combo chains bounces: a gap
 	// longer than the window resets the streak, both here and passively while idling.
 	const orbStreakEl = document.querySelector("#orb-streak-stat");
@@ -1722,6 +1760,10 @@
 	// decremented the same way as the other timed buffs in the main loop below.
 	let ghostTimeRemaining = 0;
 	const ghostDuration = 4;
+	// Counts down in real seconds while a grow orb's size increase is active;
+	// decremented the same way as the other timed buffs in the main loop below.
+	let growTimeRemaining = 0;
+	const growDuration = 5;
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -1733,10 +1775,11 @@
 			const wasShrink = orb.isShrink;
 			const wasDouble = orb.isDouble;
 			const wasGhost = orb.isGhost;
+			const wasGrow = orb.isGrow;
 			// The double orb itself always awards its flat 1 (it's what starts the buff);
 			// only orbs picked up while the buff is already running get multiplied.
 			const bonus = (wasMega ? 3 : 1) * (!wasDouble && doubleTimeRemaining > 0 ? 2 : 1);
-			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : wasDouble ? "#64ffda" : wasGhost ? "#e0e0ff" : "#ffcc00";
+			const color = wasMega ? "#ff2df5" : wasFreeze ? "#7df9ff" : wasShield ? "#8a2be2" : wasSpeed ? "#adff2f" : wasShrink ? "#ff8c00" : wasDouble ? "#64ffda" : wasGhost ? "#e0e0ff" : wasGrow ? "#ffea00" : "#ffcc00";
 			orbsCollected += bonus;
 			orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 			totalOrbs += bonus;
@@ -1806,6 +1849,12 @@
 				if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Ghost Mode!", color);
+			} else if (wasGrow) {
+				growTimeRemaining = growDuration;
+				playGrowSound();
+				if (navigator.vibrate) navigator.vibrate([60]);
+				spawnParticles(orb.x, orb.y, color);
+				spawnPopup(orb.x, orb.y - 10, "Grow!", color);
 			} else {
 				playOrbSound();
 				if (navigator.vibrate) navigator.vibrate(10);
@@ -1823,12 +1872,16 @@
 		// Double orbs pulse in a quick double-beat pattern, echoing the two-chime pickup sound.
 		// Ghost orbs flicker erratically (vs. every other orb's smooth pulse), hinting at
 		// the intangible, wall-phasing buff they grant.
+		// Grow orbs swell with a slower, bigger-amplitude pulse than any other orb,
+		// hinting at the size increase they grant (the mirror of the shrink orb's pulse).
 		const pulse = orb.isDouble
 			? 1 + (Math.abs(Math.sin(time * 6)) > 0.85 ? 0.2 : 0)
 			: orb.isGhost
 			? 0.85 + Math.abs(Math.sin(time * 11)) * 0.3
+			: orb.isGrow
+			? 1 + Math.sin(time * 1.5) * 0.3
 			: 1 + Math.sin(time * (orb.isMega ? 7 : orb.isFreeze ? 2 : orb.isShield ? 3 : orb.isSpeed ? 8 : orb.isShrink ? 5 : 4)) * 0.15;
-		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : orb.isDouble ? "#64ffda" : orb.isGhost ? "#e0e0ff" : "#ffcc00";
+		const color = orb.isMega ? "#ff2df5" : orb.isFreeze ? "#7df9ff" : orb.isShield ? "#8a2be2" : orb.isSpeed ? "#adff2f" : orb.isShrink ? "#ff8c00" : orb.isDouble ? "#64ffda" : orb.isGhost ? "#e0e0ff" : orb.isGrow ? "#ffea00" : "#ffcc00";
 		ctx.shadowColor = color;
 		ctx.shadowBlur = orb.isMega ? 30 : 20;
 		ctx.fillStyle = color;
@@ -1978,6 +2031,7 @@
 		else if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
 		else if (freezeTimeRemaining > 0) mood = "❄️ Chillin' (literally)";
 		else if (shrinkTimeRemaining > 0) mood = "🐣 Tiny!";
+		else if (growTimeRemaining > 0) mood = "🦣 Giant!";
 		else if (doubleTimeRemaining > 0) mood = "✖️2️⃣ Double bonus!";
 		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) mood = "😰 Too close!";
 		else if (combo >= 10) mood = "🤩 Unstoppable!";
@@ -2332,9 +2386,10 @@
 		const ease = 1 - Math.pow(0.001, dt);
 		jelly.scaleX += (1 - jelly.scaleX) * ease;
 		jelly.scaleY += (1 - jelly.scaleY) * ease;
-		// Smoothly grow/shrink toward the shrink orb's target size, mirroring the
+		// Smoothly grow/shrink toward the shrink/grow orb's target size, mirroring the
 		// squash/stretch easing above so the size change reads as squishy, not a snap-cut.
-		const targetSize = shrinkTimeRemaining > 0 ? jellyShrinkSize : jellyBaseSize;
+		// If both buffs somehow overlap, shrink takes priority since it's the tighter fit.
+		const targetSize = shrinkTimeRemaining > 0 ? jellyShrinkSize : growTimeRemaining > 0 ? jellyGrowSize : jellyBaseSize;
 		const prevW = jelly.w, prevH = jelly.h;
 		jelly.w += (targetSize - jelly.w) * ease;
 		jelly.h += (targetSize - jelly.h) * ease;
@@ -2741,6 +2796,7 @@
 		shrinkTimeRemaining = 0;
 		doubleTimeRemaining = 0;
 		ghostTimeRemaining = 0;
+		growTimeRemaining = 0;
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
@@ -3007,6 +3063,7 @@
 				if (shrinkTimeRemaining > 0) shrinkTimeRemaining = Math.max(shrinkTimeRemaining - rawDt, 0);
 				if (doubleTimeRemaining > 0) doubleTimeRemaining = Math.max(doubleTimeRemaining - rawDt, 0);
 				if (ghostTimeRemaining > 0) ghostTimeRemaining = Math.max(ghostTimeRemaining - rawDt, 0);
+				if (growTimeRemaining > 0) growTimeRemaining = Math.max(growTimeRemaining - rawDt, 0);
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
@@ -3067,6 +3124,7 @@
 				drawShieldRing();
 				drawFreezeRing();
 				drawShrinkRing();
+				drawGrowRing();
 				drawDoubleRing();
 				drawGhostRing();
 				drawPopups();
