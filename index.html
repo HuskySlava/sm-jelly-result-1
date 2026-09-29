@@ -495,6 +495,22 @@
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
+	// Soft radial darkening at the canvas edges, drawn as the last step of every
+	// frame, gives the scene a bit of cinematic depth instead of looking like a
+	// flat, evenly-lit rectangle.
+	const drawVignette = () => {
+		ctx.save();
+		const gradient = ctx.createRadialGradient(
+			canvas.width / 2, canvas.height / 2, canvas.height * 0.35,
+			canvas.width / 2, canvas.height / 2, canvas.height * 0.75
+		);
+		gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+		gradient.addColorStop(1, "rgba(0, 0, 0, 0.5)");
+		ctx.fillStyle = gradient;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.restore();
+	};
+
 	// Cycles the backdrop's color palette without touching gameplay: each theme just
 	// shifts the nebula's hue drift and the star tint, so players can pick a look
 	// that suits them (or just for variety) independent of every other toggle.
@@ -2942,6 +2958,7 @@
 				drawGhostRing();
 				drawPopups();
 				drawConfetti();
+				drawVignette();
 			}
 			updateFrame();
 		});
