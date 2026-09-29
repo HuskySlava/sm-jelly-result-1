@@ -227,6 +227,22 @@
 			font-family: inherit;
 		}
 
+		/* Colored dots mirror each orb's on-canvas color, so the legend reads as a
+		   direct key to what's actually glowing on the field, not just prose. */
+		#help-panel h3 {
+			font-size: 0.95rem;
+			margin: 1rem 0 0.4rem;
+		}
+
+		.orb-swatch {
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			border-radius: 50%;
+			margin-right: 0.6em;
+			vertical-align: middle;
+		}
+
 		#achievements-overlay {
 			display: none;
 			position: fixed;
@@ -482,6 +498,18 @@
 			<li><kbd>&uarr;&darr;&larr;&rarr;</kbd> Nudge direction</li>
 			<li>Click or drag on the canvas to steer</li>
 			<li>Double-click/tap canvas to boost</li>
+		</ul>
+		<h3>Orb Guide</h3>
+		<ul>
+			<li><span class="orb-swatch" style="background:#ffcc00"></span>Regular — +1 Orb</li>
+			<li><span class="orb-swatch" style="background:#ff2df5"></span>Mega — +3 Orbs</li>
+			<li><span class="orb-swatch" style="background:#7df9ff"></span>Freeze — brief slow-mo</li>
+			<li><span class="orb-swatch" style="background:#8a2be2"></span>Shield — hazard immunity</li>
+			<li><span class="orb-swatch" style="background:#adff2f"></span>Speed — instant velocity kick</li>
+			<li><span class="orb-swatch" style="background:#ff8c00"></span>Shrink — temporarily tiny</li>
+			<li><span class="orb-swatch" style="background:#64ffda"></span>Double — 2x bonus on next orbs</li>
+			<li><span class="orb-swatch" style="background:#e0e0ff"></span>Ghost — phase through walls</li>
+			<li><span class="orb-swatch" style="background:#ffea00"></span>Grow — temporarily giant</li>
 		</ul>
 	</div>
 </div>
