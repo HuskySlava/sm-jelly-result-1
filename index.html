@@ -291,7 +291,33 @@
 		}
 
 		#achievements-panel li.locked {
-			opacity: 0.4;
+			opacity: 0.55;
+		}
+
+		/* Sits inline after a locked achievement's name so its distance-to-unlock reads as
+		   part of that row rather than a separate stat block. */
+		.achievement-progress {
+			display: inline-block;
+			width: 70px;
+			height: 6px;
+			margin-left: 0.6em;
+			background: rgba(255, 255, 255, 0.15);
+			border-radius: 999px;
+			overflow: hidden;
+			vertical-align: middle;
+		}
+
+		.achievement-progress-bar {
+			height: 100%;
+			background: #ffd700;
+			border-radius: 999px;
+		}
+
+		.achievement-progress-label {
+			margin-left: 0.4em;
+			font-size: 0.75rem;
+			opacity: 0.7;
+			vertical-align: middle;
 		}
 
 		#leaderboard-overlay {
@@ -2188,19 +2214,22 @@
 	// one's special" the way a one-time gold popup does. Unlocks persist across resets
 	// and reloads, like the other "best"/"total" stats above.
 	const achievementsStatEl = document.querySelector("#achievements-stat");
+	// progress/target use each achievement's persisted "best"/"total" counterpart (not the
+	// live, resettable stat the check itself watches), so the locked progress bar climbs
+	// monotonically instead of jumping back to 0 on the next Reset.
 	const ACHIEVEMENTS = [
-		{ id: "first-bounce", name: "First Bounce", check: () => bounces >= 1 },
-		{ id: "century", name: "Century Bouncer", check: () => totalBounces >= 100 },
-		{ id: "combo-10", name: "Combo Master", check: () => combo >= 10 },
-		{ id: "corner-1", name: "Corner Cutter", check: () => cornerBounces >= 1 },
-		{ id: "corner-10", name: "Corner Legend", check: () => cornerBounces >= 10 },
-		{ id: "orb-10", name: "Orb Hunter", check: () => orbsCollected >= 10 },
-		{ id: "orb-streak-5", name: "In The Zone", check: () => orbStreak >= 5 },
-		{ id: "survivor-60", name: "Survivor", check: () => elapsedTime >= 60 },
-		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed },
-		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50 },
-		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10 },
-		{ id: "survivor-300", name: "Marathoner", check: () => elapsedTime >= 300 }
+		{ id: "first-bounce", name: "First Bounce", check: () => bounces >= 1, progress: () => totalBounces, target: 1 },
+		{ id: "century", name: "Century Bouncer", check: () => totalBounces >= 100, progress: () => totalBounces, target: 100 },
+		{ id: "combo-10", name: "Combo Master", check: () => combo >= 10, progress: () => bestCombo, target: 10 },
+		{ id: "corner-1", name: "Corner Cutter", check: () => cornerBounces >= 1, progress: () => bestCorners, target: 1 },
+		{ id: "corner-10", name: "Corner Legend", check: () => cornerBounces >= 10, progress: () => bestCorners, target: 10 },
+		{ id: "orb-10", name: "Orb Hunter", check: () => orbsCollected >= 10, progress: () => bestOrbs, target: 10 },
+		{ id: "orb-streak-5", name: "In The Zone", check: () => orbStreak >= 5, progress: () => bestOrbStreak, target: 5 },
+		{ id: "survivor-60", name: "Survivor", check: () => elapsedTime >= 60, progress: () => bestTime, target: 60 },
+		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed, progress: () => topSpeed, target: maxSpeed },
+		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50, progress: () => totalOrbs, target: 50 },
+		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10, progress: () => portalUses, target: 10 },
+		{ id: "survivor-300", name: "Marathoner", check: () => elapsedTime >= 300, progress: () => bestTime, target: 300 }
 	];
 	// A triumphant ascending three-note chime marks an achievement unlock; every other
 	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
@@ -2232,7 +2261,15 @@
 	const renderAchievementsList = () => {
 		achievementsList.innerHTML = ACHIEVEMENTS.map(a => {
 			const unlocked = unlockedAchievements.has(a.id);
-			return `<li class="${unlocked ? "unlocked" : "locked"}">${unlocked ? "🏆" : "🔒"} ${a.name}</li>`;
+			// Locked achievements get a progress bar toward their target so players can see how
+			// close they are, instead of every not-yet-earned badge looking equally far off.
+			const progressBar = unlocked ? "" : (() => {
+				const current = Math.min(a.progress(), a.target);
+				const pct = Math.max(0, Math.min(100, (current / a.target) * 100));
+				const label = Number.isInteger(a.target) ? `${Math.floor(current)}/${a.target}` : `${current.toFixed(1)}/${a.target}`;
+				return `<div class="achievement-progress"><div class="achievement-progress-bar" style="width:${pct}%"></div></div><span class="achievement-progress-label">${label}</span>`;
+			})();
+			return `<li class="${unlocked ? "unlocked" : "locked"}">${unlocked ? "🏆" : "🔒"} ${a.name}${progressBar}</li>`;
 		}).join("");
 	};
 	const toggleAchievements = () => {

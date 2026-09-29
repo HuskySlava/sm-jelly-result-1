@@ -164,3 +164,4 @@
 <2026-09-29-21:03> (Claude): Fixed bug where boosting changed the jelly's color but left the tab favicon stuck on the stale color.
 
 <2026-09-29-21:33> (Claude): Added a cosmetic hat toggle (top hat, halo, crown, bow) drawn on the jelly.
+<2026-09-29-22:02> (Claude): Added progress bars to locked achievements in the achievements panel, showing distance to unlock.
