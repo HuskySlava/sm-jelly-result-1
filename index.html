@@ -450,6 +450,7 @@
 		<button id="meteor-btn" title="Meteor shower (U)">Meteor Shower</button>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
+			<button id="copy-snapshot-btn" title="Copy snapshot image to clipboard">Copy Image</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
 		<button id="leaderboard-btn" title="Leaderboard (Y)">Leaderboard</button>
 		<button id="clear-stats-btn" title="Clear all saved stats &amp; achievements (E)">Clear Stats</button>
@@ -2825,7 +2826,9 @@
 	const snapshotFlash = document.querySelector("#snapshot-flash");
 	// Stamp a stat line onto a copy of the canvas before export, so a saved snapshot
 	// carries its own score/bounces/time caption instead of being a bare, uncaptioned image.
-	const buildSnapshotDataUrl = () => {
+	// Shared by the download (Snapshot) and clipboard (Copy Image) buttons below, so the
+	// caption stays in sync between both instead of only the downloaded file having it.
+	const buildSnapshotCanvas = () => {
 		const exportCanvas = document.createElement("canvas");
 		exportCanvas.width = canvas.width;
 		exportCanvas.height = canvas.height;
@@ -2840,8 +2843,9 @@
 			`Canvas Jelly — Score: ${computeScore()}  •  Bounces: ${bounces}  •  Time: ${elapsedTime.toFixed(1)}s`,
 			20, exportCanvas.height - 20
 		);
-		return exportCanvas.toDataURL("image/png");
+		return exportCanvas;
 	};
+	const buildSnapshotDataUrl = () => buildSnapshotCanvas().toDataURL("image/png");
 	snapshotBtn.addEventListener("click", () => {
 		const link = document.createElement("a");
 		link.download = `canvas-jelly-${Date.now()}.png`;
@@ -2857,6 +2861,36 @@
 			snapshotFlash.style.transition = "opacity 0.4s ease";
 			snapshotFlash.style.opacity = "0";
 		});
+	});
+
+	// Lets players paste a snapshot straight into a chat/doc without a download-then-attach
+	// round trip; falls back to a clear "Not supported" label on browsers without the
+	// clipboard image API instead of silently doing nothing.
+	const copySnapshotBtn = document.querySelector("#copy-snapshot-btn");
+	const flashCopySnapshotBtn = (label) => {
+		copySnapshotBtn.textContent = label;
+		clearTimeout(flashCopySnapshotBtn.timer);
+		flashCopySnapshotBtn.timer = setTimeout(() => { copySnapshotBtn.textContent = "Copy Image"; }, 1500);
+	};
+	copySnapshotBtn.addEventListener("click", () => {
+		if (!navigator.clipboard || !window.ClipboardItem) {
+			flashCopySnapshotBtn("Not supported");
+			return;
+		}
+		buildSnapshotCanvas().toBlob((blob) => {
+			if (!blob) {
+				flashCopySnapshotBtn("Copy failed");
+				return;
+			}
+			navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
+				.then(() => {
+					flashCopySnapshotBtn("Copied!");
+					playSnapshotSound();
+					if (navigator.vibrate) navigator.vibrate(20);
+					spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Copied!", "#00e5ff");
+				})
+				.catch(() => flashCopySnapshotBtn("Copy failed"));
+		}, "image/png");
 	});
 
 	// Lets players brag about a run without a screenshot: copies a plain-text
