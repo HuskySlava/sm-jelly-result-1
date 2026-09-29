@@ -2080,24 +2080,28 @@
 	// proximity, active buffs) into a single at-a-glance line, since the stat grid's
 	// raw numbers don't say how the run "feels" right now.
 	const moodStatEl = document.querySelector("#mood-stat");
+	// Drives the on-canvas mouth shape (see drawMouth below) so the jelly's face echoes
+	// the same mood the stat line reports, instead of the face staying static while only
+	// the text changes underneath it.
+	let currentMouthType = "smile";
 	const updateMood = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		const speed = Math.hypot(jelly.velX, jelly.velY);
 		let mood;
-		if (ghostTimeRemaining > 0) mood = "👻 Phasing!";
-		else if (shieldTimeRemaining > 0) mood = "🛡️ Shielded";
-		else if (freezeTimeRemaining > 0) mood = "❄️ Chillin' (literally)";
-		else if (shrinkTimeRemaining > 0) mood = "🐣 Tiny!";
-		else if (growTimeRemaining > 0) mood = "🦣 Giant!";
-		else if (doubleTimeRemaining > 0) mood = "✖️2️⃣ Double bonus!";
-		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) mood = "😰 Too close!";
-		else if (combo >= 10) mood = "🤩 Unstoppable!";
-		else if (combo >= 5) mood = "🔥 On a roll!";
-		else if (speed > maxSpeed * 0.85) mood = "😵 Dizzy!";
-		else if (orbStreak >= 3) mood = "✨ In the zone";
-		else if (elapsedTime - lastInteractionElapsed > idleThreshold) mood = "😴 Napping...";
-		else mood = "🙂 Chillin'";
+		if (ghostTimeRemaining > 0) { mood = "👻 Phasing!"; currentMouthType = "o"; }
+		else if (shieldTimeRemaining > 0) { mood = "🛡️ Shielded"; currentMouthType = "grin"; }
+		else if (freezeTimeRemaining > 0) { mood = "❄️ Chillin' (literally)"; currentMouthType = "wavy"; }
+		else if (shrinkTimeRemaining > 0) { mood = "🐣 Tiny!"; currentMouthType = "o"; }
+		else if (growTimeRemaining > 0) { mood = "🦣 Giant!"; currentMouthType = "grin"; }
+		else if (doubleTimeRemaining > 0) { mood = "✖️2️⃣ Double bonus!"; currentMouthType = "grin"; }
+		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) { mood = "😰 Too close!"; currentMouthType = "o"; }
+		else if (combo >= 10) { mood = "🤩 Unstoppable!"; currentMouthType = "grin"; }
+		else if (combo >= 5) { mood = "🔥 On a roll!"; currentMouthType = "grin"; }
+		else if (speed > maxSpeed * 0.85) { mood = "😵 Dizzy!"; currentMouthType = "wavy"; }
+		else if (orbStreak >= 3) { mood = "✨ In the zone"; currentMouthType = "grin"; }
+		else if (elapsedTime - lastInteractionElapsed > idleThreshold) { mood = "😴 Napping..."; currentMouthType = "flat"; }
+		else { mood = "🙂 Chillin'"; currentMouthType = "smile"; }
 		moodStatEl.textContent = mood;
 	};
 
@@ -2629,6 +2633,39 @@
 		}
 		ctx.fill();
 	};
+	// Draws below the eyes, inside the same translated/scaled local space, so the mouth
+	// shape reads as part of the jelly's face rather than a separately-positioned overlay.
+	// currentMouthType is kept in sync with updateMood()'s branches above.
+	const drawMouth = () => {
+		const w = jelly.w, h = jelly.h;
+		const mouthY = h / 7;
+		ctx.beginPath();
+		ctx.strokeStyle = "#1a1a1a";
+		ctx.lineWidth = Math.max(1.5, w / 12);
+		ctx.lineCap = "round";
+		if (currentMouthType === "grin") {
+			ctx.arc(0, mouthY - w / 10, w / 5, 0.15 * Math.PI, 0.85 * Math.PI);
+			ctx.stroke();
+		} else if (currentMouthType === "o") {
+			ctx.arc(0, mouthY, w / 10, 0, Math.PI * 2);
+			ctx.fillStyle = "#1a1a1a";
+			ctx.fill();
+		} else if (currentMouthType === "wavy") {
+			const amp = w / 16;
+			ctx.moveTo(-w / 6, mouthY);
+			for (let i = -2; i <= 2; i++) {
+				ctx.lineTo(i * w / 12, mouthY + (i % 2 === 0 ? amp : -amp));
+			}
+			ctx.stroke();
+		} else if (currentMouthType === "flat") {
+			ctx.moveTo(-w / 10, mouthY);
+			ctx.lineTo(w / 10, mouthY);
+			ctx.stroke();
+		} else {
+			ctx.arc(0, mouthY - w / 16, w / 8, 0.2 * Math.PI, 0.8 * Math.PI);
+			ctx.stroke();
+		}
+	};
 	const drawJelly = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
@@ -2680,6 +2717,7 @@
 			ctx.fill();
 			ctx.restore();
 		}
+		drawMouth();
 		ctx.restore();
 		drawEdgeFlashes();
 		drawParticles();

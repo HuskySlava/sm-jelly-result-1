@@ -151,3 +151,4 @@
 <2026-09-29-12:32> (Claude): Added an Orb Guide legend to the Help overlay explaining what each orb color/type does.
 <2026-09-29-13:02> (Claude): Added a dynamic favicon that mirrors the jelly's current bounce color in the browser tab.
 <2026-09-29-13:32> (Claude): Fixed the jelly color picker so a chosen color applies instantly instead of waiting for the next bounce.
+<2026-09-29-14:03> (Claude): Added a mood-reactive mouth to the jelly's face (grin, worried, dizzy, sleepy, smile).
