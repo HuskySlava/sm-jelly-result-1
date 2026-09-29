@@ -2268,6 +2268,10 @@
 	// using its current velocity only (gravity/wind/magnet/autopilot forces aren't
 	// projected forward, so this is an approximation whenever those are active).
 	const predictNextBounce = () => {
+		// While ghosted the jelly wraps through walls instead of bouncing off them, so
+		// there's no upcoming bounce to predict; showing one anyway would point at a
+		// wall the jelly is about to pass straight through.
+		if (ghostTimeRemaining > 0) return null;
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		const vx = jelly.velX, vy = jelly.velY;

@@ -130,3 +130,4 @@
 <2026-09-29-01:03> (Claude): Added a custom jelly color picker with a random-color reset button.
 <2026-09-29-01:35> (Claude): Added a ghost orb power-up that lets the jelly phase through walls and wrap to the opposite edge.
 2026-09-29-02:01 (Claude): Fixed jelly starting white on reload instead of the saved custom color until the first bounce.
+2026-09-29-02:32 (Claude): Fixed the trajectory predictor drawing a misleading wall-bounce marker while ghost mode is phasing through walls.
