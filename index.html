@@ -2070,6 +2070,9 @@
 			if (score > 0) {
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ff5722");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 130, "New Best Score!", "#ff5722");
+				// The overall score record is the single biggest milestone in the game, so it
+				// earns a full confetti burst on top of the usual particles, not just a popup.
+				spawnConfetti(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2);
 			}
 		}
 	};

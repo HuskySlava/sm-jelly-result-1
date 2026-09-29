@@ -153,3 +153,4 @@
 <2026-09-29-13:32> (Claude): Fixed the jelly color picker so a chosen color applies instantly instead of waiting for the next bounce.
 <2026-09-29-14:03> (Claude): Added a mood-reactive mouth to the jelly's face (grin, worried, dizzy, sleepy, smile).
 2026-09-29-14:33 (Claude): Fixed the Random color-reset button to update the jelly's color/favicon immediately instead of waiting for the next bounce.
+2026-09-29-15:03 (Claude): Added a confetti burst celebration when beating the all-time best score.
