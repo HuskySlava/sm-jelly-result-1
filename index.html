@@ -1244,7 +1244,7 @@
 
 	// Purely cosmetic headwear, independent of shape/theme/color, so players can mix
 	// and match a silly hat onto any body shape rather than it being tied to one look.
-	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow"];
+	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat"];
 	let hatIndex = Number(localStorage.getItem("jelly-hat-index")) || 0;
 	const hatBtn = document.querySelector("#hat-btn");
 	hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
@@ -2837,6 +2837,20 @@
 			ctx.fill();
 			ctx.beginPath();
 			ctx.arc(0, cy, w * 0.08, 0, Math.PI * 2);
+			ctx.fill();
+		} else if (hat === "Party Hat") {
+			const base = topY - w * 0.02, apex = topY - w * 0.55;
+			ctx.fillStyle = "#00e5ff";
+			ctx.beginPath();
+			ctx.moveTo(-w * 0.25, base);
+			ctx.lineTo(w * 0.25, base);
+			ctx.lineTo(0, apex);
+			ctx.closePath();
+			ctx.fill();
+			// A small golden pompom caps the cone, echoing the Crown's gem accent.
+			ctx.fillStyle = "#ffe066";
+			ctx.beginPath();
+			ctx.arc(0, apex, w * 0.06, 0, Math.PI * 2);
 			ctx.fill();
 		}
 		ctx.restore();
