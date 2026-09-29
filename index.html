@@ -419,6 +419,7 @@
 			<button id="predict-btn" title="Trajectory (X)">Trajectory: Off</button>
 		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
 		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
+		<button id="snow-btn" title="Snow (A)">Snow: Off</button>
 		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
 		<button id="shape-btn" title="Shape (Q)">Shape: Blob</button>
 		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
@@ -466,6 +467,7 @@
 				<li><kbd>X</kbd> Toggle trajectory predictor</li>
 			<li><kbd>K</kbd> Toggle screen shake</li>
 			<li><kbd>N</kbd> Toggle rainbow mode</li>
+			<li><kbd>A</kbd> Toggle falling snow</li>
 			<li><kbd>D</kbd> Cycle backdrop theme</li>
 			<li><kbd>Q</kbd> Cycle jelly shape</li>
 			<li><kbd>J</kbd> Confetti burst</li>
@@ -625,6 +627,53 @@
 		}
 		ctx.restore();
 	};
+
+	// Purely decorative ambient snowfall, independent of every gameplay toggle: gentle
+	// drifting flakes that wrap back to the top once they fall off the bottom, giving
+	// the backdrop a cozy alternative to the plain starfield.
+	const snowBtn = document.querySelector("#snow-btn");
+	let snowOn = localStorage.getItem("jelly-snow-on") === "true";
+	const snowflakes = Array.from({ length: 70 }, () => ({
+		x: Math.random() * canvas.width,
+		y: Math.random() * canvas.height,
+		radius: 1 + Math.random() * 2.2,
+		speed: 30 + Math.random() * 50,
+		sway: 10 + Math.random() * 25,
+		phase: Math.random() * Math.PI * 2
+	}));
+	const updateSnow = (dt, time) => {
+		for (const f of snowflakes) {
+			f.y += f.speed * dt;
+			f.x += Math.sin(time + f.phase) * f.sway * dt;
+			if (f.y > canvas.height + 5) {
+				f.y = -5;
+				f.x = Math.random() * canvas.width;
+			}
+			// Wrap horizontally too, since the sway drift can otherwise walk a flake
+			// off the left/right edge and leave it stuck out of view.
+			if (f.x < -5) f.x = canvas.width + 5;
+			else if (f.x > canvas.width + 5) f.x = -5;
+		}
+	};
+	const drawSnow = () => {
+		ctx.save();
+		ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+		for (const f of snowflakes) {
+			ctx.globalAlpha = 0.4 + 0.4 * (f.radius / 3.2);
+			ctx.beginPath();
+			ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+			ctx.fill();
+		}
+		ctx.restore();
+	};
+	snowBtn.textContent = snowOn ? "Snow: On" : "Snow: Off";
+	snowBtn.classList.toggle("active", snowOn);
+	snowBtn.addEventListener("click", () => {
+		snowOn = !snowOn;
+		localStorage.setItem("jelly-snow-on", snowOn);
+		snowBtn.textContent = snowOn ? "Snow: On" : "Snow: Off";
+		snowBtn.classList.toggle("active", snowOn);
+	});
 
 	const jelly = {
 		x: Math.floor(canvas.width / 2),
@@ -2856,6 +2905,8 @@
 			shakeBtn.click();
 		} else if (e.code === "KeyN") {
 			rainbowBtn.click();
+		} else if (e.code === "KeyA") {
+			snowBtn.click();
 		} else if (e.code === "KeyD") {
 			themeBtn.click();
 		} else if (e.code === "KeyQ") {
@@ -2981,6 +3032,10 @@
 				maybeSpawnShootingStar();
 				updateShootingStars(dt);
 				drawShootingStars();
+				if (snowOn) {
+					updateSnow(dt, now / 1000);
+					drawSnow();
+				}
 				drawOrb(now / 1000);
 				if (hazardOn) {
 					updateHazard(dt);
