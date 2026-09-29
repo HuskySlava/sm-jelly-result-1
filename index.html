@@ -100,7 +100,8 @@
 
 		/* Matches the pill-shaped buttons' look so the volume control reads as part
 		   of the same toolbar instead of a foreign form element. */
-		#volume-control {
+		#volume-control,
+		#color-control {
 			display: flex;
 			align-items: center;
 			gap: 0.5rem;
@@ -119,7 +120,29 @@
 			cursor: pointer;
 		}
 
-		body.zen-mode #volume-control {
+		/* Native color swatches are square by default; round it to match this
+		   toolbar's pill/circle aesthetic instead of looking like a stray input. */
+		#color-picker {
+			width: 22px;
+			height: 22px;
+			padding: 0;
+			border: none;
+			border-radius: 50%;
+			cursor: pointer;
+			background: none;
+		}
+
+		#color-picker::-webkit-color-swatch-wrapper {
+			padding: 0;
+		}
+
+		#color-picker::-webkit-color-swatch {
+			border: 1px solid rgba(255, 255, 255, 0.4);
+			border-radius: 50%;
+		}
+
+		body.zen-mode #volume-control,
+		body.zen-mode #color-control {
 			display: none;
 		}
 
@@ -382,6 +405,8 @@
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
 		<button id="sound-btn" title="Mute (M)">Sound: On</button>
 		<label id="volume-control" title="Volume">🔊 <input type="range" id="volume-slider" min="0" max="1" step="0.05"></label>
+		<label id="color-control" title="Custom jelly color">🎨 <input type="color" id="color-picker" value="#ffffff"></label>
+		<button id="color-reset-btn" title="Revert to random bounce colors">🎲 Random</button>
 		<button id="boost-btn" title="Boost (B)">Boost</button>
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
@@ -652,6 +677,23 @@
 		localStorage.setItem("jelly-volume", volume);
 	});
 
+	// Lets players lock the jelly to a chosen color instead of the default per-bounce
+	// randomization; the 🎲 button reverts to random. Rainbow mode still overrides
+	// both, exactly as it already overrode the old unconditional randomColor() calls.
+	const colorPicker = document.querySelector("#color-picker");
+	const colorResetBtn = document.querySelector("#color-reset-btn");
+	let customColor = localStorage.getItem("jelly-custom-color");
+	if (customColor) colorPicker.value = customColor;
+	const getBounceColor = () => customColor || randomColor();
+	colorPicker.addEventListener("input", () => {
+		customColor = colorPicker.value;
+		localStorage.setItem("jelly-custom-color", customColor);
+	});
+	colorResetBtn.addEventListener("click", () => {
+		customColor = null;
+		localStorage.removeItem("jelly-custom-color");
+	});
+
 	const boostBtn = document.querySelector("#boost-btn");
 	boostBtn.addEventListener("click", () => {
 		// Nothing should be able to change velocity while paused, or the resulting
@@ -665,7 +707,7 @@
 		const angle = Math.random() * Math.PI * 2;
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
-		jelly.color = randomColor();
+		jelly.color = getBounceColor();
 		updateSpeedStat();
 	});
 
@@ -1996,7 +2038,7 @@
 		// Corner hits trigger two wall checks in the same frame; only count it as one bounce.
 		const isCornerHit = bouncedX && bouncedY;
 		if (bouncedX || bouncedY) {
-			if (!rainbowOn) jelly.color = randomColor();
+			if (!rainbowOn) jelly.color = getBounceColor();
 			const isNewRecord = registerBounce();
 			playBounceSound();
 			// Touch players feel the impact even with sound muted; corners get a
@@ -2403,7 +2445,7 @@
 		jelly.y = Math.floor(canvas.height / 2);
 		jelly.velX = 60;
 		jelly.velY = 60;
-		jelly.color = "#fff";
+		jelly.color = customColor || "#fff";
 		jelly.scaleX = 1;
 		jelly.scaleY = 1;
 		jelly.w = jellyBaseSize;
