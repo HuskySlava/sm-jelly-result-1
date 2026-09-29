@@ -402,6 +402,7 @@
 	</div>
 	<div id="stats-panel">
 		<p id="mood-stat">🙂 Chillin'</p>
+		<p id="age-stat">Age: 0 days</p>
 		<p id="bounce-counter">Bounces: 0</p>
 		<p id="corner-stat">Corners: 0</p>
 		<p id="best-corners">Best corners: 0</p>
@@ -528,6 +529,17 @@
 	const ctx = canvas.getContext("2d")
 	const titleEl = document.querySelector("#canvas-section h1");
 
+	// Stamps a "birthdate" for this jelly the first time it's ever opened in this
+	// browser, so returning players see how long they've had it instead of every
+	// stat looking brand new on each reload.
+	const ageStatEl = document.querySelector("#age-stat");
+	let firstPlayedTime = Number(localStorage.getItem("jelly-first-played"));
+	if (!firstPlayedTime) {
+		firstPlayedTime = Date.now();
+		localStorage.setItem("jelly-first-played", firstPlayedTime);
+	}
+	const ageDays = Math.floor((Date.now() - firstPlayedTime) / 86400000);
+	ageStatEl.textContent = `Age: ${ageDays} day${ageDays === 1 ? "" : "s"}`;
 
 	const clear = () => {
 		// Fading to translucent black (not the jelly's own color) leaves a motion
