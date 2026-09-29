@@ -806,6 +806,13 @@
 		// Without this the swatch keeps showing the last picked color, falsely implying
 		// it's still active even though bounces have gone back to fully random colors.
 		colorPicker.value = "#ffffff";
+		// Mirrors the picker's own input handler: without this the jelly visibly keeps
+		// showing its old custom color until the next bounce, making this button feel
+		// unresponsive the same way the picker used to before that fix was applied.
+		if (!rainbowOn) {
+			jelly.color = getBounceColor();
+			updateFavicon(jelly.color);
+		}
 	});
 
 	// Mirrors the jelly's current color into the browser tab's favicon, so a glance at
