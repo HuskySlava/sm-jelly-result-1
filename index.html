@@ -767,6 +767,9 @@
 	colorResetBtn.addEventListener("click", () => {
 		customColor = null;
 		localStorage.removeItem("jelly-custom-color");
+		// Without this the swatch keeps showing the last picked color, falsely implying
+		// it's still active even though bounces have gone back to fully random colors.
+		colorPicker.value = "#ffffff";
 	});
 
 	const boostBtn = document.querySelector("#boost-btn");
