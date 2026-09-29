@@ -2611,6 +2611,14 @@
 	let countdownValue = 0;
 	let countdownTimer = null;
 	const drawCountdownOverlay = () => {
+		// Without a hard clear+redraw first, each tick's dim rect + digit stacked on top
+		// of the previous one instead of replacing it, so "3", "2", "1" ghosted through
+		// each other rather than cleanly transitioning.
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		drawNebula(performance.now() / 1000);
+		drawStars(performance.now() / 1000);
+		drawOrb(performance.now() / 1000);
+		drawJelly();
 		ctx.save();
 		ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
