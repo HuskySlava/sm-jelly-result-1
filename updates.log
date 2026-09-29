@@ -126,3 +126,4 @@
 <2026-09-28-23:02> (Claude): Added a persistent lifetime "Total time" stat that tracks cumulative play time across sessions.
 2026-09-28-23:32 (Claude): Fixed arrow keys being hijacked from the volume slider into jelly-nudge steering.
 <2026-09-29-00:02> (Claude): Added a Konami code easter egg that triggers a meteor shower and confetti celebration.
+2026-09-29-00:32 (Claude): Fixed shrink orb bug where jelly's center drifted toward top-left during resize instead of staying fixed.

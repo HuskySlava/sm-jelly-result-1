@@ -2086,8 +2086,14 @@
 		// Smoothly grow/shrink toward the shrink orb's target size, mirroring the
 		// squash/stretch easing above so the size change reads as squishy, not a snap-cut.
 		const targetSize = shrinkTimeRemaining > 0 ? jellyShrinkSize : jellyBaseSize;
+		const prevW = jelly.w, prevH = jelly.h;
 		jelly.w += (targetSize - jelly.w) * ease;
 		jelly.h += (targetSize - jelly.h) * ease;
+		// jelly.x/y track the top-left corner, so without this the jelly's visual and
+		// collision center would drift toward the top-left as it shrinks (and back as
+		// it regrows) instead of resizing in place around a fixed center.
+		jelly.x -= (jelly.w - prevW) / 2;
+		jelly.y -= (jelly.h - prevH) / 2;
 		// Cap the growth so a long combo makes the jelly noticeably chunkier without
 		// ever letting it swell large enough to dominate the arena.
 		const targetComboScale = 1 + Math.min(combo, 15) * 0.025;
