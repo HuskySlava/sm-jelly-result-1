@@ -1246,7 +1246,7 @@
 
 	// Purely cosmetic headwear, independent of shape/theme/color, so players can mix
 	// and match a silly hat onto any body shape rather than it being tied to one look.
-	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses"];
+	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat"];
 	let hatIndex = Number(localStorage.getItem("jelly-hat-index")) || 0;
 	const hatBtn = document.querySelector("#hat-btn");
 	hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
@@ -2875,6 +2875,24 @@
 				ctx.ellipse(side * w / 5 - eyeR * 0.3, eyeY - eyeR * 0.3, eyeR * 0.35, eyeR * 0.2, -0.4, 0, Math.PI * 2);
 				ctx.fill();
 			}
+		} else if (hat === "Wizard Hat") {
+			// A tall, jauntily-curved cone (vs. the Party Hat's straight little cone) with a
+			// wide brim and a golden star accent, reading as "wizard" rather than "birthday".
+			const base = topY - w * 0.02, apex = topY - w * 0.85;
+			ctx.fillStyle = "#4b0082";
+			ctx.beginPath();
+			ctx.ellipse(0, base, w * 0.45, w * 0.09, 0, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.moveTo(-w * 0.22, base);
+			ctx.quadraticCurveTo(-w * 0.06, apex + w * 0.12, w * 0.1, apex);
+			ctx.lineTo(w * 0.22, base);
+			ctx.closePath();
+			ctx.fill();
+			ctx.fillStyle = "#ffe066";
+			ctx.beginPath();
+			ctx.arc(w * 0.05, apex + w * 0.18, w * 0.045, 0, Math.PI * 2);
+			ctx.fill();
 		}
 		ctx.restore();
 	};
