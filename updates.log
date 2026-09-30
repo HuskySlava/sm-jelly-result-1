@@ -167,3 +167,4 @@
 <2026-09-29-22:02> (Claude): Added progress bars to locked achievements in the achievements panel, showing distance to unlock.
 <2026-09-29-23:03> (Claude): Fixed bug where the help, achievements, and leaderboard overlays could stack open simultaneously instead of one at a time.
 <2026-09-29-23:31> (Claude): Added a Party Hat cosmetic option to the hat cycle, a cone with a golden pompom.
+2026-09-30-00:32 (Claude): Fixed boost overriding Rainbow mode's color for a frame; now guarded like every other color-assignment site.

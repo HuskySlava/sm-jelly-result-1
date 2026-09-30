@@ -896,11 +896,13 @@
 		const angle = Math.random() * Math.PI * 2;
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
-		jelly.color = getBounceColor();
-		// Every other place that assigns jelly.color (bounce, color picker, reset,
-		// initial load) mirrors it into the favicon; boost was missing this, so the
-		// tab icon could stay stuck on a stale color indefinitely between wall hits.
-		if (!rainbowOn) updateFavicon(jelly.color);
+		// Guard like every other color-assignment site (bounce, color picker, reset):
+		// without this, boosting while Rainbow mode is on would momentarily stomp the
+		// continuously-cycling hue with a static random color for one frame.
+		if (!rainbowOn) {
+			jelly.color = getBounceColor();
+			updateFavicon(jelly.color);
+		}
 		updateSpeedStat();
 		lastInteractionElapsed = elapsedTime;
 	});
