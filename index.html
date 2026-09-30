@@ -1246,7 +1246,7 @@
 
 	// Purely cosmetic headwear, independent of shape/theme/color, so players can mix
 	// and match a silly hat onto any body shape rather than it being tied to one look.
-	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat", "Flower Crown"];
+	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat", "Flower Crown", "Headphones"];
 	let hatIndex = Number(localStorage.getItem("jelly-hat-index")) || 0;
 	const hatBtn = document.querySelector("#hat-btn");
 	hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
@@ -2917,6 +2917,28 @@
 				ctx.fillStyle = "#ffe066";
 				ctx.beginPath();
 				ctx.arc(fx, fy, petalR * 0.5, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		} else if (hat === "Headphones") {
+			// Unlike every hat above (perched on top or over the eyes), this one straddles
+			// the head: a band arcing over the crown with an earcup resting at ear height
+			// on each side.
+			const earY = -jelly.h / 8;
+			const earR = w * 0.15;
+			ctx.strokeStyle = "#222";
+			ctx.lineWidth = Math.max(2, w * 0.05);
+			ctx.beginPath();
+			ctx.moveTo(-w * 0.42, earY - earR * 0.3);
+			ctx.quadraticCurveTo(0, topY - w * 0.05, w * 0.42, earY - earR * 0.3);
+			ctx.stroke();
+			for (const side of [-1, 1]) {
+				ctx.fillStyle = "#222";
+				ctx.beginPath();
+				ctx.arc(side * w * 0.42, earY, earR, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.fillStyle = "#00e5ff";
+				ctx.beginPath();
+				ctx.arc(side * w * 0.42, earY, earR * 0.45, 0, Math.PI * 2);
 				ctx.fill();
 			}
 		}
