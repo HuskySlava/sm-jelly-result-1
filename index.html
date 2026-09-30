@@ -441,6 +441,7 @@
 		<p id="time-stat">Time: 0.0s</p>
 		<p id="best-time">Best time: 0.0s</p>
 		<p id="total-time">Total time: 0.0s</p>
+		<p id="distance-stat">Distance: 0 px</p>
 		<p id="orb-stat">Orbs: 0</p>
 		<p id="best-orbs">Best orbs: 0</p>
 		<p id="total-orbs">Total orbs: 0</p>
@@ -1682,10 +1683,18 @@
 	let totalPlayTime = Number(localStorage.getItem("jelly-total-time")) || 0;
 	totalTimeEl.textContent = `Total time: ${totalPlayTime.toFixed(1)}s`;
 	let lastTotalTimeSaveTime = -Infinity;
+	// Lifetime distance traveled, the movement counterpart to the "Age" stat's lifetime
+	// clock: accumulated from the same dt used to move the jelly (so it slows during
+	// slow-mo like the movement itself does), persisted and throttled like total time.
+	const distanceStatEl = document.querySelector("#distance-stat");
+	let totalDistance = Number(localStorage.getItem("jelly-total-distance")) || 0;
+	distanceStatEl.textContent = `Distance: ${Math.round(totalDistance).toLocaleString()} px`;
+	let lastDistanceSaveTime = -Infinity;
 	window.addEventListener("beforeunload", () => {
 		localStorage.setItem("jelly-best-time", bestTime);
 		localStorage.setItem("jelly-top-speed", topSpeed);
 		localStorage.setItem("jelly-total-time", totalPlayTime);
+		localStorage.setItem("jelly-total-distance", totalDistance);
 	});
 
 	// A glowing collectible orb spawns at a random spot; steering the jelly onto it
@@ -3567,6 +3576,12 @@
 					checkPortalCollision();
 				}
 				updateJelly(dt);
+				totalDistance += Math.hypot(jelly.velX, jelly.velY) * dt;
+				distanceStatEl.textContent = `Distance: ${Math.round(totalDistance).toLocaleString()} px`;
+				if (now - lastDistanceSaveTime > 1000) {
+					lastDistanceSaveTime = now;
+					localStorage.setItem("jelly-total-distance", totalDistance);
+				}
 				checkOrbCollision();
 				checkAchievements();
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
