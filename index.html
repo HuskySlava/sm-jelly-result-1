@@ -3590,11 +3590,9 @@
 				if (hazardOn) {
 					updateHazard(dt);
 					drawHazard(now / 1000);
-					checkHazardCollision();
 				}
 				if (portalOn) {
 					drawPortals(now / 1000);
-					checkPortalCollision();
 				}
 				updateJelly(dt);
 				totalDistance += Math.hypot(jelly.velX, jelly.velY) * dt;
@@ -3603,6 +3601,11 @@
 					lastDistanceSaveTime = now;
 					localStorage.setItem("jelly-total-distance", totalDistance);
 				}
+				// Collision checks run after updateJelly() moves the jelly this frame, so
+				// they see its current position instead of lagging a frame behind (which
+				// used to let a fast jelly visibly overlap a hazard/portal before it registered).
+				if (hazardOn) checkHazardCollision();
+				if (portalOn) checkPortalCollision();
 				checkOrbCollision();
 				checkAchievements();
 				if (trailOn) spawnTrailParticle(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
