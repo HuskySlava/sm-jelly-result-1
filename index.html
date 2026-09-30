@@ -1246,7 +1246,7 @@
 
 	// Purely cosmetic headwear, independent of shape/theme/color, so players can mix
 	// and match a silly hat onto any body shape rather than it being tied to one look.
-	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat"];
+	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat", "Flower Crown"];
 	let hatIndex = Number(localStorage.getItem("jelly-hat-index")) || 0;
 	const hatBtn = document.querySelector("#hat-btn");
 	hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
@@ -2893,6 +2893,32 @@
 			ctx.beginPath();
 			ctx.arc(w * 0.05, apex + w * 0.18, w * 0.045, 0, Math.PI * 2);
 			ctx.fill();
+		} else if (hat === "Flower Crown") {
+			// A garland of tiny flowers across the top of the head, each a ring of petals
+			// around a golden center; cycling petal colors across the row (vs. one flat
+			// color repeated) so it reads as a woven garland rather than a single stamp.
+			const petalColors = ["#ff6fae", "#ffe066", "#7dd3fc", "#c084fc"];
+			const bandY = topY - w * 0.02;
+			const count = 5;
+			for (let i = 0; i < count; i++) {
+				const fx = -w * 0.4 + (w * 0.8 * i) / (count - 1);
+				// Slight upward arc toward the middle flowers so the garland hugs the
+				// head's curve instead of sitting on a perfectly flat line.
+				const fy = bandY - Math.sin((i / (count - 1)) * Math.PI) * w * 0.08;
+				const petalColor = petalColors[i % petalColors.length];
+				const petalR = w * 0.055;
+				for (let p = 0; p < 5; p++) {
+					const angle = (p / 5) * Math.PI * 2;
+					ctx.fillStyle = petalColor;
+					ctx.beginPath();
+					ctx.arc(fx + Math.cos(angle) * petalR, fy + Math.sin(angle) * petalR, petalR * 0.75, 0, Math.PI * 2);
+					ctx.fill();
+				}
+				ctx.fillStyle = "#ffe066";
+				ctx.beginPath();
+				ctx.arc(fx, fy, petalR * 0.5, 0, Math.PI * 2);
+				ctx.fill();
+			}
 		}
 		ctx.restore();
 	};
