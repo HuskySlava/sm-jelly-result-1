@@ -1247,7 +1247,7 @@
 
 	// Purely cosmetic headwear, independent of shape/theme/color, so players can mix
 	// and match a silly hat onto any body shape rather than it being tied to one look.
-	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat", "Flower Crown", "Headphones"];
+	const hats = ["None", "Top Hat", "Halo", "Crown", "Bow", "Party Hat", "Sunglasses", "Wizard Hat", "Flower Crown", "Headphones", "Cat Ears"];
 	let hatIndex = Number(localStorage.getItem("jelly-hat-index")) || 0;
 	const hatBtn = document.querySelector("#hat-btn");
 	hatBtn.textContent = `Hat: ${hats[hatIndex]}`;
@@ -2948,6 +2948,27 @@
 				ctx.fillStyle = "#00e5ff";
 				ctx.beginPath();
 				ctx.arc(side * w * 0.42, earY, earR * 0.45, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		} else if (hat === "Cat Ears") {
+			// A pair of triangular ears straddling the top corners of the head, each
+			// with a smaller pink inner triangle, reading as a cute overlay rather
+			// than a perched accessory like the hats above.
+			const base = topY + jelly.h * 0.08, apex = topY - w * 0.4;
+			for (const side of [-1, 1]) {
+				ctx.fillStyle = "#1a1a1a";
+				ctx.beginPath();
+				ctx.moveTo(side * w * 0.15, base);
+				ctx.lineTo(side * w * 0.48, base - w * 0.05);
+				ctx.lineTo(side * w * 0.28, apex);
+				ctx.closePath();
+				ctx.fill();
+				ctx.fillStyle = "#ff8fc7";
+				ctx.beginPath();
+				ctx.moveTo(side * w * 0.21, base - w * 0.05);
+				ctx.lineTo(side * w * 0.4, base - w * 0.08);
+				ctx.lineTo(side * w * 0.27, apex + w * 0.1);
+				ctx.closePath();
 				ctx.fill();
 			}
 		}
