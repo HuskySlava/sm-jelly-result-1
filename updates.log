@@ -183,3 +183,4 @@
 <2026-10-01-15:03> (Claude): Collapsed 17 niche mode/effect toggles behind a new More button to declutter the toolbar on mobile.
 <2026-10-01-15:35> (Claude): Fixed buff rings (shield/freeze/shrink/grow/double/ghost) not scaling with the jelly during combo growth, so they stay visually attached.
 2026-10-01-16:02 (Claude): Disabled pull-to-refresh overscroll so scrolling on mobile cannot accidentally reload and wipe the current run.
+2026-10-01-16:35 (Claude): Fixed hazard mode spawning right on top of the jelly with no warning, giving an instant unavoidable hit.
