@@ -3105,11 +3105,24 @@
 	}
 
 	const fullscreenBtn = document.querySelector("#fullscreen-btn");
+	const flashFullscreenBtn = (label) => {
+		fullscreenBtn.textContent = label;
+		clearTimeout(flashFullscreenBtn.timer);
+		flashFullscreenBtn.timer = setTimeout(() => { fullscreenBtn.textContent = "Fullscreen"; }, 1500);
+	};
 	fullscreenBtn.addEventListener("click", () => {
+		// iOS Safari has no Fullscreen API for arbitrary elements: requestFullscreen()
+		// rejects silently there, which used to leave the button looking unresponsive
+		// with no feedback at all. Mirror the "Not supported" / "Copy failed" pattern
+		// the snapshot/share buttons already use for other optional browser APIs.
+		if (!document.fullscreenEnabled) {
+			flashFullscreenBtn("Not supported");
+			return;
+		}
 		if (document.fullscreenElement) {
 			document.exitFullscreen();
 		} else {
-			document.documentElement.requestFullscreen();
+			document.documentElement.requestFullscreen().catch(() => flashFullscreenBtn("Failed"));
 		}
 	});
 	document.addEventListener("fullscreenchange", () => {
