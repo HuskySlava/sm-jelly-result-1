@@ -196,3 +196,4 @@
 2026-10-01-21:34 (Claude): Fixed orb spawns landing on the hazard or a portal by adding the same retry-distance guard the hazard/portals already use.
 2026-10-01-22:01 (Claude): Enlarged the color-picker swatch to 36px on touchscreens, fixing a sub-44px tap target missed by the existing mobile widening.
 2026-10-01-22:31 (Claude): Share button now uses the native mobile share sheet (navigator.share) instead of only copying stats to clipboard.
+2026-10-01-23:33 (Claude): Fixed leaderboard rank being wrong or falsely awarded when a new run tied an existing score.

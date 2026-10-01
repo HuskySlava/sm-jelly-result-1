@@ -2575,11 +2575,15 @@
 	const recordRunForLeaderboard = () => {
 		const score = computeScore();
 		if (score <= 0) return null;
-		leaderboard.push({ score, date: new Date().toLocaleDateString() });
+		// Track this exact entry (not just its score) so a tie with an existing
+		// leaderboard row can't make findIndex() report that row's rank instead of
+		// this run's, or falsely claim a spot for a run that got sliced off.
+		const entry = { score, date: new Date().toLocaleDateString() };
+		leaderboard.push(entry);
 		leaderboard.sort((a, b) => b.score - a.score);
 		leaderboard = leaderboard.slice(0, 5);
 		localStorage.setItem("jelly-leaderboard", JSON.stringify(leaderboard));
-		const rankIndex = leaderboard.findIndex(e => e.score === score);
+		const rankIndex = leaderboard.indexOf(entry);
 		return { score, rank: rankIndex === -1 ? null : rankIndex + 1 };
 	};
 
