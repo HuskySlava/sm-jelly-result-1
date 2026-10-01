@@ -174,3 +174,4 @@
 <2026-09-30-06:32> (Claude): Added a persistent lifetime "Distance" stat tracking total pixels the jelly has traveled.
 <2026-09-30-07:02> (Claude): Added a Cat Ears cosmetic hat option to the jelly's hat cycle.
 2026-09-30-07:34 (Claude): Fixed hazard/portal collision checks using a stale prior-frame jelly position instead of the current one.
+<2026-10-01-08:02> (Claude): Replaced flaky native dblclick boost gesture with manual double-tap detection for reliable mobile boosting.

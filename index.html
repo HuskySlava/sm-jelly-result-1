@@ -1311,6 +1311,15 @@
 		});
 	};
 	let steering = false;
+	// Manual double-tap tracking instead of the native "dblclick" event: many mobile
+	// browsers don't reliably synthesize dblclick from two quick touches (especially
+	// with touch-action: none in play above), so double-tap-to-boost could silently
+	// fail on phones even though it worked fine with a mouse.
+	let lastTapTime = 0;
+	let lastTapX = 0;
+	let lastTapY = 0;
+	const doubleTapWindow = 350; // ms between taps to count as a double-tap
+	const doubleTapDistance = 30; // canvas px, lets a slightly-off second tap still count
 	canvas.addEventListener("pointerdown", (e) => {
 		if (paused) return;
 		steering = true;
@@ -1330,6 +1339,15 @@
 			playPetSound();
 			if (navigator.vibrate) navigator.vibrate(15);
 		}
+		const now = performance.now();
+		if (now - lastTapTime < doubleTapWindow && Math.hypot(pointX - lastTapX, pointY - lastTapY) < doubleTapDistance) {
+			boostBtn.click();
+			lastTapTime = 0; // consume the pair so a third quick tap doesn't re-trigger
+		} else {
+			lastTapTime = now;
+			lastTapX = pointX;
+			lastTapY = pointY;
+		}
 	});
 	// Listen on window (not the canvas) so steering keeps tracking the pointer
 	// even if it drifts off the canvas edge mid-drag.
@@ -1339,8 +1357,6 @@
 	window.addEventListener("pointerup", () => {
 		steering = false;
 	});
-	// Touch/mouse users have no keyboard, so give them a gesture equivalent to the B shortcut.
-	canvas.addEventListener("dblclick", () => boostBtn.click());
 
 	const bounceCounter = document.querySelector("#bounce-counter");
 	const highScoreEl = document.querySelector("#high-score");
