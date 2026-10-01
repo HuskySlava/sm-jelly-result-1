@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<!-- Pinch-zoom is left enabled (unlike a locked viewport) so mobile players can zoom in on
+		 small stats/button text; the canvas's own `touch-action: none` already stops gameplay
+		 touches from triggering browser zoom, so gameplay isn't affected. -->
 	<meta name="viewport"
-		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+		  content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Canvas Jelly</title>
 	<link rel="icon" id="favicon" href="">
