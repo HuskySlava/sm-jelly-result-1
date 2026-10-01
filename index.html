@@ -2453,13 +2453,17 @@
 	document.querySelector("#leaderboard-close").addEventListener("click", toggleLeaderboard);
 	// Called right before Reset wipes the run's stats, so a completed run's score
 	// gets a chance to land on the board instead of being lost with no record.
+	// Returns the saved score and its leaderboard rank (or null if it didn't place) so
+	// the Reset handler can show the player what just happened to their run.
 	const recordRunForLeaderboard = () => {
 		const score = computeScore();
-		if (score <= 0) return;
+		if (score <= 0) return null;
 		leaderboard.push({ score, date: new Date().toLocaleDateString() });
 		leaderboard.sort((a, b) => b.score - a.score);
 		leaderboard = leaderboard.slice(0, 5);
 		localStorage.setItem("jelly-leaderboard", JSON.stringify(leaderboard));
+		const rankIndex = leaderboard.findIndex(e => e.score === score);
+		return { score, rank: rankIndex === -1 ? null : rankIndex + 1 };
 	};
 
 	// Every "best"/"total" stat and achievement persists in localStorage with no way to
@@ -3398,7 +3402,7 @@
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {
 		cancelResumeCountdown();
-		recordRunForLeaderboard();
+		const runResult = recordRunForLeaderboard();
 		jelly.x = Math.floor(canvas.width / 2);
 		jelly.y = Math.floor(canvas.height / 2);
 		jelly.velX = 60;
@@ -3464,6 +3468,14 @@
 		drawJelly();
 		// Resetting while paused wiped the overlay text; redraw it so the UI stays consistent.
 		if (paused) drawPauseOverlay();
+		// Without this, Reset silently wiped a completed run with zero feedback, even
+		// though it was just saved onto the leaderboard above — a real run vanished
+		// looking identical to a zero-score one. This closes the loop with a quick recap.
+		if (runResult) {
+			const { score, rank } = runResult;
+			const text = rank ? `Run saved: ${score} pts (#${rank}!)` : `Run saved: ${score} pts`;
+			spawnPopup(canvas.width / 2, canvas.height / 2 - 60, text, rank === 1 ? "#ffd700" : "#fff");
+		}
 	});
 
 	const drawPauseOverlay = () => {
