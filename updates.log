@@ -178,3 +178,4 @@
 2026-10-01-08:31 (Claude): Enlarged toolbar button tap targets on touchscreens to meet 44px accessibility guidance and reduce mis-taps.
 <2026-10-01-09:05> (Claude): Fixed multi-touch steering bug where a second finger could hijack or prematurely end a drag-steer gesture.
 <2026-10-01-10:04> (Claude): Fixed touch steering getting permanently stuck when the OS cancels a touch mid-drag (pointercancel now resets steering state).
+<2026-10-01-12:32> (Claude): Enlarged the help/achievements/leaderboard modal close buttons on touchscreens to meet the 44px tap-target guideline.
