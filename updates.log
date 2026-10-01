@@ -176,3 +176,4 @@
 2026-09-30-07:34 (Claude): Fixed hazard/portal collision checks using a stale prior-frame jelly position instead of the current one.
 <2026-10-01-08:02> (Claude): Replaced flaky native dblclick boost gesture with manual double-tap detection for reliable mobile boosting.
 2026-10-01-08:31 (Claude): Enlarged toolbar button tap targets on touchscreens to meet 44px accessibility guidance and reduce mis-taps.
+<2026-10-01-09:05> (Claude): Fixed multi-touch steering bug where a second finger could hijack or prematurely end a drag-steer gesture.

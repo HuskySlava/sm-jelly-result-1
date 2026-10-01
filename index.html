@@ -1329,6 +1329,12 @@
 		});
 	};
 	let steering = false;
+	// Tracks which single finger/pointer started the current drag, since pointer events
+	// fire per-touch on multi-touch screens: without this, a second simultaneous touch
+	// (a resting thumb, a stray finger) would move the mood needle on `steering` and
+	// `steerToward` calls meant for the first finger, and lifting that second finger
+	// would stop steering early even though the original finger is still down.
+	let activePointerId = null;
 	// Manual double-tap tracking instead of the native "dblclick" event: many mobile
 	// browsers don't reliably synthesize dblclick from two quick touches (especially
 	// with touch-action: none in play above), so double-tap-to-boost could silently
@@ -1340,7 +1346,11 @@
 	const doubleTapDistance = 30; // canvas px, lets a slightly-off second tap still count
 	canvas.addEventListener("pointerdown", (e) => {
 		if (paused) return;
+		// Ignore a second finger touching down while the first is still steering, so a
+		// stray/resting touch can't hijack the drag mid-stroke.
+		if (steering) return;
 		steering = true;
+		activePointerId = e.pointerId;
 		steerToward(e.clientX, e.clientY);
 		const rect = canvas.getBoundingClientRect();
 		const pointX = (e.clientX - rect.left) * (canvas.width / rect.width);
@@ -1370,9 +1380,10 @@
 	// Listen on window (not the canvas) so steering keeps tracking the pointer
 	// even if it drifts off the canvas edge mid-drag.
 	window.addEventListener("pointermove", (e) => {
-		if (steering) steerToward(e.clientX, e.clientY);
+		if (steering && e.pointerId === activePointerId) steerToward(e.clientX, e.clientY);
 	});
-	window.addEventListener("pointerup", () => {
+	window.addEventListener("pointerup", (e) => {
+		if (e.pointerId !== activePointerId) return;
 		steering = false;
 	});
 
