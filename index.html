@@ -3450,6 +3450,14 @@
 			flashShareBtn("Copied!");
 			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Copied!", "#00e5ff");
 		};
+		// On mobile, routing through the OS share sheet (Messages/social apps/etc.) is far
+		// more useful than a silent clipboard copy, which players then have to remember to
+		// paste somewhere themselves. Desktop browsers mostly lack navigator.share, so they
+		// keep falling through to the clipboard behavior below.
+		if (navigator.share) {
+			navigator.share({ text, title: "Canvas Jelly" }).catch(() => {});
+			return;
+		}
 		if (navigator.clipboard && navigator.clipboard.writeText) {
 			navigator.clipboard.writeText(text).then(onCopied).catch(() => flashShareBtn("Copy failed"));
 		} else {
