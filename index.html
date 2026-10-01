@@ -426,6 +426,15 @@
 			cursor: pointer;
 		}
 
+		/* The stat tile has no native focus ring of its own (it's a <p>, not a <button>),
+		   so keyboard users tabbing to it would otherwise see no indication it's focused
+		   at all, let alone that Enter/Space opens it. */
+		#achievements-stat:focus-visible {
+			outline: 2px solid rgba(0, 229, 255, 0.8);
+			outline-offset: 2px;
+			border-radius: 4px;
+		}
+
 		#stats-panel {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
@@ -500,7 +509,7 @@
 		<p id="best-orb-streak">Best orb streak: x0</p>
 		<p id="score-stat">Score: 0</p>
 		<p id="best-score">Best score: 0</p>
-		<p id="achievements-stat" title="Click to view achievements">Achievements: 0/0</p>
+		<p id="achievements-stat" title="View achievements (Enter/Space)" role="button" tabindex="0">Achievements: 0/0</p>
 		<p id="next-goal-stat" title="Your closest unearned achievement">🎯 —</p>
 		<p id="fps-stat">FPS: 0</p>
 	</div>
@@ -2414,6 +2423,14 @@
 		if (opening) onOverlayOpened(); else onOverlayClosed();
 	};
 	achievementsStatEl.addEventListener("click", toggleAchievements);
+	// The stat tile is a <p> with role="button", not a real <button>, so Enter/Space
+	// activation isn't native and had no way in at all for keyboard-only players.
+	achievementsStatEl.addEventListener("keydown", (e) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			toggleAchievements();
+		}
+	});
 	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
 	achievementsOverlay.addEventListener("click", (e) => {
 		if (e.target === achievementsOverlay) toggleAchievements();
