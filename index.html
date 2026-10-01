@@ -2516,6 +2516,9 @@
 				jelly.velY *= scale;
 			}
 			updateSpeedStat();
+			// Magnet is actively driving the jelly toward the orb, so it shouldn't also
+			// read as untouched idling — see the matching note on autopilot below.
+			lastInteractionElapsed = elapsedTime;
 		}
 		if (autopilotOn) {
 			const cx = jelly.x + jelly.w / 2;
@@ -2543,6 +2546,10 @@
 				jelly.velY *= scale;
 			}
 			updateSpeedStat();
+			// Without this, a hands-off player watching autopilot actively steer and dodge
+			// hazards would still see the jelly declared "😴 Napping..." with droopy eyes
+			// after idleThreshold, which contradicts what's visibly happening on screen.
+			lastInteractionElapsed = elapsedTime;
 		}
 		jelly.x += jelly.velX * dt;
 		jelly.y += jelly.velY * dt;
