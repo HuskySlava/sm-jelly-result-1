@@ -18,6 +18,11 @@
 			background: #000;
 			color: #fff;
 			font-family: "Roboto", "Helvetica Neue", sans-serif;
+			/* On mobile the stacked title/canvas/stats/30+ buttons can exceed the viewport
+			   height, so a scroll-to-the-top drag (very easy to do while trying to steer
+			   near the canvas edge) would otherwise trigger the browser's pull-to-refresh
+			   and silently wipe the current run's in-memory stats. */
+			overscroll-behavior-y: none;
 		}
 
 		body {
