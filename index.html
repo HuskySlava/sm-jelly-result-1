@@ -242,6 +242,14 @@
 				height: 40px;
 				font-size: 1.3rem;
 			}
+
+			/* The color swatch itself was also left out of the widening above: it's a
+			   native <input type="color">, not a button/label, so it stayed a 22px tap
+			   target (smaller even than the old 26px close buttons) on touch devices. */
+			#color-picker {
+				width: 36px;
+				height: 36px;
+			}
 		}
 
 		#help-overlay {

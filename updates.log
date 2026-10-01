@@ -194,3 +194,4 @@
 2026-10-01-20:35 (Claude): Made the achievements stat tile keyboard-accessible with Enter/Space activation and a visible focus ring.
 <2026-10-01-21:03> (Claude): Added a dismissible "rotate to landscape" hint for touch players stuck with a cramped portrait canvas.
 2026-10-01-21:34 (Claude): Fixed orb spawns landing on the hazard or a portal by adding the same retry-distance guard the hazard/portals already use.
+2026-10-01-22:01 (Claude): Enlarged the color-picker swatch to 36px on touchscreens, fixing a sub-44px tap target missed by the existing mobile widening.
