@@ -179,6 +179,45 @@
 			border-color: rgba(0, 229, 255, 0.8);
 		}
 
+		/* A 16:9 canvas squeezed into a portrait phone screen (width-constrained) renders
+		   tiny with a lot of wasted space below it, so touch players get a dismissible
+		   nudge toward landscape instead of just silently living with a cramped canvas. */
+		#rotate-hint {
+			display: none;
+			align-items: center;
+			gap: 0.5rem;
+			position: fixed;
+			top: 0.6rem;
+			left: 50%;
+			transform: translateX(-50%);
+			max-width: 90vw;
+			background: rgba(0, 229, 255, 0.15);
+			border: 1px solid rgba(0, 229, 255, 0.5);
+			border-radius: 999px;
+			padding: 0.5rem 0.6rem 0.5rem 1rem;
+			font-size: 0.8rem;
+			color: #fff;
+			z-index: 20;
+		}
+
+		#rotate-hint.visible {
+			display: flex;
+		}
+
+		#rotate-hint button {
+			flex-shrink: 0;
+			width: 22px;
+			height: 22px;
+			border-radius: 50%;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			background: rgba(255, 255, 255, 0.1);
+			color: #fff;
+			font-size: 0.9rem;
+			line-height: 1;
+			padding: 0;
+			cursor: pointer;
+		}
+
 		/* The toolbar has 30+ buttons; at the desktop padding/font-size above they're
 		   only ~34px tall, well under the ~44px touch target Apple/WCAG recommend, so
 		   phones and tablets are prone to mis-taps on adjacent buttons. Widen targets
@@ -480,6 +519,10 @@
 	</style>
 </head>
 <body>
+<div id="rotate-hint">
+	📱 Rotate to landscape for a bigger play area
+	<button id="rotate-hint-close" aria-label="Dismiss">&times;</button>
+</div>
 <section id="canvas-section">
 	<h1>Canvas Jelly</h1>
 	<div class="canvas-container">
@@ -620,6 +663,26 @@
 	const canvas = document.querySelector("#my-canvas");
 	const ctx = canvas.getContext("2d")
 	const titleEl = document.querySelector("#canvas-section h1");
+
+	// Nudges touch players toward landscape, where the 16:9 canvas gets far more screen
+	// real estate than when it's squeezed to the width of a portrait phone. Re-checks on
+	// resize/rotation so flipping back to portrait later brings it back, but a dismissal
+	// sticks permanently (like every other toggle here) instead of re-nagging every frame.
+	const rotateHint = document.querySelector("#rotate-hint");
+	const rotateHintClose = document.querySelector("#rotate-hint-close");
+	let rotateHintDismissed = localStorage.getItem("jelly-rotate-hint-dismissed") === "true";
+	const updateRotateHint = () => {
+		const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+		const isPortrait = window.innerHeight > window.innerWidth;
+		rotateHint.classList.toggle("visible", isTouchDevice && isPortrait && !rotateHintDismissed);
+	};
+	updateRotateHint();
+	window.addEventListener("resize", updateRotateHint);
+	rotateHintClose.addEventListener("click", () => {
+		rotateHintDismissed = true;
+		localStorage.setItem("jelly-rotate-hint-dismissed", "true");
+		updateRotateHint();
+	});
 
 	// Stamps a "birthdate" for this jelly the first time it's ever opened in this
 	// browser, so returning players see how long they've had it instead of every

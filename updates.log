@@ -192,3 +192,4 @@
 <2026-10-01-19:34> (Claude): Fixed bug where turning off Rainbow mode left the jelly stuck on its last random hue.
 <2026-10-01-20:03> (Claude): Combo streaks now actually add to your score, so hazard mode's combo-reset penalty has real stakes.
 2026-10-01-20:35 (Claude): Made the achievements stat tile keyboard-accessible with Enter/Space activation and a visible focus ring.
+<2026-10-01-21:03> (Claude): Added a dismissible "rotate to landscape" hint for touch players stuck with a cramped portrait canvas.
