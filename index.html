@@ -1617,7 +1617,7 @@
 		ctx.strokeStyle = "#8a2be2";
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.75 * pulse, 0, Math.PI * 2);
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.75 * pulse * comboScale, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.restore();
 	};
@@ -1635,7 +1635,7 @@
 		ctx.strokeStyle = "#7df9ff";
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.9 * pulse, 0, Math.PI * 2);
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.9 * pulse * comboScale, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.restore();
 	};
@@ -1653,7 +1653,7 @@
 		ctx.strokeStyle = "#ff8c00";
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 1.2 * pulse, 0, Math.PI * 2);
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 1.2 * pulse * comboScale, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.restore();
 	};
@@ -1670,7 +1670,7 @@
 		ctx.strokeStyle = "#ffea00";
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.7 * pulse, 0, Math.PI * 2);
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.7 * pulse * comboScale, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.restore();
 	};
@@ -1688,7 +1688,7 @@
 		ctx.strokeStyle = "#64ffda";
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 1.05 * pulse, 0, Math.PI * 2);
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 1.05 * pulse * comboScale, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.restore();
 	};
@@ -1707,7 +1707,7 @@
 		ctx.setLineDash([4, 4]);
 		ctx.lineWidth = 2;
 		ctx.beginPath();
-		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.8 * pulse, 0, Math.PI * 2);
+		ctx.arc(cx, cy, Math.max(jelly.w, jelly.h) * 0.8 * pulse * comboScale, 0, Math.PI * 2);
 		ctx.stroke();
 		ctx.setLineDash([]);
 		ctx.restore();

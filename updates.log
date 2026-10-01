@@ -181,3 +181,4 @@
 <2026-10-01-12:32> (Claude): Enlarged the help/achievements/leaderboard modal close buttons on touchscreens to meet the 44px tap-target guideline.
 <2026-10-01-13:32> (Claude): Re-enabled pinch-zoom in the viewport meta tag for better mobile accessibility without affecting gameplay.
 <2026-10-01-15:03> (Claude): Collapsed 17 niche mode/effect toggles behind a new More button to declutter the toolbar on mobile.
+<2026-10-01-15:35> (Claude): Fixed buff rings (shield/freeze/shrink/grow/double/ghost) not scaling with the jelly during combo growth, so they stay visually attached.
