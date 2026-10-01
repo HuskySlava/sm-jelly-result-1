@@ -2246,20 +2246,25 @@
 	let combo = 0;
 	let lastBounceElapsed = -Infinity;
 	const comboWindow = 1.2; // seconds allowed between bounces to keep the combo alive
+	// Cumulative points banked from combo streaks this run, so sustained streaks actually
+	// pay off in the score (and hazard mode's combo-reset penalty has a real cost) instead
+	// of combo being a purely cosmetic counter.
+	let comboPoints = 0;
 
 	// Longest bounce streak ever landed, persisted like top speed/high score so it survives resets/reloads.
 	const bestComboEl = document.querySelector("#best-combo");
 	let bestCombo = Number(localStorage.getItem("jelly-best-combo")) || 0;
 	bestComboEl.textContent = `Best combo: x${bestCombo}`;
 
-	// Rolls bounces, corner bounces, and orbs into one combined progress number, since
-	// none of the per-stat records alone say whether a run was good overall. Corners are
-	// weighted heaviest (hardest to land), orbs next, plain bounces the least.
+	// Rolls bounces, corner bounces, orbs, and combo streaks into one combined progress
+	// number, since none of the per-stat records alone say whether a run was good overall.
+	// Corners are weighted heaviest (hardest to land), orbs next, plain bounces the least;
+	// comboPoints rewards keeping a streak alive (and gives the hazard's combo-reset bite).
 	const scoreStatEl = document.querySelector("#score-stat");
 	const bestScoreEl = document.querySelector("#best-score");
 	let bestScore = Number(localStorage.getItem("jelly-best-score")) || 0;
 	bestScoreEl.textContent = `Best score: ${bestScore}`;
-	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2;
+	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2 + comboPoints;
 	// Mirrors the score into the tab title so it stays visible even when this
 	// tab isn't focused (e.g. playing while switching between windows).
 	const defaultTitle = document.title;
@@ -2659,8 +2664,15 @@
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "New Best!", "#ffd700");
 			}
 			// Chain bounces within the combo window to build a streak; a colorful
-			// popup celebrates every third step of the streak.
-			combo = (elapsedTime - lastBounceElapsed <= comboWindow) ? combo + 1 : 1;
+			// popup celebrates every third step of the streak. Each chained step also
+			// banks `combo` points, so a longer streak is worth more than the sum of
+			// its individual bounces — actual payoff for the risk hazard mode punishes.
+			if (elapsedTime - lastBounceElapsed <= comboWindow) {
+				combo += 1;
+				comboPoints += combo;
+			} else {
+				combo = 1;
+			}
 			lastBounceElapsed = elapsedTime;
 			comboStatEl.textContent = `Combo: x${combo}`;
 			if (combo >= 3 && combo % 3 === 0) {
@@ -3483,6 +3495,7 @@
 		if (portalOn) spawnPortals();
 		lastPortalElapsed = -Infinity;
 		combo = 0;
+		comboPoints = 0;
 		lastBounceElapsed = -Infinity;
 		comboStatEl.textContent = `Combo: x${combo}`;
 		lastInteractionElapsed = 0;

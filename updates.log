@@ -190,3 +190,4 @@
 2026-10-01-18:33 (Claude): Reset now pops up a "Run saved" recap with leaderboard rank instead of silently wiping the finished run.
 2026-10-01-19:04 (Claude): Opening Help/Achievements/Leaderboard now auto-pauses the game instead of letting it run hidden behind the modal.
 <2026-10-01-19:34> (Claude): Fixed bug where turning off Rainbow mode left the jelly stuck on its last random hue.
+<2026-10-01-20:03> (Claude): Combo streaks now actually add to your score, so hazard mode's combo-reset penalty has real stakes.
