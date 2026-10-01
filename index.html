@@ -1286,6 +1286,13 @@
 		localStorage.setItem("jelly-rainbow-on", rainbowOn);
 		rainbowBtn.textContent = rainbowOn ? "Rainbow: On" : "Rainbow: Off";
 		rainbowBtn.classList.toggle("active", rainbowOn);
+		// Matches every other color-assignment site (bounce, color picker, boost, reset):
+		// without this, turning Rainbow off leaves the jelly (and favicon) stuck on
+		// whichever hue the cycling animation last landed on until the next bounce.
+		if (!rainbowOn) {
+			jelly.color = getBounceColor();
+			updateFavicon(jelly.color);
+		}
 	});
 
 	const themeBtn = document.querySelector("#theme-btn");
