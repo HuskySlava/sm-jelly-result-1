@@ -185,3 +185,4 @@
 2026-10-01-16:02 (Claude): Disabled pull-to-refresh overscroll so scrolling on mobile cannot accidentally reload and wipe the current run.
 2026-10-01-16:35 (Claude): Fixed hazard mode spawning right on top of the jelly with no warning, giving an instant unavoidable hit.
 2026-10-01-17:04 (Claude): Fixed autopilot/magnet falsely showing the jelly as "Napping" even while actively steering it.
+2026-10-01-17:33 (Claude): Fixed Rainbow mode's tab favicon freezing between bounces instead of cycling with the jelly's hue.

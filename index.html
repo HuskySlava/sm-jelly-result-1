@@ -2454,6 +2454,13 @@
 	});
 
 	let breatheTime = 0;
+	// Throttles the favicon redraw while Rainbow mode cycles jelly.color every frame: the
+	// canvas glow and title glow already re-read jelly.color every frame for free (plain
+	// CSS/style writes), but the favicon requires an actual canvas draw + toDataURL, so
+	// without a throttle the previously bounce-only favicon update would otherwise need to
+	// run 60x/sec. A noticeable-but-cheap 150ms cadence keeps the tab icon visibly in sync
+	// with the shimmer instead of freezing on whatever hue the last bounce happened to land on.
+	let lastRainbowFaviconUpdate = -Infinity;
 	let shakeMagnitude = 0;
 	// Grows the jelly slightly bigger the longer the current combo streak runs, so a
 	// hot streak is visible at a glance, not just readable in the stats text.
@@ -2472,7 +2479,16 @@
 		}
 		// Continuously cycling hue, rather than the random per-bounce color, so
 		// rainbow mode reads as a constant shimmer instead of occasional flashes.
-		if (rainbowOn) jelly.color = `hsl(${(breatheTime * 90) % 360}, 90%, 65%)`;
+		if (rainbowOn) {
+			jelly.color = `hsl(${(breatheTime * 90) % 360}, 90%, 65%)`;
+			// Without this, the tab favicon only reflected the jelly's rainbow hue at the
+			// moment of each wall bounce, so a background tab showed a stale, non-cycling
+			// color instead of mirroring the shimmer the canvas glow and title glow already do.
+			if (breatheTime - lastRainbowFaviconUpdate > 0.15) {
+				lastRainbowFaviconUpdate = breatheTime;
+				updateFavicon(jelly.color);
+			}
+		}
 		if (combo > 0 && elapsedTime - lastBounceElapsed > comboWindow) {
 			combo = 0;
 			comboStatEl.textContent = `Combo: x${combo}`;
