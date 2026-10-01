@@ -1382,10 +1382,16 @@
 	window.addEventListener("pointermove", (e) => {
 		if (steering && e.pointerId === activePointerId) steerToward(e.clientX, e.clientY);
 	});
-	window.addEventListener("pointerup", (e) => {
+	// Shared by pointerup and pointercancel: the OS can abort a touch mid-drag (edge-swipe
+	// gesture, notification shade, app switch) without ever sending pointerup, which used to
+	// leave `steering` stuck true and silently ignore every later touch via the pointerdown
+	// guard above until a full page reload.
+	const stopSteering = (e) => {
 		if (e.pointerId !== activePointerId) return;
 		steering = false;
-	});
+	};
+	window.addEventListener("pointerup", stopSteering);
+	window.addEventListener("pointercancel", stopSteering);
 
 	const bounceCounter = document.querySelector("#bounce-counter");
 	const highScoreEl = document.querySelector("#high-score");
