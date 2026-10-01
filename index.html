@@ -501,6 +501,7 @@
 		<p id="score-stat">Score: 0</p>
 		<p id="best-score">Best score: 0</p>
 		<p id="achievements-stat" title="Click to view achievements">Achievements: 0/0</p>
+		<p id="next-goal-stat" title="Your closest unearned achievement">🎯 —</p>
 		<p id="fps-stat">FPS: 0</p>
 	</div>
 	<div id="controls">
@@ -2360,6 +2361,21 @@
 		achievementsStatEl.textContent = `Achievements: ${unlockedAchievements.size}/${ACHIEVEMENTS.length}`;
 	};
 	updateAchievementsStat();
+	// Gives new players a concrete, always-visible objective (instead of a wall of 24
+	// stat numbers with no stated goal), so the page reads as "a game to play toward"
+	// rather than just a toy that happens to track stats.
+	const nextGoalStatEl = document.querySelector("#next-goal-stat");
+	const updateNextGoalStat = () => {
+		const next = ACHIEVEMENTS.find(a => !unlockedAchievements.has(a.id));
+		if (!next) {
+			nextGoalStatEl.textContent = "🎯 All goals earned!";
+			return;
+		}
+		const current = Math.min(next.progress(), next.target);
+		const label = Number.isInteger(next.target) ? `${Math.floor(current)}/${next.target}` : `${current.toFixed(1)}/${next.target}`;
+		nextGoalStatEl.textContent = `🎯 ${next.name}: ${label}`;
+	};
+	updateNextGoalStat();
 	// Lets players see exactly which achievements they've unlocked (and what's left to
 	// chase) instead of only ever seeing a bare "X/Y" count in the stats grid.
 	const achievementsOverlay = document.querySelector("#achievements-overlay");
@@ -2403,6 +2419,9 @@
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 150, `🏆 ${a.name}!`, "#ffd700");
 			}
 		}
+		// Progress toward the next goal (bounces, combo, elapsed time, etc.) ticks every
+		// frame, not just at the moment one unlocks, so this needs to run unconditionally.
+		updateNextGoalStat();
 	};
 
 	// Top 5 highest-scoring runs ever, persisted like the other lifetime stats, so a
