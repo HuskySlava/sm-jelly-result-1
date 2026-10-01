@@ -188,3 +188,4 @@
 2026-10-01-17:33 (Claude): Fixed Rainbow mode's tab favicon freezing between bounces instead of cycling with the jelly's hue.
 2026-10-01-18:03 (Claude): Added an always-visible Next Goal stat showing progress toward the closest unearned achievement.
 2026-10-01-18:33 (Claude): Reset now pops up a "Run saved" recap with leaderboard rank instead of silently wiping the finished run.
+2026-10-01-19:04 (Claude): Opening Help/Achievements/Leaderboard now auto-pauses the game instead of letting it run hidden behind the modal.

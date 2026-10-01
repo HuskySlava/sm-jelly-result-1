@@ -2396,8 +2396,10 @@
 	};
 	const toggleAchievements = () => {
 		renderAchievementsList();
-		if (!achievementsOverlay.classList.contains("open")) closeOtherOverlays(achievementsOverlay);
+		const opening = !achievementsOverlay.classList.contains("open");
+		if (opening) closeOtherOverlays(achievementsOverlay);
 		achievementsOverlay.classList.toggle("open");
+		if (opening) onOverlayOpened(); else onOverlayClosed();
 	};
 	achievementsStatEl.addEventListener("click", toggleAchievements);
 	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
@@ -2442,8 +2444,10 @@
 	};
 	const toggleLeaderboard = () => {
 		renderLeaderboardList();
-		if (!leaderboardOverlay.classList.contains("open")) closeOtherOverlays(leaderboardOverlay);
+		const opening = !leaderboardOverlay.classList.contains("open");
+		if (opening) closeOtherOverlays(leaderboardOverlay);
 		leaderboardOverlay.classList.toggle("open");
+		if (opening) onOverlayOpened(); else onOverlayClosed();
 	};
 	leaderboardBtn.addEventListener("click", toggleLeaderboard);
 	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
@@ -3388,9 +3392,33 @@
 			if (overlay !== keep) overlay.classList.remove("open");
 		}
 	};
+	// Opening Help/Achievements/Leaderboard used to leave the game fully running behind the
+	// modal (bounces, combos, hazard hits, timers), easy to miss on mobile where the toolbar
+	// is reachable mid-run. Auto-pause on open and auto-resume on close (via the existing
+	// countdown), but only when this flow did the pausing — a player who paused manually
+	// before opening an overlay shouldn't get auto-resumed out from under them.
+	let autoPausedForOverlay = false;
+	const anyOverlayOpen = () => [achievementsOverlay, leaderboardOverlay, helpOverlay].some(o => o.classList.contains("open"));
+	const onOverlayOpened = () => {
+		// A countdown's setTimeout chain keeps running even behind the modal and would
+		// otherwise resume gameplay out of sight once it finishes; cancel and hard-pause instead.
+		cancelResumeCountdown();
+		if (!paused) {
+			autoPausedForOverlay = true;
+			togglePause();
+		}
+	};
+	const onOverlayClosed = () => {
+		if (autoPausedForOverlay && !anyOverlayOpen()) {
+			autoPausedForOverlay = false;
+			if (paused) togglePause();
+		}
+	};
 	const toggleHelp = () => {
-		if (!helpOverlay.classList.contains("open")) closeOtherOverlays(helpOverlay);
+		const opening = !helpOverlay.classList.contains("open");
+		if (opening) closeOtherOverlays(helpOverlay);
 		helpOverlay.classList.toggle("open");
+		if (opening) onOverlayOpened(); else onOverlayClosed();
 	};
 	helpBtn.addEventListener("click", toggleHelp);
 	// Clicking the dimmed backdrop (but not the panel itself) closes the overlay.
@@ -3567,6 +3595,9 @@
 		// Ignore repeat presses (Space, button) while a resume countdown is already running.
 		if (countdownActive) return;
 		if (paused) {
+			// Don't let a stray Space press resume gameplay while a Help/Achievements/Leaderboard
+			// modal is still covering the canvas; closing the overlay already handles resuming.
+			if (anyOverlayOpen()) return;
 			startResumeCountdown();
 			return;
 		}
