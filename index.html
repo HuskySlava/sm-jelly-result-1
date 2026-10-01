@@ -157,6 +157,23 @@
 			display: none;
 		}
 
+		/* `display: contents` lets the toggles inside still participate directly in
+		   #controls' own flex-wrap/gap layout when expanded, instead of being laid
+		   out as one oversized child box; collapsed just removes them from flow so
+		   mobile players aren't greeted by 17 niche mode/effect buttons up front. */
+		#extra-controls.collapsed {
+			display: none;
+		}
+
+		#extra-controls:not(.collapsed) {
+			display: contents;
+		}
+
+		#more-btn.active {
+			background: rgba(0, 229, 255, 0.25);
+			border-color: rgba(0, 229, 255, 0.8);
+		}
+
 		/* The toolbar has 30+ buttons; at the desktop padding/font-size above they're
 		   only ~34px tall, well under the ~44px touch target Apple/WCAG recommend, so
 		   phones and tablets are prone to mis-taps on adjacent buttons. Widen targets
@@ -489,6 +506,8 @@
 		<label id="color-control" title="Custom jelly color">🎨 <input type="color" id="color-picker" value="#ffffff"></label>
 		<button id="color-reset-btn" title="Revert to random bounce colors">🎲 Random</button>
 		<button id="boost-btn" title="Boost (B)">Boost</button>
+		<button id="more-btn" title="Show/hide extra mode &amp; effect toggles" aria-expanded="false">More &#9662;</button>
+		<div id="extra-controls" class="collapsed">
 		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
 		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
 		<button id="magnet-btn" title="Magnet (L)">Magnet: Off</button>
@@ -506,6 +525,7 @@
 		<button id="hat-btn" title="Cosmetic headwear, cycles through a few silly hats">Hat: None</button>
 		<button id="confetti-btn" title="Confetti (J)">Confetti</button>
 		<button id="meteor-btn" title="Meteor shower (U)">Meteor Shower</button>
+		</div>
 		<button id="fullscreen-btn" title="Fullscreen (F)">Fullscreen</button>
 		<button id="snapshot-btn" title="Snapshot (P)">Snapshot</button>
 			<button id="copy-snapshot-btn" title="Copy snapshot image to clipboard">Copy Image</button>
@@ -3278,6 +3298,25 @@
 		document.body.classList.toggle("zen-mode", zenOn);
 		zenBtn.textContent = zenOn ? "Zen: On" : "Zen: Off";
 		zenBtn.classList.toggle("active", zenOn);
+	});
+
+	// Keeps the ~17 niche mode/effect toggles out of the way until a player asks for
+	// them, so the toolbar isn't a wall of buttons by default (especially on phones,
+	// where that wall used to run many rows deep before anything useful was visible).
+	const moreBtn = document.querySelector("#more-btn");
+	const extraControls = document.querySelector("#extra-controls");
+	let extraControlsOpen = localStorage.getItem("jelly-extra-controls-open") === "true";
+	const applyExtraControlsState = () => {
+		extraControls.classList.toggle("collapsed", !extraControlsOpen);
+		moreBtn.textContent = extraControlsOpen ? "Less ▴" : "More ▾";
+		moreBtn.classList.toggle("active", extraControlsOpen);
+		moreBtn.setAttribute("aria-expanded", String(extraControlsOpen));
+	};
+	applyExtraControlsState();
+	moreBtn.addEventListener("click", () => {
+		extraControlsOpen = !extraControlsOpen;
+		localStorage.setItem("jelly-extra-controls-open", extraControlsOpen);
+		applyExtraControlsState();
 	});
 
 	const helpBtn = document.querySelector("#help-btn");

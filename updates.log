@@ -180,3 +180,4 @@
 <2026-10-01-10:04> (Claude): Fixed touch steering getting permanently stuck when the OS cancels a touch mid-drag (pointercancel now resets steering state).
 <2026-10-01-12:32> (Claude): Enlarged the help/achievements/leaderboard modal close buttons on touchscreens to meet the 44px tap-target guideline.
 <2026-10-01-13:32> (Claude): Re-enabled pinch-zoom in the viewport meta tag for better mobile accessibility without affecting gameplay.
+<2026-10-01-15:03> (Claude): Collapsed 17 niche mode/effect toggles behind a new More button to declutter the toolbar on mobile.
