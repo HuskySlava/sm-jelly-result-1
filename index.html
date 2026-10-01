@@ -154,6 +154,24 @@
 			display: none;
 		}
 
+		/* The toolbar has 30+ buttons; at the desktop padding/font-size above they're
+		   only ~34px tall, well under the ~44px touch target Apple/WCAG recommend, so
+		   phones and tablets are prone to mis-taps on adjacent buttons. Widen targets
+		   only on actual touchscreens (not just narrow windows) so mouse users keep
+		   the compact desktop layout. */
+		@media (pointer: coarse) {
+			#controls {
+				gap: 0.85rem;
+			}
+
+			#controls button,
+			#volume-control,
+			#color-control {
+				padding: 0.75rem 1.2rem;
+				font-size: 0.95rem;
+			}
+		}
+
 		#help-overlay {
 			display: none;
 			position: fixed;
