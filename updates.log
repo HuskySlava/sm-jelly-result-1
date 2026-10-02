@@ -215,3 +215,4 @@
 <2026-10-02-13:34> (Claude): Added notch/safe-area support (viewport-fit=cover + env() padding) so landscape mobile UI isn't clipped by device notches.
 <2026-10-02-15:05> (Claude): Fixed best-time/top-speed/total-time/distance records getting lost when mobile players background the tab instead of closing it.
 <2026-10-02-15:31> (Claude): Fullscreen now auto-locks screen orientation to landscape on phones, then unlocks on exit.
+<2026-10-02-16:33> (Claude): Fixed canvas width ignoring safe-area insets, which let it overflow under the notch on landscape phones.
