@@ -1263,9 +1263,14 @@
 		localStorage.setItem("jelly-hazard-on", hazardOn);
 		hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
 		hazardBtn.classList.toggle("active", hazardOn);
-		lives = maxLives;
-		updateLivesStat();
-		if (hazardOn) spawnHazard();
+		// Only refill lives when (re-)starting a hazard run, not on every click —
+		// otherwise a player down to their last life could toggle hazard off and
+		// back on to freely reset to full lives, defeating the mode's whole point.
+		if (hazardOn) {
+			lives = maxLives;
+			updateLivesStat();
+			spawnHazard();
+		}
 	});
 
 	// Twin portals let players fling the jelly across the arena instead of only
