@@ -210,3 +210,4 @@
 2026-10-02-08:04 (Claude): Fixed next-goal stat to show the closest achievement by progress, not just the first locked one in the list.
 <2026-10-02-09:03> (Claude): Fixed combo-timer ring not scaling with the jelly during a hot streak, unlike every other buff ring.
 <2026-10-02-11:32> (Claude): Hazard now speeds up the longer a run survives, giving hazard mode real escalating danger.
+<2026-10-02-12:34> (Claude): Replaced the native Clear Stats confirm() popup with a custom-styled modal matching the game's other overlays.

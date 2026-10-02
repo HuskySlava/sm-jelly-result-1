@@ -494,6 +494,88 @@
 			margin: 0;
 		}
 
+		#confirm-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.75);
+			align-items: center;
+			justify-content: center;
+			z-index: 10;
+		}
+
+		#confirm-overlay.open {
+			display: flex;
+		}
+
+		#confirm-panel {
+			background: #111;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 12px;
+			padding: 1.5rem 2rem;
+			/* See #help-panel's matching comment: without this, content-box padding pushes
+			   the panel wider than narrow phone screens and clips it off-screen. */
+			box-sizing: border-box;
+			max-width: min(320px, calc(100vw - 2rem));
+			position: relative;
+		}
+
+		#confirm-panel h2 {
+			margin-top: 0;
+			font-size: 1.1rem;
+			padding-right: 1.8rem;
+		}
+
+		#confirm-panel p {
+			font-size: 0.9rem;
+			line-height: 1.5;
+			opacity: 0.85;
+		}
+
+		#confirm-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: 0.6rem;
+			margin-top: 1.2rem;
+		}
+
+		#confirm-actions button {
+			font-family: inherit;
+			font-size: 0.85rem;
+			color: #fff;
+			border-radius: 999px;
+			padding: 0.5rem 1.1rem;
+			cursor: pointer;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			background: rgba(255, 255, 255, 0.08);
+			transition: background 0.15s ease, border-color 0.15s ease;
+		}
+
+		#confirm-actions button:hover {
+			background: rgba(255, 255, 255, 0.18);
+			border-color: rgba(255, 255, 255, 0.4);
+		}
+
+		/* Marks the destructive action as visually distinct from Cancel, so a player
+		   scanning the two pill buttons doesn't have to read both labels to tell
+		   which one is safe to tap. */
+		#confirm-clear-btn {
+			background: rgba(255, 23, 68, 0.2);
+			border-color: rgba(255, 23, 68, 0.6);
+		}
+
+		#confirm-clear-btn:hover {
+			background: rgba(255, 23, 68, 0.35);
+			border-color: rgba(255, 23, 68, 0.8);
+		}
+
+		@media (pointer: coarse) {
+			#confirm-actions button {
+				padding: 0.75rem 1.2rem;
+				font-size: 0.95rem;
+			}
+		}
+
 		#achievements-stat {
 			cursor: pointer;
 		}
@@ -640,6 +722,17 @@
 		<button class="overlay-close" id="leaderboard-close" aria-label="Close">&times;</button>
 		<h2>Leaderboard — Top 5</h2>
 		<div id="leaderboard-list"></div>
+	</div>
+</div>
+<div id="confirm-overlay">
+	<div id="confirm-panel">
+		<button class="overlay-close" id="confirm-close" aria-label="Close">&times;</button>
+		<h2>Clear all saved data?</h2>
+		<p>Stats, records, achievements, and toggle preferences will all be wiped. This can't be undone.</p>
+		<div id="confirm-actions">
+			<button id="confirm-cancel-btn">Cancel</button>
+			<button id="confirm-clear-btn">Clear Everything</button>
+		</div>
 	</div>
 </div>
 <div id="help-overlay">
@@ -2710,8 +2803,23 @@
 	// undo that short of clearing browser storage by hand; this gives players an explicit,
 	// confirmed in-app way to wipe the slate and start their lifetime stats from zero.
 	const clearStatsBtn = document.querySelector("#clear-stats-btn");
-	clearStatsBtn.addEventListener("click", () => {
-		if (!confirm("Clear all saved data — stats, records, achievements, and toggle preferences? This can't be undone.")) return;
+	const confirmOverlay = document.querySelector("#confirm-overlay");
+	// A custom-styled modal (matching Help/Achievements/Leaderboard) instead of the
+	// browser's native confirm() dialog, which looked jarring next to this game's own
+	// UI and rendered as a tiny, inconsistently-styled system popup on mobile.
+	const toggleConfirmOverlay = () => {
+		const opening = !confirmOverlay.classList.contains("open");
+		if (opening) closeOtherOverlays(confirmOverlay);
+		confirmOverlay.classList.toggle("open");
+		if (opening) onOverlayOpened(); else onOverlayClosed();
+	};
+	clearStatsBtn.addEventListener("click", toggleConfirmOverlay);
+	confirmOverlay.addEventListener("click", (e) => {
+		if (e.target === confirmOverlay) toggleConfirmOverlay();
+	});
+	document.querySelector("#confirm-close").addEventListener("click", toggleConfirmOverlay);
+	document.querySelector("#confirm-cancel-btn").addEventListener("click", toggleConfirmOverlay);
+	document.querySelector("#confirm-clear-btn").addEventListener("click", () => {
 		localStorage.clear();
 		location.reload();
 	});
@@ -3635,11 +3743,11 @@
 
 	const helpBtn = document.querySelector("#help-btn");
 	const helpOverlay = document.querySelector("#help-overlay");
-	// The three overlay panels (achievements, leaderboard, help) all share the same fixed,
-	// centered positioning, so opening one while another is already up used to stack them
-	// silently on top of each other instead of ever showing just one at a time.
+	// The four overlay panels (achievements, leaderboard, help, confirm) all share the same
+	// fixed, centered positioning, so opening one while another is already up used to stack
+	// them silently on top of each other instead of ever showing just one at a time.
 	const closeOtherOverlays = (keep) => {
-		for (const overlay of [achievementsOverlay, leaderboardOverlay, helpOverlay]) {
+		for (const overlay of [achievementsOverlay, leaderboardOverlay, helpOverlay, confirmOverlay]) {
 			if (overlay !== keep) overlay.classList.remove("open");
 		}
 	};
@@ -3649,7 +3757,7 @@
 	// countdown), but only when this flow did the pausing — a player who paused manually
 	// before opening an overlay shouldn't get auto-resumed out from under them.
 	let autoPausedForOverlay = false;
-	const anyOverlayOpen = () => [achievementsOverlay, leaderboardOverlay, helpOverlay].some(o => o.classList.contains("open"));
+	const anyOverlayOpen = () => [achievementsOverlay, leaderboardOverlay, helpOverlay, confirmOverlay].some(o => o.classList.contains("open"));
 	const onOverlayOpened = () => {
 		// A countdown's setTimeout chain keeps running even behind the modal and would
 		// otherwise resume gameplay out of sight once it finishes; cancel and hard-pause instead.
@@ -3993,6 +4101,8 @@
 			toggleAchievements();
 		} else if (e.code === "Escape" && leaderboardOverlay.classList.contains("open")) {
 			toggleLeaderboard();
+		} else if (e.code === "Escape" && confirmOverlay.classList.contains("open")) {
+			toggleConfirmOverlay();
 		} else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
 			// Mirrors the Space-key button guard above: the volume slider (and any other
 			// input) natively uses arrow keys for its own purpose, so don't hijack them
