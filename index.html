@@ -2747,7 +2747,7 @@
 	// already clears the target unlocks immediately instead of showing a "10/10" bar on a
 	// badge that stays locked until they re-perform the feat live in a fresh run.
 	const ACHIEVEMENTS = [
-		{ id: "first-bounce", name: "First Bounce", check: () => bounces >= 1, progress: () => totalBounces, target: 1 },
+		{ id: "first-bounce", name: "First Bounce", check: () => totalBounces >= 1, progress: () => totalBounces, target: 1 },
 		{ id: "century", name: "Century Bouncer", check: () => totalBounces >= 100, progress: () => totalBounces, target: 100 },
 		{ id: "combo-10", name: "Combo Master", check: () => bestCombo >= 10, progress: () => bestCombo, target: 10 },
 		{ id: "corner-1", name: "Corner Cutter", check: () => bestCorners >= 1, progress: () => bestCorners, target: 1 },
