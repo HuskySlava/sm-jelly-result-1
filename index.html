@@ -894,7 +894,12 @@
 	const welcomeHintClose = document.querySelector("#welcome-hint-close");
 	const dismissWelcomeHint = () => {
 		localStorage.setItem("jelly-welcome-dismissed", "true");
-		welcomeHint.classList.add("hidden");
+		// Deferred a frame: collapsing the hint synchronously on the same pointerdown
+		// that first touches the canvas shifts the canvas upward in the layout *before*
+		// the steer handler (also listening on pointerdown, registered later) reads
+		// canvas.getBoundingClientRect() — so a new player's very first tap/drag would
+		// steer toward the wrong point, offset by the hint's height.
+		requestAnimationFrame(() => welcomeHint.classList.add("hidden"));
 	};
 	if (localStorage.getItem("jelly-welcome-dismissed") === "true") {
 		welcomeHint.classList.add("hidden");
