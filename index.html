@@ -2445,6 +2445,11 @@
 	const bestScoreEl = document.querySelector("#best-score");
 	let bestScore = Number(localStorage.getItem("jelly-best-score")) || 0;
 	bestScoreEl.textContent = `Best score: ${bestScore}`;
+	// Snapshot of the record this run needs to beat, mirroring previousBestTime/beatBestTimeThisRun:
+	// without a one-shot flag, score keeps climbing past the (constantly updated) bestScore on every
+	// single bounce/orb pickup for the rest of the run, spamming a confetti burst each time.
+	let previousBestScore = bestScore;
+	let beatBestScoreThisRun = false;
 	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2 + comboPoints;
 	// Mirrors the score into the tab title so it stays visible even when this
 	// tab isn't focused (e.g. playing while switching between windows).
@@ -2457,11 +2462,12 @@
 			bestScore = score;
 			localStorage.setItem("jelly-best-score", bestScore);
 			bestScoreEl.textContent = `Best score: ${bestScore}`;
-			// Guard against celebrating the trivial 0 > 0 case on a fresh reset. Every other
-			// "new best" moment (combo, corners, time, speed) pairs its popup with a matching
-			// particle burst; this one was popup-only, making the overall score record feel
-			// less celebrated than every stat that rolls up into it.
-			if (score > 0) {
+			// Only celebrate once per run (like the best-time record above), and only when there
+			// was an actual prior record to beat, so a brand-new player doesn't get "New Best
+			// Score!" on their very first bounce, and an in-progress record isn't re-celebrated
+			// with a fresh confetti burst on every subsequent bounce/orb pickup.
+			if (!beatBestScoreThisRun && previousBestScore > 0) {
+				beatBestScoreThisRun = true;
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ff5722");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 130, "New Best Score!", "#ff5722");
 				// The overall score record is the single biggest milestone in the game, so it
@@ -3709,6 +3715,8 @@
 		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
 		previousBestTime = bestTime;
 		beatBestTimeThisRun = false;
+		previousBestScore = bestScore;
+		beatBestScoreThisRun = false;
 		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		// clearRect wipes the stars along with the trail; redraw them immediately so a
