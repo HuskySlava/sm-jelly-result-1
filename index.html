@@ -1783,7 +1783,7 @@
 		if (remaining <= 0) return;
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
-		const radius = Math.max(jelly.w, jelly.h) * 0.9;
+		const radius = Math.max(jelly.w, jelly.h) * 0.9 * comboScale;
 		ctx.save();
 		ctx.strokeStyle = "#ff9100";
 		ctx.lineWidth = 3;
