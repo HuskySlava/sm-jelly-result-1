@@ -6,7 +6,7 @@
 		 small stats/button text; the canvas's own `touch-action: none` already stops gameplay
 		 touches from triggering browser zoom, so gameplay isn't affected. -->
 	<meta name="viewport"
-		  content="width=device-width, initial-scale=1.0">
+		  content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Canvas Jelly</title>
 	<link rel="icon" id="favicon" href="">
@@ -42,6 +42,13 @@
 			margin: 0;
 			justify-content: space-around;
 			align-items: center;
+			/* `viewport-fit=cover` above lets the page draw under notches/rounded corners
+			   (needed for the dvh fix above to reach the true screen edge), but without this
+			   padding that same change would let the toolbar and canvas edge sit right behind
+			   a notch/home-indicator — exactly where a landscape phone (the orientation this
+			   game nudges players toward) puts its notch, on the left/right edge. */
+			padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+			box-sizing: border-box;
 		}
 
 		#canvas-section {
@@ -203,7 +210,9 @@
 			align-items: center;
 			gap: 0.5rem;
 			position: fixed;
-			top: 0.6rem;
+			/* Fixed positioning sits outside the body's own safe-area padding above, so this
+			   needs its own offset or a notch/status bar could clip this hint on affected phones. */
+			top: calc(0.6rem + env(safe-area-inset-top));
 			left: 50%;
 			transform: translateX(-50%);
 			max-width: 90vw;
