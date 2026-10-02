@@ -89,6 +89,12 @@
 			   the body padding already accounts for. */
 			max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
 			max-height: 80vh;
+			/* Same chrome-collapsed-vs-visible-viewport mismatch the body's min-height
+			   fix above addresses: on a fresh mobile load (toolbar still showing), a
+			   plain 80vh renders against the taller, chrome-collapsed viewport and can
+			   push the stats/controls below the fold. dvh tracks the real visible
+			   viewport; the vh line above remains as a fallback for older browsers. */
+			max-height: 80dvh;
 			width: auto;
 			height: auto;
 			cursor: crosshair;
@@ -348,6 +354,11 @@
 			box-sizing: border-box;
 			max-width: min(320px, calc(100vw - 2rem));
 			max-height: 85vh;
+			/* Same chrome-collapsed-vs-visible-viewport mismatch as the canvas's own
+			   max-height fix above: dvh tracks the real visible viewport on mobile so
+			   the panel doesn't overshoot it on a fresh load. The vh line above stays
+			   as a fallback for browsers without dvh support. */
+			max-height: 85dvh;
 			overflow-y: auto;
 			position: relative;
 		}
@@ -446,6 +457,9 @@
 			box-sizing: border-box;
 			max-width: min(320px, calc(100vw - 2rem));
 			max-height: 85vh;
+			/* See #help-panel's matching comment: dvh tracks the real visible mobile
+			   viewport instead of overshooting it on a fresh load. */
+			max-height: 85dvh;
 			overflow-y: auto;
 			position: relative;
 		}
@@ -518,6 +532,9 @@
 			box-sizing: border-box;
 			max-width: min(320px, calc(100vw - 2rem));
 			max-height: 85vh;
+			/* See #help-panel's matching comment: dvh tracks the real visible mobile
+			   viewport instead of overshooting it on a fresh load. */
+			max-height: 85dvh;
 			overflow-y: auto;
 			position: relative;
 		}
