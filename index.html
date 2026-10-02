@@ -1198,6 +1198,11 @@
 	// the combo every single frame, mirroring the combo/orb-streak windows above.
 	let lastHazardHitElapsed = -Infinity;
 	const hazardHitCooldown = 1;
+	// resetBtn's handler wipes the popups array (and runs synchronously, before this
+	// frame ever paints), so a "💀 Game Over!" popup spawned right before resetBtn.click()
+	// would be destroyed before the player ever saw it. This flag lets resetBtn fold the
+	// game-over callout into the recap message it spawns afterward instead.
+	let pendingGameOverMessage = false;
 	const checkHazardCollision = () => {
 		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
 		const cx = jelly.x + jelly.w / 2;
@@ -1225,8 +1230,10 @@
 			updateLivesStat();
 			if (lives <= 0) {
 				// Out of lives: this is the run's actual end, not just another penalty, so
-				// it gets its own callout instead of the usual "Hazard!" bounce-penalty text.
-				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "💀 Game Over!", "#ff1744");
+				// it gets its own callout. resetBtn.click() below wipes popups before this
+				// frame ever paints, so the message is deferred into its recap popup instead
+				// of being spawned (and instantly destroyed) here.
+				pendingGameOverMessage = true;
 				resetBtn.click();
 			} else {
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Hazard!", "#ff1744");
@@ -3670,9 +3677,15 @@
 		// looking identical to a zero-score one. This closes the loop with a quick recap.
 		if (runResult) {
 			const { score, rank } = runResult;
-			const text = rank ? `Run saved: ${score} pts (#${rank}!)` : `Run saved: ${score} pts`;
+			const prefix = pendingGameOverMessage ? "💀 Game Over! " : "";
+			const text = rank ? `${prefix}Run saved: ${score} pts (#${rank}!)` : `${prefix}Run saved: ${score} pts`;
 			spawnPopup(canvas.width / 2, canvas.height / 2 - 60, text, rank === 1 ? "#ffd700" : "#fff");
+		} else if (pendingGameOverMessage) {
+			// A 0-score run still ended in death and deserves to say so, even though it
+			// has nothing to record on the leaderboard.
+			spawnPopup(canvas.width / 2, canvas.height / 2 - 60, "💀 Game Over!", "#ff1744");
 		}
+		pendingGameOverMessage = false;
 	});
 
 	const drawPauseOverlay = () => {

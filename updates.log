@@ -198,3 +198,4 @@
 2026-10-01-22:31 (Claude): Share button now uses the native mobile share sheet (navigator.share) instead of only copying stats to clipboard.
 2026-10-01-23:33 (Claude): Fixed leaderboard rank being wrong or falsely awarded when a new run tied an existing score.
 <2026-10-02-00:35> (Claude): Fixed orbs respawning on top of the jelly for a free chain pickup by adding the same jelly-distance guard spawnHazard uses.
+<2026-10-02-01:32> (Claude): Fixed Game Over message vanishing instantly on death by folding it into the run-saved recap popup.
