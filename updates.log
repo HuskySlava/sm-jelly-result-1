@@ -217,3 +217,4 @@
 <2026-10-02-15:31> (Claude): Fullscreen now auto-locks screen orientation to landscape on phones, then unlocks on exit.
 <2026-10-02-16:33> (Claude): Fixed canvas width ignoring safe-area insets, which let it overflow under the notch on landscape phones.
 <2026-10-02-17:05> (Claude): Fixed Combo/Corner/Orb/Survivor achievements staying locked forever for returning players whose saved best stat already met the goal.
+<2026-10-02-18:02> (Claude): Fixed the orb-streak achievement checking live streak instead of persisted best, leaving it unfairly locked for returning players.
