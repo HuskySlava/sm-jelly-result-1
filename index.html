@@ -2570,7 +2570,10 @@
 	// rather than just a toy that happens to track stats.
 	const nextGoalStatEl = document.querySelector("#next-goal-stat");
 	const updateNextGoalStat = () => {
-		const next = ACHIEVEMENTS.find(a => !unlockedAchievements.has(a.id));
+		// Ranks by completion ratio (not declaration order) so this reflects the
+		// achievement the player is actually nearest to earning, as the tooltip promises.
+		const locked = ACHIEVEMENTS.filter(a => !unlockedAchievements.has(a.id));
+		const next = locked.sort((a, b) => (b.progress() / b.target) - (a.progress() / a.target))[0];
 		if (!next) {
 			nextGoalStatEl.textContent = "🎯 All goals earned!";
 			return;
