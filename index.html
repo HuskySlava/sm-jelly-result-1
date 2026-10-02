@@ -3647,6 +3647,17 @@
 	});
 	document.addEventListener("fullscreenchange", () => {
 		fullscreenBtn.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Fullscreen";
+		// Phones get the most out of fullscreen in landscape (see the rotate-hint banner
+		// above), so lock orientation there automatically instead of making players take
+		// a second manual rotation step right after they just tapped Fullscreen. Desktop
+		// browsers and ones without the Orientation Lock API simply no-op.
+		if (document.fullscreenElement) {
+			if (screen.orientation && screen.orientation.lock) {
+				screen.orientation.lock("landscape").catch(() => {});
+			}
+		} else if (screen.orientation && screen.orientation.unlock) {
+			screen.orientation.unlock();
+		}
 	});
 
 	// Percussive double-click (vs. every other cue's single tone) mimics a camera shutter.
