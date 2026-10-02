@@ -1262,15 +1262,24 @@
 			lives--;
 			updateLivesStat();
 			if (lives <= 0) {
-				// Out of lives: this is the run's actual end, not just another penalty, so
-				// it gets its own callout. resetBtn.click() below wipes popups, particles and
-				// shakeMagnitude before this frame ever paints, so both the message and the
-				// hit's own particle burst/shake are deferred until after it runs instead of
-				// being spawned (and instantly destroyed) before it.
-				pendingGameOverMessage = true;
-				resetBtn.click();
+				// Out of lives: freeze on this exact frame (explosion + "GAME OVER" banner
+				// right where the jelly died) for a beat instead of instantly teleporting
+				// back to center, so losing your last life actually reads as an event. The
+				// reset (which wipes popups/particles/shakeMagnitude) is deferred until the
+				// freeze plays out.
 				spawnParticles(hazardHitX, hazardHitY, "#ff1744");
 				if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
+				paused = true;
+				gameOverFreezeActive = true;
+				pauseBtn.disabled = true;
+				drawGameOverOverlay();
+				setTimeout(() => {
+					gameOverFreezeActive = false;
+					pauseBtn.disabled = false;
+					paused = false;
+					pendingGameOverMessage = true;
+					resetBtn.click();
+				}, 1100);
 			} else {
 				spawnParticles(hazardHitX, hazardHitY, "#ff1744");
 				if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
@@ -3671,6 +3680,10 @@
 
 	const resetBtn = document.querySelector("#reset-btn");
 	resetBtn.addEventListener("click", () => {
+		// Let the game-over freeze-frame's own deferred reset (see checkHazardCollision)
+		// be the only thing that ends it; a manual Reset press mid-freeze would otherwise
+		// double-record/reset the run and leave `paused`/`gameOverFreezeActive` stuck true.
+		if (gameOverFreezeActive) return;
 		cancelResumeCountdown();
 		const runResult = recordRunForLeaderboard();
 		jelly.x = Math.floor(canvas.width / 2);
@@ -3780,7 +3793,35 @@
 		ctx.restore();
 	}
 
+	// Renders one frozen frame of the exact moment the jelly ran out of lives (full
+	// scene + its death particle burst, already spawned by the caller) under a red
+	// "GAME OVER" banner, instead of the old instant teleport back to center.
+	const drawGameOverOverlay = () => {
+		const time = performance.now() / 1000;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		drawNebula(time);
+		drawStars(time);
+		drawOrb(time);
+		if (hazardOn) drawHazard(time);
+		drawJelly();
+		drawParticles();
+		ctx.save();
+		ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.fillStyle = "#ff1744";
+		ctx.font = "bold 52px 'Roboto', sans-serif";
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText("💀 GAME OVER", canvas.width / 2, canvas.height / 2);
+		ctx.restore();
+	};
+
 	let paused = false;
+	// Blocks pause/resume toggling and manual resets while the game-over freeze-frame
+	// above is on screen, mirroring how `countdownActive` already blocks them during
+	// the resume countdown — the deferred resetBtn.click() it schedules must be the
+	// only thing that ends this state.
+	let gameOverFreezeActive = false;
 	const pauseBtn = document.querySelector("#pause-btn");
 	// Resuming used to drop the player straight back into full-speed physics, which
 	// felt jarring (and unfair near a hazard/wall). A brief on-canvas countdown gives
@@ -3847,6 +3888,9 @@
 	const togglePause = () => {
 		// Ignore repeat presses (Space, button) while a resume countdown is already running.
 		if (countdownActive) return;
+		// Same for the game-over freeze-frame: it manages its own paused/resume
+		// transition on a timer, so a stray Space press here must not jump in early.
+		if (gameOverFreezeActive) return;
 		if (paused) {
 			// Don't let a stray Space press resume gameplay while a Help/Achievements/Leaderboard
 			// modal is still covering the canvas; closing the overlay already handles resuming.
