@@ -211,3 +211,4 @@
 <2026-10-02-09:03> (Claude): Fixed combo-timer ring not scaling with the jelly during a hot streak, unlike every other buff ring.
 <2026-10-02-11:32> (Claude): Hazard now speeds up the longer a run survives, giving hazard mode real escalating danger.
 <2026-10-02-12:34> (Claude): Replaced the native Clear Stats confirm() popup with a custom-styled modal matching the game's other overlays.
+<2026-10-02-13:04> (Claude): Added a one-time dismissible welcome banner explaining how to steer and pointing new players to Help.
