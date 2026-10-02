@@ -28,6 +28,12 @@
 		body {
 			display: flex;
 			min-height: 100vh;
+			/* Mobile browsers size 100vh against the viewport with the address/toolbar
+			   chrome collapsed, so the page is taller than what's actually visible and
+			   the bottom controls end up requiring a scroll to reach. `dvh` tracks the
+			   real, currently-visible viewport instead; older browsers ignore this line
+			   and keep the 100vh fallback above. */
+			min-height: 100dvh;
 			margin: 0;
 			justify-content: space-around;
 			align-items: center;
