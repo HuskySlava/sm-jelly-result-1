@@ -1443,9 +1443,19 @@
 				setTimeout(() => {
 					gameOverFreezeActive = false;
 					pauseBtn.disabled = false;
-					paused = false;
 					pendingGameOverMessage = true;
 					resetBtn.click();
+					// A Help/Achievements/Leaderboard modal opened during the freeze doesn't
+					// disable this timer, so force-unpausing here unconditionally used to resume
+					// gameplay behind an open overlay — exactly what the auto-pause-on-open
+					// feature elsewhere exists to prevent. Defer to its own resume-on-close path
+					// instead of fighting it.
+					if (anyOverlayOpen()) {
+						autoPausedForOverlay = true;
+						paused = true;
+					} else {
+						paused = false;
+					}
 				}, 1100);
 			} else {
 				spawnParticles(hazardHitX, hazardHitY, "#ff1744");
