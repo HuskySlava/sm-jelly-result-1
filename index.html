@@ -1134,7 +1134,7 @@
 	// costing a life, giving the run an actual way to end instead of running forever.
 	const hazardBtn = document.querySelector("#hazard-btn");
 	let hazardOn = localStorage.getItem("jelly-hazard-on") === "true";
-	const hazard = { x: 0, y: 0, vx: 0, vy: 0, radius: 12 };
+	const hazard = { x: 0, y: 0, vx: 0, vy: 0, radius: 12, baseSpeed: 80 };
 
 	// Hazard mode's stakes: each unshielded hit costs a life; hitting zero ends the
 	// run (saving it to the leaderboard) instead of letting hazard hits be purely
@@ -1163,11 +1163,19 @@
 			attempts++;
 		} while (Math.hypot(hazard.x - jelly.x, hazard.y - jelly.y) < minDistFromJelly && attempts < 20);
 		const angle = Math.random() * Math.PI * 2;
-		const speed = 80 + Math.random() * 60;
-		hazard.vx = Math.cos(angle) * speed;
-		hazard.vy = Math.sin(angle) * speed;
+		hazard.baseSpeed = 80 + Math.random() * 60;
+		hazard.vx = Math.cos(angle) * hazard.baseSpeed;
+		hazard.vy = Math.sin(angle) * hazard.baseSpeed;
 	};
 	const updateHazard = (dt) => {
+		// Ramp the hazard's speed up the longer a run survives, so hazard mode is an
+		// escalating challenge (rewarding the Survivor/Marathoner achievements with real
+		// rising danger) instead of a flat, unchanging threat for the whole run.
+		const speedMultiplier = Math.min(1 + elapsedTime / 40, 2.5);
+		const angle = Math.atan2(hazard.vy, hazard.vx);
+		const speed = hazard.baseSpeed * speedMultiplier;
+		hazard.vx = Math.cos(angle) * speed;
+		hazard.vy = Math.sin(angle) * speed;
 		hazard.x += hazard.vx * dt;
 		hazard.y += hazard.vy * dt;
 		const maxX = canvas.width - hazard.radius;
