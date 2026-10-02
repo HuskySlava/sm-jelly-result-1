@@ -3948,10 +3948,10 @@
 		comboStatEl.textContent = `Combo: x${combo}`;
 		lastInteractionElapsed = 0;
 		nextZzzElapsed = Infinity;
-		updateScoreStat();
-		updateMood();
 		elapsedTime = 0;
 		timeStatEl.textContent = `Time: ${elapsedTime.toFixed(1)}s`;
+		updateScoreStat();
+		updateMood();
 		previousBestTime = bestTime;
 		beatBestTimeThisRun = false;
 		previousBestScore = bestScore;
