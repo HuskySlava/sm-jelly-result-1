@@ -1932,12 +1932,18 @@
 		// pickup) since nothing here previously checked against either.
 		const minDistFromHazard = 70;
 		const minDistFromPortal = 50;
+		// Also mirrors spawnHazard's own jelly-distance guard: without this, a freshly
+		// collected orb could respawn right under the jelly (checkOrbCollision calls
+		// spawnOrb and re-checks collision on the very next frame), granting a free,
+		// skill-less chain pickup instead of requiring the player to travel to it.
+		const minDistFromJelly = 90;
 		let attempts = 0;
 		do {
 			orb.x = margin + Math.random() * (canvas.width - margin * 2);
 			orb.y = margin + Math.random() * (canvas.height - margin * 2);
 			attempts++;
 		} while (attempts < 20 && (
+			Math.hypot(orb.x - jelly.x, orb.y - jelly.y) < minDistFromJelly ||
 			(hazardOn && Math.hypot(orb.x - hazard.x, orb.y - hazard.y) < minDistFromHazard) ||
 			(portalOn && (Math.hypot(orb.x - portalA.x, orb.y - portalA.y) < minDistFromPortal || Math.hypot(orb.x - portalB.x, orb.y - portalB.y) < minDistFromPortal))
 		));
