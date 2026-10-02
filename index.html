@@ -539,6 +539,7 @@
 	</div>
 	<div id="stats-panel">
 		<p id="mood-stat">🙂 Chillin'</p>
+		<p id="lives-stat" title="Hazard mode only: run ends when this hits zero">Lives: ❤️❤️❤️</p>
 		<p id="age-stat">Age: 0 days</p>
 		<p id="bounce-counter">Bounces: 0</p>
 		<p id="corner-stat">Corners: 0</p>
@@ -1104,10 +1105,26 @@
 	});
 
 	// Risk mode for players who want more than passive wall-bouncing: a roaming
-	// hazard orb that punishes contact by resetting the current combo streak.
+	// hazard orb that punishes contact by resetting the current combo streak and
+	// costing a life, giving the run an actual way to end instead of running forever.
 	const hazardBtn = document.querySelector("#hazard-btn");
 	let hazardOn = localStorage.getItem("jelly-hazard-on") === "true";
 	const hazard = { x: 0, y: 0, vx: 0, vy: 0, radius: 12 };
+
+	// Hazard mode's stakes: each unshielded hit costs a life; hitting zero ends the
+	// run (saving it to the leaderboard) instead of letting hazard hits be purely
+	// cosmetic forever. Irrelevant (and hidden as infinite) while hazard mode is off.
+	const maxLives = 3;
+	let lives = maxLives;
+	const livesStatEl = document.querySelector("#lives-stat");
+	const updateLivesStat = () => {
+		if (!hazardOn) {
+			livesStatEl.textContent = "Lives: ∞";
+			return;
+		}
+		livesStatEl.textContent = `Lives: ${"❤️".repeat(Math.max(lives, 0))}${"🖤".repeat(Math.max(maxLives - lives, 0))}`;
+	};
+	updateLivesStat();
 	const spawnHazard = () => {
 		const margin = 60;
 		// Keep the hazard clear of the jelly's spawn/reset point (canvas center) so
@@ -1203,8 +1220,17 @@
 			// Sharper, longer buzz than a bounce so a hazard hit is felt as a penalty, not progress.
 			if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
 			spawnParticles(hazard.x, hazard.y, "#ff1744");
-			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Hazard!", "#ff1744");
 			if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
+			lives--;
+			updateLivesStat();
+			if (lives <= 0) {
+				// Out of lives: this is the run's actual end, not just another penalty, so
+				// it gets its own callout instead of the usual "Hazard!" bounce-penalty text.
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "💀 Game Over!", "#ff1744");
+				resetBtn.click();
+			} else {
+				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Hazard!", "#ff1744");
+			}
 		}
 	};
 	hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
@@ -1215,6 +1241,8 @@
 		localStorage.setItem("jelly-hazard-on", hazardOn);
 		hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
 		hazardBtn.classList.toggle("active", hazardOn);
+		lives = maxLives;
+		updateLivesStat();
 		if (hazardOn) spawnHazard();
 	});
 
@@ -3611,6 +3639,8 @@
 		spawnOrb();
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
+		lives = maxLives;
+		updateLivesStat();
 		if (portalOn) spawnPortals();
 		lastPortalElapsed = -Infinity;
 		combo = 0;
