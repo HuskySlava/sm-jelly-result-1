@@ -1261,13 +1261,24 @@
 	const portalB = { x: 0, y: 0, radius: 14, color: "#d500f9" };
 	const spawnPortals = () => {
 		const margin = 80;
-		portalA.x = margin + Math.random() * (canvas.width - margin * 2);
-		portalA.y = margin + Math.random() * (canvas.height - margin * 2);
+		// Mirrors spawnHazard/spawnOrb's jelly-proximity guard: without it, a portal could
+		// land within collision range of the jelly's canvas-center reset position, instantly
+		// and involuntarily warping it the moment Portals mode is toggled on or a run resets.
+		const minDistFromJelly = 150;
+		let attemptsA = 0;
+		do {
+			portalA.x = margin + Math.random() * (canvas.width - margin * 2);
+			portalA.y = margin + Math.random() * (canvas.height - margin * 2);
+			attemptsA++;
+		} while (Math.hypot(portalA.x - jelly.x, portalA.y - jelly.y) < minDistFromJelly && attemptsA < 20);
 		// Keep them far apart, otherwise a same-spot pair would make teleporting pointless.
+		let attemptsB = 0;
 		do {
 			portalB.x = margin + Math.random() * (canvas.width - margin * 2);
 			portalB.y = margin + Math.random() * (canvas.height - margin * 2);
-		} while (Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4);
+			attemptsB++;
+		} while ((Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4
+			|| Math.hypot(portalB.x - jelly.x, portalB.y - jelly.y) < minDistFromJelly) && attemptsB < 20);
 	};
 	const drawPortals = (time) => {
 		for (const portal of [portalA, portalB]) {
