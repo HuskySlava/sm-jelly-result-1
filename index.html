@@ -1397,7 +1397,13 @@
 	// Lets motion-sensitive players disable the camera-shake impact effect
 	// without losing the other bounce feedback (particles, rings, sound).
 	const shakeBtn = document.querySelector("#shake-btn");
-	let shakeOn = localStorage.getItem("jelly-shake-on") !== "false";
+	// Honor the OS-level reduced-motion setting as the *default* for players who've
+	// never touched this toggle, instead of always opting new visitors into shake
+	// regardless of an accessibility preference they already set system-wide. An
+	// explicit stored choice (on OR off) still always wins over the OS preference.
+	const storedShakePref = localStorage.getItem("jelly-shake-on");
+	const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	let shakeOn = storedShakePref !== null ? storedShakePref !== "false" : !prefersReducedMotion;
 	shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
 	shakeBtn.classList.toggle("active", shakeOn);
 	shakeBtn.addEventListener("click", () => {
