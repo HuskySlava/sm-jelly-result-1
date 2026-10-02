@@ -206,3 +206,4 @@
 <2026-10-02-05:05> (Claude): Fixed Hazard mode lives exploit where toggling it off then on refilled lives for free.
 <2026-10-02-06:03> (Claude): Suppressed mobile tap-highlight/long-press callout on canvas and buttons so only the game's own touch feedback shows.
 <2026-10-02-06:33> (Claude): Fixed score-record confetti spamming every bounce/orb pickup for the rest of a run instead of celebrating once.
+<2026-10-02-07:35> (Claude): Fixed a fatal hazard hit losing its particle burst and screen shake to the same-frame reset.

@@ -1249,18 +1249,23 @@
 			playHazardSound();
 			// Sharper, longer buzz than a bounce so a hazard hit is felt as a penalty, not progress.
 			if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
-			spawnParticles(hazard.x, hazard.y, "#ff1744");
-			if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
+			// Captured before a possible resetBtn.click() below respawns the hazard elsewhere.
+			const hazardHitX = hazard.x, hazardHitY = hazard.y;
 			lives--;
 			updateLivesStat();
 			if (lives <= 0) {
 				// Out of lives: this is the run's actual end, not just another penalty, so
-				// it gets its own callout. resetBtn.click() below wipes popups before this
-				// frame ever paints, so the message is deferred into its recap popup instead
-				// of being spawned (and instantly destroyed) here.
+				// it gets its own callout. resetBtn.click() below wipes popups, particles and
+				// shakeMagnitude before this frame ever paints, so both the message and the
+				// hit's own particle burst/shake are deferred until after it runs instead of
+				// being spawned (and instantly destroyed) before it.
 				pendingGameOverMessage = true;
 				resetBtn.click();
+				spawnParticles(hazardHitX, hazardHitY, "#ff1744");
+				if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
 			} else {
+				spawnParticles(hazardHitX, hazardHitY, "#ff1744");
+				if (shakeOn) shakeMagnitude = Math.min(shakeMagnitude + 8, 14);
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Hazard!", "#ff1744");
 			}
 		}
