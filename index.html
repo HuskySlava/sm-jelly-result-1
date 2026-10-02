@@ -2714,22 +2714,24 @@
 	// one's special" the way a one-time gold popup does. Unlocks persist across resets
 	// and reloads, like the other "best"/"total" stats above.
 	const achievementsStatEl = document.querySelector("#achievements-stat");
-	// progress/target use each achievement's persisted "best"/"total" counterpart (not the
-	// live, resettable stat the check itself watches), so the locked progress bar climbs
-	// monotonically instead of jumping back to 0 on the next Reset.
+	// check() and progress() both read the same persisted "best"/"total" counterpart (never
+	// the live, resettable per-run stat) so the locked progress bar climbs monotonically
+	// instead of resetting on the next Reset, and so a returning player whose saved best
+	// already clears the target unlocks immediately instead of showing a "10/10" bar on a
+	// badge that stays locked until they re-perform the feat live in a fresh run.
 	const ACHIEVEMENTS = [
 		{ id: "first-bounce", name: "First Bounce", check: () => bounces >= 1, progress: () => totalBounces, target: 1 },
 		{ id: "century", name: "Century Bouncer", check: () => totalBounces >= 100, progress: () => totalBounces, target: 100 },
-		{ id: "combo-10", name: "Combo Master", check: () => combo >= 10, progress: () => bestCombo, target: 10 },
-		{ id: "corner-1", name: "Corner Cutter", check: () => cornerBounces >= 1, progress: () => bestCorners, target: 1 },
-		{ id: "corner-10", name: "Corner Legend", check: () => cornerBounces >= 10, progress: () => bestCorners, target: 10 },
-		{ id: "orb-10", name: "Orb Hunter", check: () => orbsCollected >= 10, progress: () => bestOrbs, target: 10 },
+		{ id: "combo-10", name: "Combo Master", check: () => bestCombo >= 10, progress: () => bestCombo, target: 10 },
+		{ id: "corner-1", name: "Corner Cutter", check: () => bestCorners >= 1, progress: () => bestCorners, target: 1 },
+		{ id: "corner-10", name: "Corner Legend", check: () => bestCorners >= 10, progress: () => bestCorners, target: 10 },
+		{ id: "orb-10", name: "Orb Hunter", check: () => bestOrbs >= 10, progress: () => bestOrbs, target: 10 },
 		{ id: "orb-streak-5", name: "In The Zone", check: () => orbStreak >= 5, progress: () => bestOrbStreak, target: 5 },
-		{ id: "survivor-60", name: "Survivor", check: () => elapsedTime >= 60, progress: () => bestTime, target: 60 },
+		{ id: "survivor-60", name: "Survivor", check: () => bestTime >= 60, progress: () => bestTime, target: 60 },
 		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed, progress: () => topSpeed, target: maxSpeed },
 		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50, progress: () => totalOrbs, target: 50 },
 		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10, progress: () => portalUses, target: 10 },
-		{ id: "survivor-300", name: "Marathoner", check: () => elapsedTime >= 300, progress: () => bestTime, target: 300 }
+		{ id: "survivor-300", name: "Marathoner", check: () => bestTime >= 300, progress: () => bestTime, target: 300 }
 	];
 	// A triumphant ascending three-note chime marks an achievement unlock; every other
 	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
