@@ -219,3 +219,4 @@
 <2026-10-02-17:05> (Claude): Fixed Combo/Corner/Orb/Survivor achievements staying locked forever for returning players whose saved best stat already met the goal.
 <2026-10-02-18:02> (Claude): Fixed the orb-streak achievement checking live streak instead of persisted best, leaving it unfairly locked for returning players.
 <2026-10-02-19:04> (Claude): Fixed a bug where dying in hazard mode could resume gameplay hidden behind an open Help/Achievements/Leaderboard modal.
+<2026-10-02-20:35> (Claude): Fixed the Grow orb pushing the jelly partly off-canvas when it resized while touching a wall.

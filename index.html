@@ -3177,6 +3177,15 @@
 		// it regrows) instead of resizing in place around a fixed center.
 		jelly.x -= (jelly.w - prevW) / 2;
 		jelly.y -= (jelly.h - prevH) / 2;
+		// Growing in place while already flush against a wall pushes the far edge past
+		// the canvas boundary (the center-preserving shift above has no idea where the
+		// walls are); re-clamp so a Grow orb picked up mid-bounce can't render the jelly
+		// partly off-canvas. Skipped during ghost mode, which intentionally allows the
+		// jelly off-screen while it wraps around.
+		if (ghostTimeRemaining <= 0) {
+			jelly.x = Math.min(Math.max(jelly.x, 0), canvas.width - jelly.w);
+			jelly.y = Math.min(Math.max(jelly.y, 0), canvas.height - jelly.h);
+		}
 		// Cap the growth so a long combo makes the jelly noticeably chunkier without
 		// ever letting it swell large enough to dominate the arena.
 		const targetComboScale = 1 + Math.min(combo, 15) * 0.025;
