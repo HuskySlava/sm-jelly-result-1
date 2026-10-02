@@ -200,3 +200,4 @@
 <2026-10-02-00:35> (Claude): Fixed orbs respawning on top of the jelly for a free chain pickup by adding the same jelly-distance guard spawnHazard uses.
 <2026-10-02-01:32> (Claude): Fixed Game Over message vanishing instantly on death by folding it into the run-saved recap popup.
 <2026-10-02-02:03> (Claude): Fixed portal spawn to not land on the jelly instantly, matching hazard/orb spawn guards.
+<2026-10-02-02:33> (Claude): Fixed modal panels (Help/Achievements/Leaderboard) overflowing and clipping off-screen on narrow phones.

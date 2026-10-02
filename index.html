@@ -271,9 +271,12 @@
 			border: 1px solid rgba(255, 255, 255, 0.2);
 			border-radius: 12px;
 			padding: 1.5rem 2rem;
-			max-width: 320px;
-			/* The shortcut list is long enough to exceed short viewports (e.g. mobile
-			   landscape); without this the overlay clips it with no way to scroll. */
+			/* box-sizing + the calc() cap keep padding from pushing the panel wider than
+			   narrow phone screens (320-375px); content-box's default add-on-top padding
+			   used to push the true width past 380px, clipping the panel and its close
+			   button off the edges of the viewport. */
+			box-sizing: border-box;
+			max-width: min(320px, calc(100vw - 2rem));
 			max-height: 85vh;
 			overflow-y: auto;
 			position: relative;
@@ -368,7 +371,10 @@
 			border: 1px solid rgba(255, 255, 255, 0.2);
 			border-radius: 12px;
 			padding: 1.5rem 2rem;
-			max-width: 320px;
+			/* See #help-panel's matching comment: without this, content-box padding pushes
+			   the panel wider than narrow phone screens and clips it off-screen. */
+			box-sizing: border-box;
+			max-width: min(320px, calc(100vw - 2rem));
 			max-height: 85vh;
 			overflow-y: auto;
 			position: relative;
@@ -437,7 +443,10 @@
 			border: 1px solid rgba(255, 255, 255, 0.2);
 			border-radius: 12px;
 			padding: 1.5rem 2rem;
-			max-width: 320px;
+			/* See #help-panel's matching comment: without this, content-box padding pushes
+			   the panel wider than narrow phone screens and clips it off-screen. */
+			box-sizing: border-box;
+			max-width: min(320px, calc(100vw - 2rem));
 			max-height: 85vh;
 			overflow-y: auto;
 			position: relative;
