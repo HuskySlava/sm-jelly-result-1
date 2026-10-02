@@ -213,3 +213,4 @@
 <2026-10-02-12:34> (Claude): Replaced the native Clear Stats confirm() popup with a custom-styled modal matching the game's other overlays.
 <2026-10-02-13:04> (Claude): Added a one-time dismissible welcome banner explaining how to steer and pointing new players to Help.
 <2026-10-02-13:34> (Claude): Added notch/safe-area support (viewport-fit=cover + env() padding) so landscape mobile UI isn't clipped by device notches.
+<2026-10-02-15:05> (Claude): Fixed best-time/top-speed/total-time/distance records getting lost when mobile players background the tab instead of closing it.

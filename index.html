@@ -2140,12 +2140,17 @@
 	let totalDistance = Number(localStorage.getItem("jelly-total-distance")) || 0;
 	distanceStatEl.textContent = `Distance: ${Math.round(totalDistance).toLocaleString()} px`;
 	let lastDistanceSaveTime = -Infinity;
-	window.addEventListener("beforeunload", () => {
+	// Factored out so the visibilitychange handler below can flush these same throttled
+	// writes: `beforeunload` alone is unreliable on mobile, where backgrounding/swiping
+	// away a tab (the normal way mobile players "leave") often fires only `visibilitychange`,
+	// silently losing up to a throttle-window's worth of best-stat progress otherwise.
+	const flushThrottledStats = () => {
 		localStorage.setItem("jelly-best-time", bestTime);
 		localStorage.setItem("jelly-top-speed", topSpeed);
 		localStorage.setItem("jelly-total-time", totalPlayTime);
 		localStorage.setItem("jelly-total-distance", totalDistance);
-	});
+	};
+	window.addEventListener("beforeunload", flushThrottledStats);
 
 	// A glowing collectible orb spawns at a random spot; steering the jelly onto it
 	// scores a bonus distinct from the wall-bounce combo, giving players a second
@@ -4089,6 +4094,7 @@
 	// vanish and hazard hits could register while the player wasn't even watching.
 	document.addEventListener("visibilitychange", () => {
 		if (!document.hidden) return;
+		flushThrottledStats();
 		// A countdown leaves `paused` true for its whole duration (by design, to block
 		// input), but its setTimeout chain keeps ticking in a backgrounded tab and its
 		// final step unconditionally resumes — so without this branch, tabbing away
