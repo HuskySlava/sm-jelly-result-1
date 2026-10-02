@@ -23,6 +23,11 @@
 			   near the canvas edge) would otherwise trigger the browser's pull-to-refresh
 			   and silently wipe the current run's in-memory stats. */
 			overscroll-behavior-y: none;
+			/* Despite all the custom tap feedback below (scale-down :active, haptics,
+			   widened touch targets), iOS Safari/older Android Chrome still flash their
+			   own gray highlight rectangle over whatever was tapped; suppress it so taps
+			   on the pill buttons and canvas only show the game's own feedback. */
+			-webkit-tap-highlight-color: transparent;
 		}
 
 		body {
@@ -81,6 +86,11 @@
 			/* Without this, dragging to steer on touch devices also scrolls the
 			   page instead of just steering the jelly. */
 			touch-action: none;
+			/* A steering drag that pauses on the jelly for a moment can otherwise trigger
+			   iOS's long-press callout (save/copy image), stealing the touch mid-steer. */
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			user-select: none;
 		}
 
 		#controls {

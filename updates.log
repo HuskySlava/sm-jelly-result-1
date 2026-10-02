@@ -204,3 +204,4 @@
 <2026-10-02-03:02> (Claude): Screen shake now defaults off for new players whose OS has reduced-motion enabled.
 <2026-10-02-04:31> (Claude): Used 100dvh for the page height so mobile browser toolbars no longer push controls below the visible viewport.
 <2026-10-02-05:05> (Claude): Fixed Hazard mode lives exploit where toggling it off then on refilled lives for free.
+<2026-10-02-06:03> (Claude): Suppressed mobile tap-highlight/long-press callout on canvas and buttons so only the game's own touch feedback shows.
