@@ -1946,7 +1946,7 @@
 	let lastTapX = 0;
 	let lastTapY = 0;
 	const doubleTapWindow = 350; // ms between taps to count as a double-tap
-	const doubleTapDistance = 30; // canvas px, lets a slightly-off second tap still count
+	const doubleTapDistance = 30; // CSS px, lets a slightly-off second tap still count
 	canvas.addEventListener("pointerdown", (e) => {
 		if (paused) return;
 		// Ignore a second finger touching down while the first is still steering, so a
@@ -1976,13 +1976,17 @@
 			if (navigator.vibrate) navigator.vibrate(15);
 		}
 		const now = performance.now();
-		if (now - lastTapTime < doubleTapWindow && Math.hypot(pointX - lastTapX, pointY - lastTapY) < doubleTapDistance) {
+		// Compared in CSS px (clientX/clientY), not canvas-internal px (pointX/pointY):
+		// the canvas is almost never rendered at its native 1280x720, so on a phone where
+		// it's scaled down ~3x, canvas-space coordinates would shrink the real on-screen
+		// tolerance to ~9px, well under a human double-tap's natural drift.
+		if (now - lastTapTime < doubleTapWindow && Math.hypot(e.clientX - lastTapX, e.clientY - lastTapY) < doubleTapDistance) {
 			boostBtn.click();
 			lastTapTime = 0; // consume the pair so a third quick tap doesn't re-trigger
 		} else {
 			lastTapTime = now;
-			lastTapX = pointX;
-			lastTapY = pointY;
+			lastTapX = e.clientX;
+			lastTapY = e.clientY;
 		}
 	});
 	// Listen on window (not the canvas) so steering keeps tracking the pointer
