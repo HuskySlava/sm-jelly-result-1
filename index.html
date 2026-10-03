@@ -327,6 +327,36 @@
 				height: 36px;
 			}
 
+			/* The volume slider's thumb was left out of the widening too: #volume-control's
+			   padding grew with every other toolbar control, but a native <input type="range">
+			   thumb stays at its tiny browser-default size (~12-16px) regardless, making fine
+			   volume adjustments fiddly on touchscreens. Widen the thumb itself and thicken the
+			   track so dragging it is as forgiving as every other control this media query covers. */
+			#volume-slider {
+				width: 110px;
+				height: 28px;
+			}
+
+			#volume-slider::-webkit-slider-runnable-track {
+				height: 6px;
+			}
+
+			#volume-slider::-webkit-slider-thumb {
+				width: 26px;
+				height: 26px;
+				margin-top: -10px;
+			}
+
+			#volume-slider::-moz-range-track {
+				height: 6px;
+			}
+
+			#volume-slider::-moz-range-thumb {
+				width: 26px;
+				height: 26px;
+				border: none;
+			}
+
 			/* The rotate/welcome hint dismiss buttons were left out of the widening too:
 			   they're the smallest tap targets in the UI (22px) on exactly the touch
 			   devices #rotate-hint exclusively targets, sitting right next to body text
