@@ -228,3 +228,4 @@
 <2026-10-03-06:33> (Claude): Orb streaks now bank score points like bounce combos do, instead of being purely cosmetic.
 <2026-10-03-07:02> (Claude): Widened the rotate-hint and welcome-hint dismiss buttons to 40px, matching other touch targets on mobile.
 <2026-10-03-07:32> (Claude): Lives stat now pulses red when down to the last life in Hazard mode, signaling real danger.
+<2026-10-03-08:33> (Claude): Added a collapsible stats panel toggle, defaulting to compact on touch devices to cut mobile clutter.

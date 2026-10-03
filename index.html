@@ -706,10 +706,51 @@
 			50% { background: rgba(255, 23, 68, 0.35); border-color: rgba(255, 23, 68, 0.8); }
 		}
 
+		/* Hides the "record" stats (bests/totals/streaks) when the panel is collapsed
+		   to just the stats that matter mid-run, so a mobile screen isn't dominated by
+		   26 tiny tiles. The live stats (mood, lives, time, speed, combo, orbs, score)
+		   stay put either way. */
+		#stats-panel.compact .secondary-stat {
+			display: none;
+		}
+
+		#stats-toggle-btn {
+			font-family: inherit;
+			font-size: 0.75rem;
+			letter-spacing: 0.02em;
+			color: rgba(255, 255, 255, 0.75);
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			border-radius: 999px;
+			padding: 0.3rem 0.8rem;
+			margin: -0.3rem 0 0.4rem;
+			cursor: pointer;
+		}
+
+		#stats-toggle-btn:hover {
+			background: rgba(255, 255, 255, 0.12);
+		}
+
+		/* Matches #controls button.active above: reads as "a mode is on" when the
+		   panel is collapsed down to essentials. */
+		#stats-toggle-btn.active {
+			background: rgba(0, 229, 255, 0.2);
+			border-color: rgba(0, 229, 255, 0.6);
+			color: #fff;
+		}
+
+		@media (pointer: coarse) {
+			#stats-toggle-btn {
+				padding: 0.5rem 1rem;
+				font-size: 0.85rem;
+			}
+		}
+
 		/* Zen mode strips away the title/stats/controls for a distraction-free view of
 		   the jelly, leaving only a dimmed re-toggle button so there's always a way back. */
 		body.zen-mode #canvas-section > h1,
-		body.zen-mode #stats-panel {
+		body.zen-mode #stats-panel,
+		body.zen-mode #stats-toggle-btn {
 			display: none;
 		}
 
@@ -745,31 +786,32 @@
 	<div id="stats-panel">
 		<p id="mood-stat">🙂 Chillin'</p>
 		<p id="lives-stat" title="Hazard mode only: run ends when this hits zero">Lives: ❤️❤️❤️</p>
-		<p id="age-stat">Age: 0 days</p>
-		<p id="bounce-counter">Bounces: 0</p>
-		<p id="corner-stat">Corners: 0</p>
-		<p id="best-corners">Best corners: 0</p>
+		<p id="age-stat" class="secondary-stat">Age: 0 days</p>
+		<p id="bounce-counter" class="secondary-stat">Bounces: 0</p>
+		<p id="corner-stat" class="secondary-stat">Corners: 0</p>
+		<p id="best-corners" class="secondary-stat">Best corners: 0</p>
 		<p id="combo-stat">Combo: x0</p>
-		<p id="best-combo">Best combo: x0</p>
-		<p id="high-score">Best: 0</p>
-		<p id="total-bounces">Total: 0</p>
+		<p id="best-combo" class="secondary-stat">Best combo: x0</p>
+		<p id="high-score" class="secondary-stat">Best: 0</p>
+		<p id="total-bounces" class="secondary-stat">Total: 0</p>
 		<p id="speed-stat">Speed: 85 px/s</p>
-		<p id="top-speed">Top speed: 0 px/s</p>
+		<p id="top-speed" class="secondary-stat">Top speed: 0 px/s</p>
 		<p id="time-stat">Time: 0.0s</p>
-		<p id="best-time">Best time: 0.0s</p>
-		<p id="total-time">Total time: 0.0s</p>
-		<p id="distance-stat">Distance: 0 px</p>
+		<p id="best-time" class="secondary-stat">Best time: 0.0s</p>
+		<p id="total-time" class="secondary-stat">Total time: 0.0s</p>
+		<p id="distance-stat" class="secondary-stat">Distance: 0 px</p>
 		<p id="orb-stat">Orbs: 0</p>
-		<p id="best-orbs">Best orbs: 0</p>
-		<p id="total-orbs">Total orbs: 0</p>
-		<p id="orb-streak-stat">Orb streak: x0</p>
-		<p id="best-orb-streak">Best orb streak: x0</p>
+		<p id="best-orbs" class="secondary-stat">Best orbs: 0</p>
+		<p id="total-orbs" class="secondary-stat">Total orbs: 0</p>
+		<p id="orb-streak-stat" class="secondary-stat">Orb streak: x0</p>
+		<p id="best-orb-streak" class="secondary-stat">Best orb streak: x0</p>
 		<p id="score-stat">Score: 0</p>
-		<p id="best-score">Best score: 0</p>
+		<p id="best-score" class="secondary-stat">Best score: 0</p>
 		<p id="achievements-stat" title="View achievements (Enter/Space)" role="button" tabindex="0">Achievements: 0/0</p>
 		<p id="next-goal-stat" title="Your closest unearned achievement">🎯 —</p>
-		<p id="fps-stat">FPS: 0</p>
+		<p id="fps-stat" class="secondary-stat">FPS: 0</p>
 	</div>
+	<button id="stats-toggle-btn" title="Show fewer/more stats" aria-expanded="true">Fewer Stats &#9652;</button>
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
@@ -929,6 +971,30 @@
 	}
 	welcomeHintClose.addEventListener("click", dismissWelcomeHint);
 	canvas.addEventListener("pointerdown", dismissWelcomeHint, { once: true });
+
+	// The 26-tile stats panel is a lot to scroll past on a small phone screen, so it
+	// starts collapsed to just the mid-run essentials (mood, lives, speed, time, combo,
+	// orbs, score) on touch devices, and fully expanded on desktop, unless the player
+	// has already picked a preference (same precedent as #shake-btn's reduced-motion
+	// default below).
+	const statsPanel = document.querySelector("#stats-panel");
+	const statsToggleBtn = document.querySelector("#stats-toggle-btn");
+	const storedStatsCompact = localStorage.getItem("jelly-stats-compact");
+	let statsCompact = storedStatsCompact !== null
+		? storedStatsCompact === "true"
+		: window.matchMedia("(pointer: coarse)").matches;
+	const applyStatsCompactState = () => {
+		statsPanel.classList.toggle("compact", statsCompact);
+		statsToggleBtn.textContent = statsCompact ? "More Stats ▾" : "Fewer Stats ▴";
+		statsToggleBtn.classList.toggle("active", statsCompact);
+		statsToggleBtn.setAttribute("aria-expanded", String(!statsCompact));
+	};
+	applyStatsCompactState();
+	statsToggleBtn.addEventListener("click", () => {
+		statsCompact = !statsCompact;
+		localStorage.setItem("jelly-stats-compact", statsCompact);
+		applyStatsCompactState();
+	});
 
 	// Stamps a "birthdate" for this jelly the first time it's ever opened in this
 	// browser, so returning players see how long they've had it instead of every
