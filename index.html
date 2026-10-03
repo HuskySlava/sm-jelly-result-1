@@ -2814,7 +2814,11 @@
 		{ id: "speed-demon", name: "Speed Demon", check: () => topSpeed >= maxSpeed, progress: () => topSpeed, target: maxSpeed },
 		{ id: "orb-collector", name: "Orb Collector", check: () => totalOrbs >= 50, progress: () => totalOrbs, target: 50 },
 		{ id: "portal-10", name: "Portal Master", check: () => portalUses >= 10, progress: () => portalUses, target: 10 },
-		{ id: "survivor-300", name: "Marathoner", check: () => bestTime >= 300, progress: () => bestTime, target: 300 }
+		{ id: "survivor-300", name: "Marathoner", check: () => bestTime >= 300, progress: () => bestTime, target: 300 },
+		// Lifetime distance was already tracked (totalDistance, persisted across resets) but
+		// never fed into a goal, so steady play that never beats a single-run record still
+		// had nothing to chase.
+		{ id: "road-warrior", name: "Road Warrior", check: () => totalDistance >= 100000, progress: () => totalDistance, target: 100000 }
 	];
 	// A triumphant ascending three-note chime marks an achievement unlock; every other
 	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
