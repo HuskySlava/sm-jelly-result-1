@@ -1785,6 +1785,11 @@
 		// Ignore a second finger touching down while the first is still steering, so a
 		// stray/resting touch can't hijack the drag mid-stroke.
 		if (steering) return;
+		// Unlock audio here too, not just via the document-level listener below: pointerdown
+		// fires on this canvas handler before it bubbles to document, so on a brand-new
+		// session's very first touch landing on the jelly, playPetSound() a few lines down
+		// would otherwise silently no-op with audioCtx still null.
+		unlockAudio();
 		steering = true;
 		activePointerId = e.pointerId;
 		steerToward(e.clientX, e.clientY);
