@@ -2381,7 +2381,13 @@
 	// writes: `beforeunload` alone is unreliable on mobile, where backgrounding/swiping
 	// away a tab (the normal way mobile players "leave") often fires only `visibilitychange`,
 	// silently losing up to a throttle-window's worth of best-stat progress otherwise.
+	// Set right before the Clear Stats flow wipes localStorage and reloads, so neither
+	// this flush nor the visibilitychange handler below (both of which can still fire
+	// during that reload) write the in-memory stats straight back into the storage
+	// that was just cleared, silently resurrecting old bests and their achievements.
+	let statsCleared = false;
 	const flushThrottledStats = () => {
+		if (statsCleared) return;
 		localStorage.setItem("jelly-best-time", bestTime);
 		localStorage.setItem("jelly-top-speed", topSpeed);
 		localStorage.setItem("jelly-total-time", totalPlayTime);
@@ -3177,6 +3183,11 @@
 	document.querySelector("#confirm-close").addEventListener("click", toggleConfirmOverlay);
 	document.querySelector("#confirm-cancel-btn").addEventListener("click", toggleConfirmOverlay);
 	document.querySelector("#confirm-clear-btn").addEventListener("click", () => {
+		// Without this, location.reload() below fires `beforeunload` (and/or a
+		// `visibilitychange` to hidden), both wired to flushThrottledStats — writing the
+		// in-memory best time/top speed/total time/distance right back into the
+		// localStorage we just wiped, and silently re-unlocking achievements gated on them.
+		statsCleared = true;
 		localStorage.clear();
 		location.reload();
 	});

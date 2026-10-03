@@ -237,3 +237,4 @@
 <2026-10-03-20:34> (Claude): Fixed zen mode not hiding the rotate-to-landscape hint, so it no longer blocks the distraction-free view.
 <2026-10-03-21:34> (Claude): Fixed Close-one hazard feedback staying suppressed for ~2 minutes after any reset.
 2026-10-03-22:35 (Claude): Fixed hazard hits not resetting orb streak, so the penalty now breaks both streak systems consistently.
+<2026-10-03-23:03> (Claude): Fixed Clear Stats so it no longer silently re-saves and re-unlocks old best-time/speed/distance achievements.
