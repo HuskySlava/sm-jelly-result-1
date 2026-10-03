@@ -1316,6 +1316,7 @@
 		localStorage.setItem("jelly-autopilot-on", autopilotOn);
 		autopilotBtn.textContent = autopilotOn ? "Autopilot: On" : "Autopilot: Off";
 		autopilotBtn.classList.toggle("active", autopilotOn);
+		updateWakeLock();
 	});
 
 	// Risk mode for players who want more than passive wall-bouncing: a roaming
@@ -3853,7 +3854,31 @@
 		document.body.classList.toggle("zen-mode", zenOn);
 		zenBtn.textContent = zenOn ? "Zen: On" : "Zen: Off";
 		zenBtn.classList.toggle("active", zenOn);
+		updateWakeLock();
 	});
+
+	// Autopilot and zen mode are both meant to be watched hands-off, but with no touches
+	// landing on the screen a phone will auto-dim/lock after its own idle timeout, which
+	// backgrounds the page and triggers the visibilitychange handler below to pause the
+	// very run the player left running to watch. Holding a screen wake lock while either
+	// mode is active prevents that; browsers without the API (desktop Safari, older
+	// Android) just no-op the feature check below instead of erroring.
+	let wakeLock = null;
+	const updateWakeLock = async () => {
+		if (!navigator.wakeLock) return;
+		if ((autopilotOn || zenOn) && !document.hidden) {
+			if (!wakeLock) {
+				try {
+					wakeLock = await navigator.wakeLock.request("screen");
+					wakeLock.addEventListener("release", () => { wakeLock = null; });
+				} catch {}
+			}
+		} else if (wakeLock) {
+			wakeLock.release().catch(() => {});
+			wakeLock = null;
+		}
+	};
+	updateWakeLock();
 
 	// Keeps the ~17 niche mode/effect toggles out of the way until a player asks for
 	// them, so the toolbar isn't a wall of buttons by default (especially on phones,
@@ -4151,7 +4176,13 @@
 	// decay, audio) with only the frame's dt capped, so combos/streaks could silently
 	// vanish and hazard hits could register while the player wasn't even watching.
 	document.addEventListener("visibilitychange", () => {
-		if (!document.hidden) return;
+		if (!document.hidden) {
+			// The OS auto-releases the wake lock the moment the page backgrounds (e.g. screen
+			// auto-lock), so it needs re-requesting on return or a second idle timeout would
+			// hit with nothing holding the screen open.
+			updateWakeLock();
+			return;
+		}
 		flushThrottledStats();
 		// A countdown leaves `paused` true for its whole duration (by design, to block
 		// input), but its setTimeout chain keeps ticking in a backgrounded tab and its
