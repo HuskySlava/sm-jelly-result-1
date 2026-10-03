@@ -1426,11 +1426,29 @@
 	// would be destroyed before the player ever saw it. This flag lets resetBtn fold the
 	// game-over callout into the recap message it spawns afterward instead.
 	let pendingGameOverMessage = false;
+	// Until now hazard mode only ever punished contact, with nothing rewarding the player
+	// for skillfully skimming right past it — so skirting the danger zone felt identical
+	// to steering nowhere near it at all. A cooldown (not per-frame) keeps hugging the
+	// edge of the band from spamming the callout every frame.
+	let lastNearMissElapsed = -Infinity;
+	const nearMissCooldown = 2;
+	const nearMissMargin = 24; // px beyond the hit radius that still counts as a daring close pass
 	const checkHazardCollision = () => {
-		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
-		if (Math.hypot(cx - hazard.x, cy - hazard.y) < hazard.radius + jelly.w / 2) {
+		const hazardDist = Math.hypot(cx - hazard.x, cy - hazard.y);
+		const hitRadius = hazard.radius + jelly.w / 2;
+		// Shielded passes carry no real risk, so they don't earn the "close one" callout
+		// that's meant to celebrate a genuinely daring pass.
+		if (shieldTimeRemaining <= 0 && hazardDist >= hitRadius && hazardDist < hitRadius + nearMissMargin
+			&& elapsedTime - lastNearMissElapsed > nearMissCooldown) {
+			lastNearMissElapsed = elapsedTime;
+			spawnParticles(cx, cy, "#ffd700");
+			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Close one!", "#ffd700");
+			if (navigator.vibrate) navigator.vibrate(10);
+		}
+		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
+		if (hazardDist < hitRadius) {
 			lastHazardHitElapsed = elapsedTime;
 			if (shieldTimeRemaining > 0) {
 				// Shield absorbs the hit: no combo loss, just a distinct violet spark
