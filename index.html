@@ -2519,6 +2519,10 @@
 			orbStreak = (elapsedTime - lastOrbElapsed <= orbStreakWindow) ? orbStreak + 1 : 1;
 			lastOrbElapsed = elapsedTime;
 			orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
+			// Mirrors comboPoints: without this, orb streak was purely cosmetic (shown in
+			// stats/mood/achievements but worth nothing), unlike bounce combos which bank
+			// points for staying alive.
+			orbStreakPoints += orbStreak;
 			if (orbStreak > bestOrbStreak) {
 				bestOrbStreak = orbStreak;
 				localStorage.setItem("jelly-best-orb-streak", bestOrbStreak);
@@ -2708,6 +2712,9 @@
 	// pay off in the score (and hazard mode's combo-reset penalty has a real cost) instead
 	// of combo being a purely cosmetic counter.
 	let comboPoints = 0;
+	// Cumulative points banked from orb streaks this run, mirroring comboPoints above so
+	// keeping an orb streak alive pays off in the score like a bounce combo does.
+	let orbStreakPoints = 0;
 
 	// Longest bounce streak ever landed, persisted like top speed/high score so it survives resets/reloads.
 	const bestComboEl = document.querySelector("#best-combo");
@@ -2717,7 +2724,8 @@
 	// Rolls bounces, corner bounces, orbs, and combo streaks into one combined progress
 	// number, since none of the per-stat records alone say whether a run was good overall.
 	// Corners are weighted heaviest (hardest to land), orbs next, plain bounces the least;
-	// comboPoints rewards keeping a streak alive (and gives the hazard's combo-reset bite).
+	// comboPoints/orbStreakPoints reward keeping a streak alive (and give the hazard's
+	// combo-reset bite real teeth).
 	const scoreStatEl = document.querySelector("#score-stat");
 	const bestScoreEl = document.querySelector("#best-score");
 	let bestScore = Number(localStorage.getItem("jelly-best-score")) || 0;
@@ -2727,7 +2735,7 @@
 	// single bounce/orb pickup for the rest of the run, spamming a confetti burst each time.
 	let previousBestScore = bestScore;
 	let beatBestScoreThisRun = false;
-	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2 + comboPoints;
+	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2 + comboPoints + orbStreakPoints;
 	// Mirrors the score into the tab title so it stays visible even when this
 	// tab isn't focused (e.g. playing while switching between windows).
 	const defaultTitle = document.title;
@@ -4037,6 +4045,7 @@
 		orbsCollected = 0;
 		orbStatEl.textContent = `Orbs: ${orbsCollected}`;
 		orbStreak = 0;
+		orbStreakPoints = 0;
 		lastOrbElapsed = -Infinity;
 		orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
 		freezeTimeRemaining = 0;

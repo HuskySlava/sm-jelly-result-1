@@ -225,3 +225,4 @@
 <2026-10-03-00:34> (Claude): Fixed pet sound silently failing on a session's very first canvas tap due to an audio-unlock event-order race.
 <2026-10-03-03:34> (Claude): Fixed Pause button label staying stuck on "Pause" after a hazard-mode death freeze ends behind an open overlay.
 <2026-10-03-04:32> (Claude): Added a Road Warrior achievement that tracks lifetime distance, giving steady players a new goal to chase.
+<2026-10-03-06:33> (Claude): Orb streaks now bank score points like bounce combos do, instead of being purely cosmetic.
