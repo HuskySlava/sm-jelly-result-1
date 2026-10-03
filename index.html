@@ -694,6 +694,18 @@
 			text-overflow: ellipsis;
 		}
 
+		/* Down to the last life in Hazard mode is the moment stakes are highest, so
+		   it gets an urgent pulse instead of reading as just another static stat
+		   tile identical to "Age" or "Bounces". */
+		#lives-stat.critical {
+			animation: lives-critical-pulse 0.9s ease-in-out infinite;
+		}
+
+		@keyframes lives-critical-pulse {
+			0%, 100% { background: rgba(255, 23, 68, 0.12); border-color: rgba(255, 23, 68, 0.35); }
+			50% { background: rgba(255, 23, 68, 0.35); border-color: rgba(255, 23, 68, 0.8); }
+		}
+
 		/* Zen mode strips away the title/stats/controls for a distraction-free view of
 		   the jelly, leaving only a dimmed re-toggle button so there's always a way back. */
 		body.zen-mode #canvas-section > h1,
@@ -1350,9 +1362,11 @@
 	const updateLivesStat = () => {
 		if (!hazardOn) {
 			livesStatEl.textContent = "Lives: ∞";
+			livesStatEl.classList.remove("critical");
 			return;
 		}
 		livesStatEl.textContent = `Lives: ${"❤️".repeat(Math.max(lives, 0))}${"🖤".repeat(Math.max(maxLives - lives, 0))}`;
+		livesStatEl.classList.toggle("critical", lives === 1);
 	};
 	updateLivesStat();
 	const spawnHazard = () => {
