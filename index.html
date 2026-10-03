@@ -1475,6 +1475,10 @@
 		// Hazard on mid-run (or resetting while it's on) could drop the hazard right on top
 		// of the already-placed orb, forcing an unfair "take damage to collect" moment.
 		const minDistFromOrb = 70;
+		// Same reasoning extended to portals: without this, a portal mouth could land right
+		// on (or just past) the hazard, so stepping through a perfectly safe-looking portal
+		// warps the jelly straight into a hit it had no way to see coming.
+		const minDistFromPortal = 70;
 		let attempts = 0;
 		do {
 			hazard.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1482,7 +1486,9 @@
 			attempts++;
 		} while (attempts < 20 && (
 			Math.hypot(hazard.x - jelly.x, hazard.y - jelly.y) < minDistFromJelly ||
-			Math.hypot(hazard.x - orb.x, hazard.y - orb.y) < minDistFromOrb
+			Math.hypot(hazard.x - orb.x, hazard.y - orb.y) < minDistFromOrb ||
+			(portalOn && Math.hypot(hazard.x - portalA.x, hazard.y - portalA.y) < minDistFromPortal) ||
+			(portalOn && Math.hypot(hazard.x - portalB.x, hazard.y - portalB.y) < minDistFromPortal)
 		));
 		const angle = Math.random() * Math.PI * 2;
 		hazard.baseSpeed = 80 + Math.random() * 60;
@@ -1646,7 +1652,6 @@
 	};
 	hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
 	hazardBtn.classList.toggle("active", hazardOn);
-	if (hazardOn) spawnHazard();
 	hazardBtn.addEventListener("click", () => {
 		hazardOn = !hazardOn;
 		localStorage.setItem("jelly-hazard-on", hazardOn);
@@ -1678,6 +1683,10 @@
 		// Portals on mid-run (or resetting while it's on) could drop a portal mouth right on
 		// top of the already-placed orb, warping the jelly the instant it tries to collect it.
 		const minDistFromOrb = 50;
+		// Same reasoning extended to the hazard: without this, a portal mouth could land
+		// right on (or just past) the hazard, so stepping through a perfectly safe-looking
+		// portal warps the jelly straight into a hit it had no way to see coming.
+		const minDistFromHazard = 70;
 		let attemptsA = 0;
 		do {
 			portalA.x = margin + Math.random() * (canvas.width - margin * 2);
@@ -1685,7 +1694,8 @@
 			attemptsA++;
 		} while (attemptsA < 20 && (
 			Math.hypot(portalA.x - jelly.x, portalA.y - jelly.y) < minDistFromJelly ||
-			Math.hypot(portalA.x - orb.x, portalA.y - orb.y) < minDistFromOrb
+			Math.hypot(portalA.x - orb.x, portalA.y - orb.y) < minDistFromOrb ||
+			(hazardOn && Math.hypot(portalA.x - hazard.x, portalA.y - hazard.y) < minDistFromHazard)
 		));
 		// Keep them far apart, otherwise a same-spot pair would make teleporting pointless.
 		let attemptsB = 0;
@@ -1697,6 +1707,7 @@
 			Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4
 			|| Math.hypot(portalB.x - jelly.x, portalB.y - jelly.y) < minDistFromJelly
 			|| Math.hypot(portalB.x - orb.x, portalB.y - orb.y) < minDistFromOrb
+			|| (hazardOn && Math.hypot(portalB.x - hazard.x, portalB.y - hazard.y) < minDistFromHazard)
 		));
 	};
 	const drawPortals = (time) => {
@@ -1761,6 +1772,11 @@
 	portalBtn.textContent = portalOn ? "Portals: On" : "Portals: Off";
 	portalBtn.classList.toggle("active", portalOn);
 	if (portalOn) spawnPortals();
+	// Deferred from the Hazard setup above: spawnHazard() needs portalA/portalB/portalOn
+	// (just declared here) to keep the hazard off any already-placed portal, so its
+	// initial on-load spawn has to run after this point rather than right next to its
+	// own button setup.
+	if (hazardOn) spawnHazard();
 	portalBtn.addEventListener("click", () => {
 		portalOn = !portalOn;
 		localStorage.setItem("jelly-portal-on", portalOn);

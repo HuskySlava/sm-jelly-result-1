@@ -232,3 +232,4 @@
 2026-10-03-10:32 (Claude): Enlarged the volume slider's touch target (thumb/track) on mobile, matching the other coarse-pointer control fixes.
 <2026-10-03-12:35> (Claude): Fixed double-tap-to-boost using canvas-scaled coordinates, making it nearly unusable on scaled-down mobile screens.
 <2026-10-03-14:35> (Claude): Fixed bug where Gravity/Wind modes falsely showed the jelly as idle/napping despite actively moving it.
+2026-10-03-16:35 (Claude): Fixed hazard/portal spawns landing on each other, causing unavoidable hazard hits when warping.
