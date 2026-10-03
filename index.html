@@ -3178,6 +3178,9 @@
 				jelly.velY *= scale;
 			}
 			updateSpeedStat();
+			// Gravity is continuously accelerating the jelly, so it shouldn't also read as
+			// untouched idling — see the matching note on autopilot below.
+			lastInteractionElapsed = elapsedTime;
 		}
 		if (windOn) {
 			const wind = computeWind(breatheTime);
@@ -3190,6 +3193,9 @@
 				jelly.velY *= scale;
 			}
 			updateSpeedStat();
+			// Wind is continuously pushing the jelly, so it shouldn't also read as
+			// untouched idling — see the matching note on autopilot below.
+			lastInteractionElapsed = elapsedTime;
 		}
 		if (magnetOn) {
 			const cx = jelly.x + jelly.w / 2;
