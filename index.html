@@ -326,6 +326,17 @@
 				width: 36px;
 				height: 36px;
 			}
+
+			/* The rotate/welcome hint dismiss buttons were left out of the widening too:
+			   they're the smallest tap targets in the UI (22px) on exactly the touch
+			   devices #rotate-hint exclusively targets, sitting right next to body text
+			   where a mis-tap is easy. */
+			#rotate-hint button,
+			#welcome-hint button {
+				width: 40px;
+				height: 40px;
+				font-size: 1.3rem;
+			}
 		}
 
 		#help-overlay {
