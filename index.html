@@ -1331,6 +1331,10 @@
 	// cosmetic forever. Irrelevant (and hidden as infinite) while hazard mode is off.
 	const maxLives = 3;
 	let lives = maxLives;
+	// Declared up here (rather than down by the rest of the orb logic) so spawnHazard/
+	// spawnPortals below can check their own placement against the orb's position —
+	// both run before the orb's own setup code further down the script.
+	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false, isGhost: false, isGrow: false };
 	const livesStatEl = document.querySelector("#lives-stat");
 	const updateLivesStat = () => {
 		if (!hazardOn) {
@@ -1346,12 +1350,19 @@
 		// toggling Hazard on, or resetting while it's active, can't instantly land the
 		// hazard on top of the jelly with zero time to react to the danger warning.
 		const minDistFromJelly = 180;
+		// Mirrors spawnOrb's own guard against landing on the hazard: without this, toggling
+		// Hazard on mid-run (or resetting while it's on) could drop the hazard right on top
+		// of the already-placed orb, forcing an unfair "take damage to collect" moment.
+		const minDistFromOrb = 70;
 		let attempts = 0;
 		do {
 			hazard.x = margin + Math.random() * (canvas.width - margin * 2);
 			hazard.y = margin + Math.random() * (canvas.height - margin * 2);
 			attempts++;
-		} while (Math.hypot(hazard.x - jelly.x, hazard.y - jelly.y) < minDistFromJelly && attempts < 20);
+		} while (attempts < 20 && (
+			Math.hypot(hazard.x - jelly.x, hazard.y - jelly.y) < minDistFromJelly ||
+			Math.hypot(hazard.x - orb.x, hazard.y - orb.y) < minDistFromOrb
+		));
 		const angle = Math.random() * Math.PI * 2;
 		hazard.baseSpeed = 80 + Math.random() * 60;
 		hazard.vx = Math.cos(angle) * hazard.baseSpeed;
@@ -1535,20 +1546,30 @@
 		// land within collision range of the jelly's canvas-center reset position, instantly
 		// and involuntarily warping it the moment Portals mode is toggled on or a run resets.
 		const minDistFromJelly = 150;
+		// Mirrors spawnOrb's own guard against landing on a portal: without this, toggling
+		// Portals on mid-run (or resetting while it's on) could drop a portal mouth right on
+		// top of the already-placed orb, warping the jelly the instant it tries to collect it.
+		const minDistFromOrb = 50;
 		let attemptsA = 0;
 		do {
 			portalA.x = margin + Math.random() * (canvas.width - margin * 2);
 			portalA.y = margin + Math.random() * (canvas.height - margin * 2);
 			attemptsA++;
-		} while (Math.hypot(portalA.x - jelly.x, portalA.y - jelly.y) < minDistFromJelly && attemptsA < 20);
+		} while (attemptsA < 20 && (
+			Math.hypot(portalA.x - jelly.x, portalA.y - jelly.y) < minDistFromJelly ||
+			Math.hypot(portalA.x - orb.x, portalA.y - orb.y) < minDistFromOrb
+		));
 		// Keep them far apart, otherwise a same-spot pair would make teleporting pointless.
 		let attemptsB = 0;
 		do {
 			portalB.x = margin + Math.random() * (canvas.width - margin * 2);
 			portalB.y = margin + Math.random() * (canvas.height - margin * 2);
 			attemptsB++;
-		} while ((Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4
-			|| Math.hypot(portalB.x - jelly.x, portalB.y - jelly.y) < minDistFromJelly) && attemptsB < 20);
+		} while (attemptsB < 20 && (
+			Math.hypot(portalB.x - portalA.x, portalB.y - portalA.y) < canvas.width * 0.4
+			|| Math.hypot(portalB.x - jelly.x, portalB.y - jelly.y) < minDistFromJelly
+			|| Math.hypot(portalB.x - orb.x, portalB.y - orb.y) < minDistFromOrb
+		));
 	};
 	const drawPortals = (time) => {
 		for (const portal of [portalA, portalB]) {
@@ -2227,7 +2248,6 @@
 	const totalOrbsEl = document.querySelector("#total-orbs");
 	let totalOrbs = Number(localStorage.getItem("jelly-total-orbs")) || 0;
 	totalOrbsEl.textContent = `Total orbs: ${totalOrbs}`;
-	const orb = { x: 0, y: 0, radius: 10, isMega: false, isFreeze: false, isShield: false, isSpeed: false, isShrink: false, isDouble: false, isGhost: false, isGrow: false };
 	// One in eight orbs is a rarer "mega" orb: bigger, magenta, and worth a
 	// 3-orb bonus instead of 1, giving players an occasional jackpot to chase.
 	const megaOrbChance = 0.125;
