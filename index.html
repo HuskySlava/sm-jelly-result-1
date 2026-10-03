@@ -2903,6 +2903,38 @@
 		}
 	};
 
+	// A slim progress bar across the top of the canvas tracks this run's score against
+	// the all-time best in real time, so beating it reads as a live race against a
+	// visible target instead of only two numbers in the stats grid that have to be
+	// compared after the fact. Uses the frozen previousBestScore (like the "New Best
+	// Score!" check above), not the live bestScore, so the target doesn't move as this
+	// run's own score climbs past it.
+	const drawScoreProgress = () => {
+		if (previousBestScore <= 0) return;
+		const score = computeScore();
+		const pct = Math.min(score / previousBestScore, 1);
+		const barWidth = canvas.width * 0.4;
+		const barHeight = 6;
+		const x = (canvas.width - barWidth) / 2;
+		const y = 16;
+		ctx.save();
+		ctx.font = "11px 'Roboto', sans-serif";
+		ctx.textAlign = "center";
+		ctx.textBaseline = "bottom";
+		ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+		ctx.fillText(`🏆 ${Math.min(score, previousBestScore)}/${previousBestScore}`, canvas.width / 2, y - 3);
+		ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+		ctx.fillRect(x, y, barWidth, barHeight);
+		// Gold once this run has actually overtaken the record, matching the gold used
+		// everywhere else a new best is celebrated (popups, particles, confetti).
+		ctx.fillStyle = beatBestScoreThisRun ? "#ffd700" : "#ff5722";
+		ctx.fillRect(x, y, barWidth * pct, barHeight);
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+		ctx.lineWidth = 1;
+		ctx.strokeRect(x, y, barWidth, barHeight);
+		ctx.restore();
+	};
+
 	// Tracks the last time the player actively steered/boosted/nudged the jelly, so a
 	// long stretch of pure idling can be called out (mood + droopy eyes) instead of
 	// looking identical to a player who's simply holding steady.
@@ -4621,6 +4653,7 @@
 				drawConfetti();
 				drawVignette();
 				drawDangerWarning(now / 1000);
+				drawScoreProgress();
 			}
 			updateFrame();
 		});
