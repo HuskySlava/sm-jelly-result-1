@@ -1505,6 +1505,13 @@
 					if (anyOverlayOpen()) {
 						autoPausedForOverlay = true;
 						paused = true;
+						// Mirrors the visibilitychange handler's same fix: setting `paused` directly
+						// (instead of via togglePause()) skips the button's label/state update, so
+						// without this the "Pause" button would keep reading "Pause" — and silently
+						// no-op if clicked — while the game is actually paused behind the modal.
+						pauseBtn.textContent = "Resume";
+						pauseBtn.title = "Resume (Space)";
+						pauseBtn.classList.add("active");
 					} else {
 						paused = false;
 					}
