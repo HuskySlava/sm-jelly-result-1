@@ -1601,6 +1601,13 @@
 				combo = 0;
 				comboStatEl.textContent = `Combo: x${combo}`;
 			}
+			// A hazard hit is meant to cost you real progress, but was only breaking the
+			// bounce combo while leaving the orb streak untouched, so getting hit mid-streak
+			// was a free pass for the other half of the run's momentum.
+			if (orbStreak > 0) {
+				orbStreak = 0;
+				orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
+			}
 			playHazardSound();
 			// Sharper, longer buzz than a bounce so a hazard hit is felt as a penalty, not progress.
 			if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
