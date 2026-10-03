@@ -235,3 +235,4 @@
 2026-10-03-16:35 (Claude): Fixed hazard/portal spawns landing on each other, causing unavoidable hazard hits when warping.
 <2026-10-03-19:35> (Claude): Added a live top-of-canvas progress bar tracking this run's score against the all-time best score.
 <2026-10-03-20:34> (Claude): Fixed zen mode not hiding the rotate-to-landscape hint, so it no longer blocks the distraction-free view.
+<2026-10-03-21:34> (Claude): Fixed Close-one hazard feedback staying suppressed for ~2 minutes after any reset.
