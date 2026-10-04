@@ -881,26 +881,26 @@
 	<div id="controls">
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
-		<button id="sound-btn" title="Mute (M)">Sound: On</button>
-		<button id="haptics-btn" title="Toggle vibration feedback on bounces, orbs &amp; achievements">Haptics: On</button>
+		<button id="sound-btn" title="Mute (M)" aria-pressed="true">Sound: On</button>
+		<button id="haptics-btn" title="Toggle vibration feedback on bounces, orbs &amp; achievements" aria-pressed="true">Haptics: On</button>
 		<label id="volume-control" title="Volume">🔊 <input type="range" id="volume-slider" min="0" max="1" step="0.05"></label>
 		<label id="color-control" title="Custom jelly color">🎨 <input type="color" id="color-picker" value="#ffffff"></label>
 		<button id="color-reset-btn" title="Revert to random bounce colors">🎲 Random</button>
 		<button id="boost-btn" title="Boost (B)">Boost</button>
 		<button id="more-btn" title="Show/hide extra mode &amp; effect toggles" aria-expanded="false">More &#9662;</button>
 		<div id="extra-controls" class="collapsed">
-		<button id="gravity-btn" title="Gravity (G)">Gravity: Off</button>
-		<button id="wind-btn" title="Wind (W)">Wind: Off</button>
-		<button id="magnet-btn" title="Magnet (L)">Magnet: Off</button>
-			<button id="autopilot-btn" title="Autopilot (I)">Autopilot: Off</button>
-		<button id="hazard-btn" title="Hazard (V)">Hazard: Off</button>
-		<button id="portal-btn" title="Portals (O)">Portals: Off</button>
-		<button id="slowmo-btn" title="Slow-mo (S)">Slow-mo: Off</button>
-		<button id="trail-btn" title="Trail (T)">Trail: Off</button>
-			<button id="predict-btn" title="Trajectory (X)">Trajectory: Off</button>
-		<button id="shake-btn" title="Screen shake (K)">Shake: On</button>
-		<button id="rainbow-btn" title="Rainbow mode (N)">Rainbow: Off</button>
-		<button id="snow-btn" title="Snow (A)">Snow: Off</button>
+		<button id="gravity-btn" title="Gravity (G)" aria-pressed="false">Gravity: Off</button>
+		<button id="wind-btn" title="Wind (W)" aria-pressed="false">Wind: Off</button>
+		<button id="magnet-btn" title="Magnet (L)" aria-pressed="false">Magnet: Off</button>
+			<button id="autopilot-btn" title="Autopilot (I)" aria-pressed="false">Autopilot: Off</button>
+		<button id="hazard-btn" title="Hazard (V)" aria-pressed="false">Hazard: Off</button>
+		<button id="portal-btn" title="Portals (O)" aria-pressed="false">Portals: Off</button>
+		<button id="slowmo-btn" title="Slow-mo (S)" aria-pressed="false">Slow-mo: Off</button>
+		<button id="trail-btn" title="Trail (T)" aria-pressed="false">Trail: Off</button>
+			<button id="predict-btn" title="Trajectory (X)" aria-pressed="false">Trajectory: Off</button>
+		<button id="shake-btn" title="Screen shake (K)" aria-pressed="true">Shake: On</button>
+		<button id="rainbow-btn" title="Rainbow mode (N)" aria-pressed="false">Rainbow: Off</button>
+		<button id="snow-btn" title="Snow (A)" aria-pressed="false">Snow: Off</button>
 		<button id="theme-btn" title="Theme (D)">Theme: Nebula</button>
 		<button id="shape-btn" title="Shape (Q)">Shape: Blob</button>
 		<button id="hat-btn" title="Cosmetic headwear, cycles through a few silly hats">Hat: None</button>
@@ -915,7 +915,7 @@
 		<button id="achievements-btn" title="View achievements">Achievements</button>
 		<button id="clear-stats-btn" title="Clear all saved stats &amp; achievements (E)">Clear Stats</button>
 		<button id="help-btn" title="Help (H)">Help</button>
-		<button id="zen-btn" title="Zen mode (Z)">Zen: Off</button>
+		<button id="zen-btn" title="Zen mode (Z)" aria-pressed="false">Zen: Off</button>
 	</div>
 </section>
 <div id="achievements-overlay">
@@ -1012,6 +1012,16 @@
 	const canvas = document.querySelector("#my-canvas");
 	const ctx = canvas.getContext("2d")
 	const titleEl = document.querySelector("#canvas-section h1");
+
+	// Every mode/effect toggle button below only ever reflected its on/off state via
+	// the visual .active class, so a screen reader user tabbing through the toolbar
+	// heard nothing distinguishing "Gravity: On" from "Gravity: Off" beyond the label
+	// text itself (which some screen readers don't re-announce on every click). Mirror
+	// the state into aria-pressed too, the standard toggle-button semantic.
+	const setToggleActive = (btn, on) => {
+		btn.classList.toggle("active", on);
+		btn.setAttribute("aria-pressed", String(on));
+	};
 
 	// Nudges touch players toward landscape, where the 16:9 canvas gets far more screen
 	// real estate than when it's squeezed to the width of a portrait phone. Re-checks on
@@ -1269,12 +1279,12 @@
 		ctx.restore();
 	};
 	snowBtn.textContent = snowOn ? "Snow: On" : "Snow: Off";
-	snowBtn.classList.toggle("active", snowOn);
+	setToggleActive(snowBtn, snowOn);
 	snowBtn.addEventListener("click", () => {
 		snowOn = !snowOn;
 		localStorage.setItem("jelly-snow-on", snowOn);
 		snowBtn.textContent = snowOn ? "Snow: On" : "Snow: Off";
-		snowBtn.classList.toggle("active", snowOn);
+		setToggleActive(snowBtn, snowOn);
 	});
 
 	const jelly = {
@@ -1327,13 +1337,13 @@
 	const soundBtn = document.querySelector("#sound-btn");
 	soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
 	soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
-	soundBtn.classList.toggle("active", soundOn);
+	setToggleActive(soundBtn, soundOn);
 	soundBtn.addEventListener("click", () => {
 		soundOn = !soundOn;
 		localStorage.setItem("jelly-sound-on", soundOn);
 		soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
 		soundBtn.title = soundOn ? "Mute (M)" : "Unmute (M)";
-		soundBtn.classList.toggle("active", soundOn);
+		setToggleActive(soundBtn, soundOn);
 	});
 
 	// Separate from the mute toggle: vibration is the one feedback channel sound's
@@ -1343,12 +1353,12 @@
 	let hapticsOn = localStorage.getItem("jelly-haptics-on") !== "false";
 	const hapticsBtn = document.querySelector("#haptics-btn");
 	hapticsBtn.textContent = hapticsOn ? "Haptics: On" : "Haptics: Off";
-	hapticsBtn.classList.toggle("active", hapticsOn);
+	setToggleActive(hapticsBtn, hapticsOn);
 	hapticsBtn.addEventListener("click", () => {
 		hapticsOn = !hapticsOn;
 		localStorage.setItem("jelly-haptics-on", hapticsOn);
 		hapticsBtn.textContent = hapticsOn ? "Haptics: On" : "Haptics: Off";
-		hapticsBtn.classList.toggle("active", hapticsOn);
+		setToggleActive(hapticsBtn, hapticsOn);
 	});
 
 	// Independent of the mute toggle: lets players dial the effect volume in rather
@@ -1451,12 +1461,12 @@
 	let gravityOn = localStorage.getItem("jelly-gravity-on") === "true";
 	const gravity = 400; // px/s^2 downward pull, only applied while gravity mode is on
 	gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
-	gravityBtn.classList.toggle("active", gravityOn);
+	setToggleActive(gravityBtn, gravityOn);
 	gravityBtn.addEventListener("click", () => {
 		gravityOn = !gravityOn;
 		localStorage.setItem("jelly-gravity-on", gravityOn);
 		gravityBtn.textContent = gravityOn ? "Gravity: On" : "Gravity: Off";
-		gravityBtn.classList.toggle("active", gravityOn);
+		setToggleActive(gravityBtn, gravityOn);
 	});
 
 	const windBtn = document.querySelector("#wind-btn");
@@ -1469,12 +1479,12 @@
 		y: Math.cos(t * 0.45) * windStrength * 0.6
 	});
 	windBtn.textContent = windOn ? "Wind: On" : "Wind: Off";
-	windBtn.classList.toggle("active", windOn);
+	setToggleActive(windBtn, windOn);
 	windBtn.addEventListener("click", () => {
 		windOn = !windOn;
 		localStorage.setItem("jelly-wind-on", windOn);
 		windBtn.textContent = windOn ? "Wind: On" : "Wind: Off";
-		windBtn.classList.toggle("active", windOn);
+		setToggleActive(windBtn, windOn);
 	});
 
 	// Assist mode for players who'd rather chase the score than chase the orb: gently
@@ -1483,12 +1493,12 @@
 	let magnetOn = localStorage.getItem("jelly-magnet-on") === "true";
 	const magnetStrength = 150; // px/s^2 acceleration toward the orb when magnet mode is on
 	magnetBtn.textContent = magnetOn ? "Magnet: On" : "Magnet: Off";
-	magnetBtn.classList.toggle("active", magnetOn);
+	setToggleActive(magnetBtn, magnetOn);
 	magnetBtn.addEventListener("click", () => {
 		magnetOn = !magnetOn;
 		localStorage.setItem("jelly-magnet-on", magnetOn);
 		magnetBtn.textContent = magnetOn ? "Magnet: On" : "Magnet: Off";
-		magnetBtn.classList.toggle("active", magnetOn);
+		setToggleActive(magnetBtn, magnetOn);
 	});
 
 	// Hands-off mode that steers the jelly on its own: chases the orb like magnet
@@ -1499,12 +1509,12 @@
 	const autopilotStrength = 180; // px/s^2 steering acceleration when autopilot is on
 	const autopilotAvoidRadius = 120; // px, distance at which it starts swerving away from the hazard
 	autopilotBtn.textContent = autopilotOn ? "Autopilot: On" : "Autopilot: Off";
-	autopilotBtn.classList.toggle("active", autopilotOn);
+	setToggleActive(autopilotBtn, autopilotOn);
 	autopilotBtn.addEventListener("click", () => {
 		autopilotOn = !autopilotOn;
 		localStorage.setItem("jelly-autopilot-on", autopilotOn);
 		autopilotBtn.textContent = autopilotOn ? "Autopilot: On" : "Autopilot: Off";
-		autopilotBtn.classList.toggle("active", autopilotOn);
+		setToggleActive(autopilotBtn, autopilotOn);
 		updateWakeLock();
 	});
 
@@ -1728,12 +1738,12 @@
 		}
 	};
 	hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
-	hazardBtn.classList.toggle("active", hazardOn);
+	setToggleActive(hazardBtn, hazardOn);
 	hazardBtn.addEventListener("click", () => {
 		hazardOn = !hazardOn;
 		localStorage.setItem("jelly-hazard-on", hazardOn);
 		hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
-		hazardBtn.classList.toggle("active", hazardOn);
+		setToggleActive(hazardBtn, hazardOn);
 		// Only refill lives when (re-)starting a hazard run, not on every click —
 		// otherwise a player down to their last life could toggle hazard off and
 		// back on to freely reset to full lives, defeating the mode's whole point.
@@ -1852,7 +1862,7 @@
 		if (hapticsOn && navigator.vibrate) navigator.vibrate(25);
 	};
 	portalBtn.textContent = portalOn ? "Portals: On" : "Portals: Off";
-	portalBtn.classList.toggle("active", portalOn);
+	setToggleActive(portalBtn, portalOn);
 	if (portalOn) spawnPortals();
 	// Deferred from the Hazard setup above: spawnHazard() needs portalA/portalB/portalOn
 	// (just declared here) to keep the hazard off any already-placed portal, so its
@@ -1863,30 +1873,30 @@
 		portalOn = !portalOn;
 		localStorage.setItem("jelly-portal-on", portalOn);
 		portalBtn.textContent = portalOn ? "Portals: On" : "Portals: Off";
-		portalBtn.classList.toggle("active", portalOn);
+		setToggleActive(portalBtn, portalOn);
 		if (portalOn) spawnPortals();
 	});
 
 	const slowmoBtn = document.querySelector("#slowmo-btn");
 	let slowMoOn = localStorage.getItem("jelly-slowmo-on") === "true";
 	slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
-	slowmoBtn.classList.toggle("active", slowMoOn);
+	setToggleActive(slowmoBtn, slowMoOn);
 	slowmoBtn.addEventListener("click", () => {
 		slowMoOn = !slowMoOn;
 		localStorage.setItem("jelly-slowmo-on", slowMoOn);
 		slowmoBtn.textContent = slowMoOn ? "Slow-mo: On" : "Slow-mo: Off";
-		slowmoBtn.classList.toggle("active", slowMoOn);
+		setToggleActive(slowmoBtn, slowMoOn);
 	});
 
 	const trailBtn = document.querySelector("#trail-btn");
 	let trailOn = localStorage.getItem("jelly-trail-on") === "true";
 	trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
-	trailBtn.classList.toggle("active", trailOn);
+	setToggleActive(trailBtn, trailOn);
 	trailBtn.addEventListener("click", () => {
 		trailOn = !trailOn;
 		localStorage.setItem("jelly-trail-on", trailOn);
 		trailBtn.textContent = trailOn ? "Trail: On" : "Trail: Off";
-		trailBtn.classList.toggle("active", trailOn);
+		setToggleActive(trailBtn, trailOn);
 	});
 
 	// Shows a dotted line to where the jelly will next hit a wall, so players can
@@ -1894,12 +1904,12 @@
 	const predictBtn = document.querySelector("#predict-btn");
 	let predictOn = localStorage.getItem("jelly-predict-on") === "true";
 	predictBtn.textContent = predictOn ? "Trajectory: On" : "Trajectory: Off";
-	predictBtn.classList.toggle("active", predictOn);
+	setToggleActive(predictBtn, predictOn);
 	predictBtn.addEventListener("click", () => {
 		predictOn = !predictOn;
 		localStorage.setItem("jelly-predict-on", predictOn);
 		predictBtn.textContent = predictOn ? "Trajectory: On" : "Trajectory: Off";
-		predictBtn.classList.toggle("active", predictOn);
+		setToggleActive(predictBtn, predictOn);
 	});
 
 	// Lets motion-sensitive players disable the camera-shake impact effect
@@ -1913,12 +1923,12 @@
 	const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 	let shakeOn = storedShakePref !== null ? storedShakePref !== "false" : !prefersReducedMotion;
 	shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
-	shakeBtn.classList.toggle("active", shakeOn);
+	setToggleActive(shakeBtn, shakeOn);
 	shakeBtn.addEventListener("click", () => {
 		shakeOn = !shakeOn;
 		localStorage.setItem("jelly-shake-on", shakeOn);
 		shakeBtn.textContent = shakeOn ? "Shake: On" : "Shake: Off";
-		shakeBtn.classList.toggle("active", shakeOn);
+		setToggleActive(shakeBtn, shakeOn);
 		if (!shakeOn) {
 			shakeMagnitude = 0;
 			canvas.style.transform = "";
@@ -1929,12 +1939,12 @@
 	const rainbowBtn = document.querySelector("#rainbow-btn");
 	let rainbowOn = localStorage.getItem("jelly-rainbow-on") === "true";
 	rainbowBtn.textContent = rainbowOn ? "Rainbow: On" : "Rainbow: Off";
-	rainbowBtn.classList.toggle("active", rainbowOn);
+	setToggleActive(rainbowBtn, rainbowOn);
 	rainbowBtn.addEventListener("click", () => {
 		rainbowOn = !rainbowOn;
 		localStorage.setItem("jelly-rainbow-on", rainbowOn);
 		rainbowBtn.textContent = rainbowOn ? "Rainbow: On" : "Rainbow: Off";
-		rainbowBtn.classList.toggle("active", rainbowOn);
+		setToggleActive(rainbowBtn, rainbowOn);
 		// Matches every other color-assignment site (bounce, color picker, boost, reset):
 		// without this, turning Rainbow off leaves the jelly (and favicon) stuck on
 		// whichever hue the cycling animation last landed on until the next bounce.
@@ -4227,13 +4237,13 @@
 	let zenOn = localStorage.getItem("jelly-zen-on") === "true";
 	document.body.classList.toggle("zen-mode", zenOn);
 	zenBtn.textContent = zenOn ? "Zen: On" : "Zen: Off";
-	zenBtn.classList.toggle("active", zenOn);
+	setToggleActive(zenBtn, zenOn);
 	zenBtn.addEventListener("click", () => {
 		zenOn = !zenOn;
 		localStorage.setItem("jelly-zen-on", zenOn);
 		document.body.classList.toggle("zen-mode", zenOn);
 		zenBtn.textContent = zenOn ? "Zen: On" : "Zen: Off";
-		zenBtn.classList.toggle("active", zenOn);
+		setToggleActive(zenBtn, zenOn);
 		updateWakeLock();
 	});
 

@@ -252,3 +252,4 @@
 <2026-10-04-10:03> (Claude): Fixed the hazard danger-warning screen flash wrongly triggering while Shield immunity is active.
 <2026-10-04-10:35> (Claude): Fixed Lives stat staying stuck on old hearts/critical pulse after turning Hazard mode off.
 <2026-10-04-11:35> (Claude): Added haptic feedback to the Boost button, the only core gameplay action missing it.
+<2026-10-04-12:34> (Claude): Added aria-pressed to all 15 mode/effect toggle buttons so screen readers announce on/off state.
