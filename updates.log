@@ -242,3 +242,4 @@
 <2026-10-04-00:04> (Claude): Fixed toolbar/modal buttons getting stuck showing their hover highlight after a tap on touchscreens.
 <2026-10-04-00:35> (Claude): Tagged Achievements stat as secondary so compact mobile view hides it like other lifetime stats.
 2026-10-04-01:33 (Claude): Modals now move keyboard focus in on open and restore it on close, instead of stranding focus behind the backdrop.
+<2026-10-04-03:35> (Claude): Added a "Dedicated" achievement tied to cumulative play time, which was tracked but fed no goal.

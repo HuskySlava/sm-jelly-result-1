@@ -3045,7 +3045,12 @@
 		// Lifetime distance was already tracked (totalDistance, persisted across resets) but
 		// never fed into a goal, so steady play that never beats a single-run record still
 		// had nothing to chase.
-		{ id: "road-warrior", name: "Road Warrior", check: () => totalDistance >= 100000, progress: () => totalDistance, target: 100000 }
+		{ id: "road-warrior", name: "Road Warrior", check: () => totalDistance >= 100000, progress: () => totalDistance, target: 100000 },
+		// Lifetime play time was already tracked (totalPlayTime, persisted across resets and
+		// shown as "Total time") but never fed into a goal, so a player who only ever plays
+		// in short bursts (never beating bestTime's single-run Survivor/Marathoner targets)
+		// had no progression goal tied to their cumulative engagement at all.
+		{ id: "dedicated", name: "Dedicated", check: () => totalPlayTime >= 1800, progress: () => totalPlayTime, target: 1800 }
 	];
 	// A triumphant ascending three-note chime marks an achievement unlock; every other
 	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
