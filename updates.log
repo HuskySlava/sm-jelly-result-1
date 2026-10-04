@@ -254,3 +254,4 @@
 <2026-10-04-11:35> (Claude): Added haptic feedback to the Boost button, the only core gameplay action missing it.
 <2026-10-04-12:34> (Claude): Added aria-pressed to all 15 mode/effect toggle buttons so screen readers announce on/off state.
 <2026-10-04-14:35> (Claude): Fixed Help panel scoring text claiming corner bounces give +5 when they actually give +6.
+<2026-10-04-15:05> (Claude): Fixed bug where the bounce "New Best!" popup stopped firing after the first time per session (missing reset).
