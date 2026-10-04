@@ -131,9 +131,16 @@
 			transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 		}
 
-		#controls button:hover {
-			background: rgba(255, 255, 255, 0.18);
-			border-color: rgba(255, 255, 255, 0.4);
+		/* Scoped to hover-capable pointers only: without this, tapping a button on a
+		   touchscreen leaves it stuck showing this hover style (there's no mouse to
+		   move away and clear it) until the player taps elsewhere, which reads as
+		   a stray lingering highlight easily confused with the deliberate .active
+		   toggle-on styling below. */
+		@media (hover: hover) {
+			#controls button:hover {
+				background: rgba(255, 255, 255, 0.18);
+				border-color: rgba(255, 255, 255, 0.4);
+			}
 		}
 
 		/* Lets an at-a-glance scan of the toolbar show which modes are on,
@@ -434,9 +441,13 @@
 			transition: background 0.15s ease, border-color 0.15s ease;
 		}
 
-		.overlay-close:hover {
-			background: rgba(255, 255, 255, 0.18);
-			border-color: rgba(255, 255, 255, 0.45);
+		/* See #controls button:hover above: scoped to hover-capable pointers so a
+		   tap doesn't leave this stuck highlighted on touchscreens. */
+		@media (hover: hover) {
+			.overlay-close:hover {
+				background: rgba(255, 255, 255, 0.18);
+				border-color: rgba(255, 255, 255, 0.45);
+			}
 		}
 
 		#help-panel ul {
@@ -664,9 +675,13 @@
 			transition: background 0.15s ease, border-color 0.15s ease;
 		}
 
-		#confirm-actions button:hover {
-			background: rgba(255, 255, 255, 0.18);
-			border-color: rgba(255, 255, 255, 0.4);
+		/* See #controls button:hover above: scoped to hover-capable pointers so a
+		   tap doesn't leave these stuck highlighted on touchscreens. */
+		@media (hover: hover) {
+			#confirm-actions button:hover {
+				background: rgba(255, 255, 255, 0.18);
+				border-color: rgba(255, 255, 255, 0.4);
+			}
 		}
 
 		/* Marks the destructive action as visually distinct from Cancel, so a player
@@ -677,9 +692,11 @@
 			border-color: rgba(255, 23, 68, 0.6);
 		}
 
-		#confirm-clear-btn:hover {
-			background: rgba(255, 23, 68, 0.35);
-			border-color: rgba(255, 23, 68, 0.8);
+		@media (hover: hover) {
+			#confirm-clear-btn:hover {
+				background: rgba(255, 23, 68, 0.35);
+				border-color: rgba(255, 23, 68, 0.8);
+			}
 		}
 
 		@media (pointer: coarse) {
@@ -758,8 +775,12 @@
 			cursor: pointer;
 		}
 
-		#stats-toggle-btn:hover {
-			background: rgba(255, 255, 255, 0.12);
+		/* See #controls button:hover above: scoped to hover-capable pointers so a
+		   tap doesn't leave this stuck highlighted on touchscreens. */
+		@media (hover: hover) {
+			#stats-toggle-btn:hover {
+				background: rgba(255, 255, 255, 0.12);
+			}
 		}
 
 		/* Matches #controls button.active above: reads as "a mode is on" when the
@@ -794,8 +815,12 @@
 			transition: opacity 0.2s ease;
 		}
 
-		body.zen-mode #zen-btn:hover {
-			opacity: 1;
+		/* See #controls button:hover above: scoped to hover-capable pointers so a
+		   tap doesn't leave this stuck at full opacity on touchscreens. */
+		@media (hover: hover) {
+			body.zen-mode #zen-btn:hover {
+				opacity: 1;
+			}
 		}
 	</style>
 </head>

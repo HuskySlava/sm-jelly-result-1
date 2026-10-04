@@ -239,3 +239,4 @@
 2026-10-03-22:35 (Claude): Fixed hazard hits not resetting orb streak, so the penalty now breaks both streak systems consistently.
 <2026-10-03-23:03> (Claude): Fixed Clear Stats so it no longer silently re-saves and re-unlocks old best-time/speed/distance achievements.
 <2026-10-03-23:33> (Claude): Documented the scoring formula in Help and added a score tooltip, so points no longer feel arbitrary.
+<2026-10-04-00:04> (Claude): Fixed toolbar/modal buttons getting stuck showing their hover highlight after a tap on touchscreens.
