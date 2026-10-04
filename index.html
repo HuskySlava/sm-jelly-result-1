@@ -2732,7 +2732,10 @@
 				bestOrbs = orbsCollected;
 				localStorage.setItem("jelly-best-orbs", bestOrbs);
 				bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
-				spawnPopup(orb.x, orb.y - 50, "New Best Orbs!", "#ffcc00");
+				if (!beatBestOrbsThisRun && previousBestOrbs > 0) {
+					beatBestOrbsThisRun = true;
+					spawnPopup(orb.x, orb.y - 50, "New Best Orbs!", "#ffcc00");
+				}
 			}
 			orbStreak = (elapsedTime - lastOrbElapsed <= orbStreakWindow) ? orbStreak + 1 : 1;
 			lastOrbElapsed = elapsedTime;
@@ -2745,7 +2748,10 @@
 				bestOrbStreak = orbStreak;
 				localStorage.setItem("jelly-best-orb-streak", bestOrbStreak);
 				bestOrbStreakEl.textContent = `Best orb streak: x${bestOrbStreak}`;
-				spawnPopup(orb.x, orb.y - 30, "New Best Streak!", "#ffcc00");
+				if (!beatBestOrbStreakThisRun && previousBestOrbStreak > 0) {
+					beatBestOrbStreakThisRun = true;
+					spawnPopup(orb.x, orb.y - 30, "New Best Streak!", "#ffcc00");
+				}
 			}
 			if (wasMega) {
 				playMegaOrbSound();
@@ -3468,8 +3474,11 @@
 				bestCombo = combo;
 				localStorage.setItem("jelly-best-combo", bestCombo);
 				bestComboEl.textContent = `Best combo: x${bestCombo}`;
-				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#7cff00");
-				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 70, "New Best Combo!", "#7cff00");
+				if (!beatBestComboThisRun && previousBestCombo > 0) {
+					beatBestComboThisRun = true;
+					spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#7cff00");
+					spawnPopup(jelly.x + jelly.w / 2, jelly.y - 70, "New Best Combo!", "#7cff00");
+				}
 			}
 			// Every 10th bounce gets an extra multicolor confetti burst so milestones
 			// stand out even on runs that don't beat the best streak.
@@ -3495,7 +3504,10 @@
 					bestCorners = cornerBounces;
 					localStorage.setItem("jelly-best-corners", bestCorners);
 					bestCornersEl.textContent = `Best corners: ${bestCorners}`;
-					spawnPopup(jelly.x + jelly.w / 2, jelly.y - 110, "New Best Corners!", "#00ff9d");
+					if (!beatBestCornersThisRun && previousBestCorners > 0) {
+						beatBestCornersThisRun = true;
+						spawnPopup(jelly.x + jelly.w / 2, jelly.y - 110, "New Best Corners!", "#00ff9d");
+					}
 				}
 			}
 			// Squash along the axis of impact and stretch the other, like real jelly.
