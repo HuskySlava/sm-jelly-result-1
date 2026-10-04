@@ -248,3 +248,4 @@
 2026-10-04-07:31 (Claude): Fixed stuck New-Best flags so orbs/combo/streak/corner record popups fire every run, not just once per page load.
 2026-10-04-08:35 (Claude): Fixed the score-progress bar text freezing at the old best instead of showing the real score after beating it.
 <2026-10-04-09:04> (Claude): Widened the Achievements stat tile tap target on touch devices to meet the 44px target used elsewhere.
+<2026-10-04-09:32> (Claude): Added a toolbar Achievements button, since the stat tile was its only (and often hidden) entry point.

@@ -912,6 +912,7 @@
 			<button id="copy-snapshot-btn" title="Copy snapshot image to clipboard">Copy Image</button>
 		<button id="share-btn" title="Copy stats (C)">Share</button>
 		<button id="leaderboard-btn" title="Leaderboard (Y)">Leaderboard</button>
+		<button id="achievements-btn" title="View achievements">Achievements</button>
 		<button id="clear-stats-btn" title="Clear all saved stats &amp; achievements (E)">Clear Stats</button>
 		<button id="help-btn" title="Help (H)">Help</button>
 		<button id="zen-btn" title="Zen mode (Z)">Zen: Off</button>
@@ -3182,6 +3183,11 @@
 		if (opening) onOverlayOpened(); else onOverlayClosed();
 	};
 	achievementsStatEl.addEventListener("click", toggleAchievements);
+	// The stat tile is tagged `secondary-stat`, so it's hidden by default on touch devices
+	// (compact mode defaults on there) and has no keyboard shortcut of its own (every A-Z
+	// letter is already claimed by another toggle) — without a toolbar button to match
+	// Help/Leaderboard, mobile players had no way at all to ever open this overlay.
+	document.querySelector("#achievements-btn").addEventListener("click", toggleAchievements);
 	// The stat tile is a <p> with role="button", not a real <button>, so Enter/Space
 	// activation isn't native and had no way in at all for keyboard-only players.
 	achievementsStatEl.addEventListener("keydown", (e) => {
