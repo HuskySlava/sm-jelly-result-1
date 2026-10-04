@@ -243,3 +243,4 @@
 <2026-10-04-00:35> (Claude): Tagged Achievements stat as secondary so compact mobile view hides it like other lifetime stats.
 2026-10-04-01:33 (Claude): Modals now move keyboard focus in on open and restore it on close, instead of stranding focus behind the backdrop.
 <2026-10-04-03:35> (Claude): Added a "Dedicated" achievement tied to cumulative play time, which was tracked but fed no goal.
+2026-10-04-04:05 (Claude): Added a Hazard Mode section to the Help panel explaining lives, shields, and game over.
