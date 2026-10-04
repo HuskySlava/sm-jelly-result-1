@@ -1744,11 +1744,13 @@
 		localStorage.setItem("jelly-hazard-on", hazardOn);
 		hazardBtn.textContent = hazardOn ? "Hazard: On" : "Hazard: Off";
 		setToggleActive(hazardBtn, hazardOn);
-		// Only refill lives when (re-)starting a hazard run, not on every click —
-		// otherwise a player down to their last life could toggle hazard off and
-		// back on to freely reset to full lives, defeating the mode's whole point.
+		// Deliberately does NOT refill lives here: `lives` is already seeded at
+		// full on page load and by every reset (including the auto-reset after a
+		// game-over), so this toggle only needs to re-show the stat & respawn the
+		// hazard. Refilling here too would let a player down to their last life
+		// toggle hazard off then back on to freely reset to full lives, defeating
+		// the mode's whole point.
 		if (hazardOn) {
-			lives = maxLives;
 			updateLivesStat();
 			spawnHazard();
 		} else {

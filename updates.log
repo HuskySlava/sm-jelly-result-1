@@ -256,3 +256,4 @@
 <2026-10-04-14:35> (Claude): Fixed Help panel scoring text claiming corner bounces give +5 when they actually give +6.
 <2026-10-04-15:05> (Claude): Fixed bug where the bounce "New Best!" popup stopped firing after the first time per session (missing reset).
 2026-10-04-17:35 (Claude): Fixed achievements stat tile being hidden by default on mobile despite its always-visible design intent.
+2026-10-04-18:35 (Claude): Fixed Hazard mode exploit where toggling it off and on refilled lives for free.
