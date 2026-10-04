@@ -4559,7 +4559,10 @@
 			// A focused toolbar button also treats Space as its own activation key (fired on
 			// keyup); preventDefault()-ing here would cancel that click and pause the game
 			// instead, so let the button handle it when that's where focus currently is.
-			if (e.target instanceof HTMLButtonElement) return;
+			// The achievements stat tile is a <p role="button"> with its own Space handler
+			// (toggleAchievements) for the same reason — without this check, Space on that
+			// tile both opened the achievements overlay and toggled pause at once.
+			if (e.target instanceof HTMLButtonElement || e.target.getAttribute("role") === "button") return;
 			e.preventDefault();
 			togglePause();
 		} else if (e.code === "KeyR") {
