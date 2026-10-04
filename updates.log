@@ -250,3 +250,4 @@
 <2026-10-04-09:04> (Claude): Widened the Achievements stat tile tap target on touch devices to meet the 44px target used elsewhere.
 <2026-10-04-09:32> (Claude): Added a toolbar Achievements button, since the stat tile was its only (and often hidden) entry point.
 <2026-10-04-10:03> (Claude): Fixed the hazard danger-warning screen flash wrongly triggering while Shield immunity is active.
+<2026-10-04-10:35> (Claude): Fixed Lives stat staying stuck on old hearts/critical pulse after turning Hazard mode off.

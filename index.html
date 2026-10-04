@@ -1738,6 +1738,11 @@
 			lives = maxLives;
 			updateLivesStat();
 			spawnHazard();
+		} else {
+			// Without this, switching hazard off while critically low on lives left
+			// the stat tile stuck showing the old hearts (and the red "critical" pulse)
+			// instead of flipping back to the "Lives: ∞" it should show while off.
+			updateLivesStat();
 		}
 	});
 
