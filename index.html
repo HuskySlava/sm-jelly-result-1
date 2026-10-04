@@ -375,6 +375,16 @@
 				height: 40px;
 				font-size: 1.3rem;
 			}
+
+			/* #achievements-stat was also left out of the widening above: it's a <p
+			   role="button"> styled like the other (non-interactive) stat tiles, so it
+			   stayed sized for display text rather than tapping, and unlike the
+			   secondary stats it's never hidden in compact mode — it's one of the few
+			   always-present tap targets on mobile that was still well under 44px. */
+			#achievements-stat {
+				padding: 0.75rem 0.5rem;
+				font-size: 0.85rem;
+			}
 		}
 
 		#help-overlay {
