@@ -872,6 +872,7 @@
 		<button id="reset-btn" title="Reset (R)">Reset</button>
 		<button id="pause-btn" title="Pause (Space)">Pause</button>
 		<button id="sound-btn" title="Mute (M)">Sound: On</button>
+		<button id="haptics-btn" title="Toggle vibration feedback on bounces, orbs &amp; achievements">Haptics: On</button>
 		<label id="volume-control" title="Volume">🔊 <input type="range" id="volume-slider" min="0" max="1" step="0.05"></label>
 		<label id="color-control" title="Custom jelly color">🎨 <input type="color" id="color-picker" value="#ffffff"></label>
 		<button id="color-reset-btn" title="Revert to random bounce colors">🎲 Random</button>
@@ -1324,6 +1325,21 @@
 		soundBtn.classList.toggle("active", soundOn);
 	});
 
+	// Separate from the mute toggle: vibration is the one feedback channel sound's
+	// own mute/volume controls can't silence, and it fires on every bounce/orb/
+	// achievement regardless of whether the player wants their phone buzzing
+	// (e.g. phone muted in a meeting, or in bed) — so it gets its own on/off switch.
+	let hapticsOn = localStorage.getItem("jelly-haptics-on") !== "false";
+	const hapticsBtn = document.querySelector("#haptics-btn");
+	hapticsBtn.textContent = hapticsOn ? "Haptics: On" : "Haptics: Off";
+	hapticsBtn.classList.toggle("active", hapticsOn);
+	hapticsBtn.addEventListener("click", () => {
+		hapticsOn = !hapticsOn;
+		localStorage.setItem("jelly-haptics-on", hapticsOn);
+		hapticsBtn.textContent = hapticsOn ? "Haptics: On" : "Haptics: Off";
+		hapticsBtn.classList.toggle("active", hapticsOn);
+	});
+
 	// Independent of the mute toggle: lets players dial the effect volume in rather
 	// than only choosing between full volume and silence.
 	const volumeSlider = document.querySelector("#volume-slider");
@@ -1623,7 +1639,7 @@
 			lastNearMissElapsed = elapsedTime;
 			spawnParticles(cx, cy, "#ffd700");
 			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Close one!", "#ffd700");
-			if (navigator.vibrate) navigator.vibrate(10);
+			if (hapticsOn && navigator.vibrate) navigator.vibrate(10);
 		}
 		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
 		if (hazardDist < hitRadius) {
@@ -1633,7 +1649,7 @@
 				// so the block still feels acknowledged instead of silently no-op'ing.
 				spawnParticles(hazard.x, hazard.y, "#8a2be2");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Blocked!", "#8a2be2");
-				if (navigator.vibrate) navigator.vibrate(15);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate(15);
 				return;
 			}
 			if (combo > 0) {
@@ -1649,7 +1665,7 @@
 			}
 			playHazardSound();
 			// Sharper, longer buzz than a bounce so a hazard hit is felt as a penalty, not progress.
-			if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
+			if (hapticsOn && navigator.vibrate) navigator.vibrate([40, 30, 40]);
 			// Captured before a possible resetBtn.click() below respawns the hazard elsewhere.
 			const hazardHitX = hazard.x, hazardHitY = hazard.y;
 			lives--;
@@ -1814,7 +1830,7 @@
 		spawnParticles(exit.x, exit.y, exit.color);
 		spawnRing(exit.x, exit.y, exit.color);
 		playPortalSound();
-		if (navigator.vibrate) navigator.vibrate(25);
+		if (hapticsOn && navigator.vibrate) navigator.vibrate(25);
 	};
 	portalBtn.textContent = portalOn ? "Portals: On" : "Portals: Off";
 	portalBtn.classList.toggle("active", portalOn);
@@ -2036,7 +2052,7 @@
 			spawnParticles(cx, cy, "#ff6fae");
 			spawnPopup(cx, cy - jelly.h, "💛", "#ff6fae");
 			playPetSound();
-			if (navigator.vibrate) navigator.vibrate(15);
+			if (hapticsOn && navigator.vibrate) navigator.vibrate(15);
 		}
 		const now = performance.now();
 		// Compared in CSS px (clientX/clientY), not canvas-internal px (pointX/pointY):
@@ -2725,20 +2741,20 @@
 			}
 			if (wasMega) {
 				playMegaOrbSound();
-				if (navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 40]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 40]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, `Mega Orb! +${bonus}`, color);
 			} else if (wasFreeze) {
 				freezeTimeRemaining = freezeDuration;
 				playFreezeSound();
-				if (navigator.vibrate) navigator.vibrate([60]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([60]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Freeze! Slow-mo", color);
 			} else if (wasShield) {
 				shieldTimeRemaining = shieldDuration;
 				playShieldSound();
-				if (navigator.vibrate) navigator.vibrate([60]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([60]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Shield Up!", color);
 			} else if (wasSpeed) {
@@ -2751,36 +2767,36 @@
 				jelly.velY = Math.sin(angle) * kickSpeed;
 				updateSpeedStat();
 				playSpeedOrbSound();
-				if (navigator.vibrate) navigator.vibrate([30]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([30]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Speed Up!", color);
 			} else if (wasShrink) {
 				shrinkTimeRemaining = shrinkDuration;
 				playShrinkSound();
-				if (navigator.vibrate) navigator.vibrate([60]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([60]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Shrink!", color);
 			} else if (wasDouble) {
 				doubleTimeRemaining = doubleDuration;
 				playDoubleSound();
-				if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([30, 20, 30]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Double Orbs!", color);
 			} else if (wasGhost) {
 				ghostTimeRemaining = ghostDuration;
 				playGhostSound();
-				if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([50, 30, 50]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Ghost Mode!", color);
 			} else if (wasGrow) {
 				growTimeRemaining = growDuration;
 				playGrowSound();
-				if (navigator.vibrate) navigator.vibrate([60]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([60]);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, "Grow!", color);
 			} else {
 				playOrbSound();
-				if (navigator.vibrate) navigator.vibrate(10);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate(10);
 				spawnParticles(orb.x, orb.y, color);
 				spawnPopup(orb.x, orb.y - 10, bonus > 1 ? `+${bonus} Orb!` : "+1 Orb!", color);
 			}
@@ -3148,7 +3164,7 @@
 				localStorage.setItem("jelly-achievements", JSON.stringify([...unlockedAchievements]));
 				updateAchievementsStat();
 				playAchievementSound();
-				if (navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 60]);
+				if (hapticsOn && navigator.vibrate) navigator.vibrate([20, 20, 20, 20, 60]);
 				spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, "#ffd700");
 				spawnPopup(jelly.x + jelly.w / 2, jelly.y - 150, `🏆 ${a.name}!`, "#ffd700");
 			}
@@ -3403,7 +3419,7 @@
 			playBounceSound();
 			// Touch players feel the impact even with sound muted; corners get a
 			// distinct triple-pulse pattern instead of the single-pulse plain bounce.
-			if (navigator.vibrate) navigator.vibrate(isCornerHit ? [15, 30, 15] : 12);
+			if (hapticsOn && navigator.vibrate) navigator.vibrate(isCornerHit ? [15, 30, 15] : 12);
 			spawnParticles(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			spawnRing(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2, jelly.color);
 			if (bouncedX) spawnEdgeFlash(jelly.x <= 0 ? "left" : "right", jelly.color);
@@ -4059,7 +4075,7 @@
 		link.href = buildSnapshotDataUrl();
 		link.click();
 		playSnapshotSound();
-		if (navigator.vibrate) navigator.vibrate(20);
+		if (hapticsOn && navigator.vibrate) navigator.vibrate(20);
 		// Snap straight to bright, then transition back down, so it reads as an
 		// instant flash rather than a slow fade-in.
 		snapshotFlash.style.transition = "none";
@@ -4093,7 +4109,7 @@
 				.then(() => {
 					flashCopySnapshotBtn("Copied!");
 					playSnapshotSound();
-					if (navigator.vibrate) navigator.vibrate(20);
+					if (hapticsOn && navigator.vibrate) navigator.vibrate(20);
 					spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Copied!", "#00e5ff");
 				})
 				.catch(() => flashCopySnapshotBtn("Copy failed"));
@@ -4621,7 +4637,7 @@
 			spawnMeteorShower();
 			spawnConfetti(jelly.x + jelly.w / 2, jelly.y + jelly.h / 2);
 			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "🎮 Konami Code!", "#ff2df5");
-			if (navigator.vibrate) navigator.vibrate([30, 30, 30, 30, 60]);
+			if (hapticsOn && navigator.vibrate) navigator.vibrate([30, 30, 30, 30, 60]);
 		}
 	});
 
