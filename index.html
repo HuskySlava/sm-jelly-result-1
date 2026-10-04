@@ -2077,7 +2077,12 @@
 		// chirp on top of the plain steer ripple every other click already gets.
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
-		if (Math.hypot(pointX - cx, pointY - cy) < Math.max(jelly.w, jelly.h) * 0.7) {
+		// Floored in canvas-space px equivalent to ~22 real screen px (a reasonable touch
+		// radius): without this, the zone shrinks with jelly.w/h, which on a phone (canvas
+		// scaled down from its 1280px-wide internal resolution) makes petting the resting
+		// jelly nearly untappable, and the Shrink buff (11px) makes it untappable outright.
+		const petRadius = Math.max(Math.max(jelly.w, jelly.h) * 0.7, 22 * (canvas.width / rect.width));
+		if (Math.hypot(pointX - cx, pointY - cy) < petRadius) {
 			spawnParticles(cx, cy, "#ff6fae");
 			spawnPopup(cx, cy - jelly.h, "💛", "#ff6fae");
 			playPetSound();
