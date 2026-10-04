@@ -3412,7 +3412,11 @@
 			// read as untouched idling — see the matching note on autopilot below.
 			lastInteractionElapsed = elapsedTime;
 		}
-		if (autopilotOn) {
+		// Skipped while the player is actively dragging to steer: without this, autopilot's
+		// pull toward the orb (and away from the hazard) silently fought the player's own
+		// drag every single frame, making manual steering feel unresponsive with no
+		// indication why. Manual input now simply takes priority until released.
+		if (autopilotOn && !steering) {
 			const cx = jelly.x + jelly.w / 2;
 			const cy = jelly.y + jelly.h / 2;
 			let steerX = orb.x - cx;
