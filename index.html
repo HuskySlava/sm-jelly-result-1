@@ -4208,6 +4208,11 @@
 	// before opening an overlay shouldn't get auto-resumed out from under them.
 	let autoPausedForOverlay = false;
 	const anyOverlayOpen = () => [achievementsOverlay, leaderboardOverlay, helpOverlay, confirmOverlay].some(o => o.classList.contains("open"));
+	// Opening a modal never moved keyboard focus into it, and closing one never returned focus
+	// anywhere deliberate — so keyboard/screen-reader users who opened Help/Achievements/
+	// Leaderboard/Clear-Stats could just keep tabbing through the (visually hidden) page behind
+	// the dimmed backdrop. Remembers whatever had focus before opening so it can be restored on close.
+	let overlayTriggerEl = null;
 	const onOverlayOpened = () => {
 		// A countdown's setTimeout chain keeps running even behind the modal and would
 		// otherwise resume gameplay out of sight once it finishes; cancel and hard-pause instead.
@@ -4216,11 +4221,18 @@
 			autoPausedForOverlay = true;
 			togglePause();
 		}
+		overlayTriggerEl = document.activeElement;
+		const openOverlay = [achievementsOverlay, leaderboardOverlay, helpOverlay, confirmOverlay].find(o => o.classList.contains("open"));
+		openOverlay?.querySelector(".overlay-close")?.focus();
 	};
 	const onOverlayClosed = () => {
 		if (autoPausedForOverlay && !anyOverlayOpen()) {
 			autoPausedForOverlay = false;
 			if (paused) togglePause();
+		}
+		if (overlayTriggerEl) {
+			overlayTriggerEl.focus();
+			overlayTriggerEl = null;
 		}
 	};
 	const toggleHelp = () => {
