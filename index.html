@@ -4378,6 +4378,17 @@
 		beatBestTimeThisRun = false;
 		previousBestScore = bestScore;
 		beatBestScoreThisRun = false;
+		// Mirrors the time/score reset above: without this, the orbs/orb-streak/corners/combo
+		// "New Best!" popups below would only ever fire once per page load, since their
+		// beatBestXThisRun flags got stuck true the first time a record was broken.
+		previousBestOrbs = bestOrbs;
+		beatBestOrbsThisRun = false;
+		previousBestOrbStreak = bestOrbStreak;
+		beatBestOrbStreakThisRun = false;
+		previousBestCorners = bestCorners;
+		beatBestCornersThisRun = false;
+		previousBestCombo = bestCombo;
+		beatBestComboThisRun = false;
 		updateSpeedStat();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		// clearRect wipes the stars along with the trail; redraw them immediately so a
