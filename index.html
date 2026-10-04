@@ -2460,6 +2460,11 @@
 	const bestOrbsEl = document.querySelector("#best-orbs");
 	let bestOrbs = Number(localStorage.getItem("jelly-best-orbs")) || 0;
 	bestOrbsEl.textContent = `Best orbs: ${bestOrbs}`;
+	// Snapshot + one-shot flag mirroring previousBestScore/beatBestScoreThisRun below: without
+	// these, a brand-new player's first orb pickup is a "record" against a zero baseline, and a
+	// run that's setting a genuine new high gets the celebration re-fired on every single orb.
+	let previousBestOrbs = bestOrbs;
+	let beatBestOrbsThisRun = false;
 	// Unlike "Best orbs" (the most collected in a single run), this counts every
 	// orb ever collected across all sessions and resets, and never goes down.
 	const totalOrbsEl = document.querySelector("#total-orbs");
@@ -2675,6 +2680,9 @@
 	const orbStreakWindow = 4; // seconds allowed between orb pickups to keep the streak alive
 	let bestOrbStreak = Number(localStorage.getItem("jelly-best-orb-streak")) || 0;
 	bestOrbStreakEl.textContent = `Best orb streak: x${bestOrbStreak}`;
+	// See previousBestOrbs/beatBestOrbsThisRun above for why this guard exists.
+	let previousBestOrbStreak = bestOrbStreak;
+	let beatBestOrbStreakThisRun = false;
 	// Counts down in real seconds while a freeze orb's bonus slow-mo is active;
 	// see the dt calculation in the main loop below.
 	let freezeTimeRemaining = 0;
@@ -2889,9 +2897,15 @@
 	const bestCornersEl = document.querySelector("#best-corners");
 	let bestCorners = Number(localStorage.getItem("jelly-best-corners")) || 0;
 	bestCornersEl.textContent = `Best corners: ${bestCorners}`;
+	// See previousBestOrbs/beatBestOrbsThisRun above for why this guard exists.
+	let previousBestCorners = bestCorners;
+	let beatBestCornersThisRun = false;
 	let bounces = 0;
 	let highScore = Number(localStorage.getItem("jelly-high-score")) || 0;
 	highScoreEl.textContent = `Best: ${highScore}`;
+	// See previousBestOrbs/beatBestOrbsThisRun above for why this guard exists.
+	let previousHighScore = highScore;
+	let beatHighScoreThisRun = false;
 	// Unlike "Best" (the longest streak without a reset), this counts every
 	// bounce ever landed, across all sessions and resets, and never goes down.
 	const totalBouncesEl = document.querySelector("#total-bounces");
@@ -2907,7 +2921,10 @@
 			highScore = bounces;
 			localStorage.setItem("jelly-high-score", highScore);
 			highScoreEl.textContent = `Best: ${highScore}`;
-			return true;
+			if (!beatHighScoreThisRun && previousHighScore > 0) {
+				beatHighScoreThisRun = true;
+				return true;
+			}
 		}
 		return false;
 	}
@@ -2930,6 +2947,9 @@
 	const bestComboEl = document.querySelector("#best-combo");
 	let bestCombo = Number(localStorage.getItem("jelly-best-combo")) || 0;
 	bestComboEl.textContent = `Best combo: x${bestCombo}`;
+	// See previousBestOrbs/beatBestOrbsThisRun above for why this guard exists.
+	let previousBestCombo = bestCombo;
+	let beatBestComboThisRun = false;
 
 	// Rolls bounces, corner bounces, orbs, and combo streaks into one combined progress
 	// number, since none of the per-stat records alone say whether a run was good overall.
