@@ -1433,6 +1433,9 @@
 		const angle = Math.random() * Math.PI * 2;
 		jelly.velX = Math.cos(angle) * speed;
 		jelly.velY = Math.sin(angle) * speed;
+		// Boost is a deliberate action (click or double-tap) like every other haptic-backed
+		// interaction here (bounces, orbs, achievements), so it should feel the same way.
+		if (hapticsOn && navigator.vibrate) navigator.vibrate([15, 15, 30]);
 		// Guard like every other color-assignment site (bounce, color picker, reset):
 		// without this, boosting while Rainbow mode is on would momentarily stomp the
 		// continuously-cycling hue with a static random color for one frame.
