@@ -2301,6 +2301,22 @@
 		ctx.restore();
 	};
 
+	// A shrinking ring around the orb mirrors drawComboTimer's jelly ring, so an orb
+	// streak about to lapse is visible (and worth rushing toward) instead of only
+	// being readable in the orb-streak stat text after it's already too late.
+	const drawOrbStreakTimer = () => {
+		if (orbStreak <= 0) return;
+		const remaining = 1 - (elapsedTime - lastOrbElapsed) / orbStreakWindow;
+		if (remaining <= 0) return;
+		ctx.save();
+		ctx.strokeStyle = "#ffd700";
+		ctx.lineWidth = 3;
+		ctx.beginPath();
+		ctx.arc(orb.x, orb.y, orb.radius + 8, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * remaining);
+		ctx.stroke();
+		ctx.restore();
+	};
+
 	// A pulsing violet ring around the jelly shows an active shield's remaining
 	// time, so players can see the hazard-immunity window before it lapses.
 	const drawShieldRing = () => {
@@ -4802,6 +4818,7 @@
 					drawSnow();
 				}
 				drawOrb(now / 1000);
+				drawOrbStreakTimer();
 				if (hazardOn) {
 					updateHazard(dt);
 					drawHazard(now / 1000);

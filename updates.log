@@ -258,3 +258,4 @@
 2026-10-04-17:35 (Claude): Fixed achievements stat tile being hidden by default on mobile despite its always-visible design intent.
 2026-10-04-18:35 (Claude): Fixed Hazard mode exploit where toggling it off and on refilled lives for free.
 <2026-10-04-23:05> (Claude): Fixed autopilot fighting manual steering by pausing its pull while the player is actively dragging.
+<2026-10-04-23:33> (Claude): Added a shrinking ring around the orb showing the orb-streak timer, mirroring the combo ring.
