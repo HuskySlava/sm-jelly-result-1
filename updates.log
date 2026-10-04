@@ -246,3 +246,4 @@
 <2026-10-04-06:35> (Claude): Fixed Space on the focused Achievements tile from both opening achievements and toggling pause at once.
 2026-10-04-04:05 (Claude): Added a Hazard Mode section to the Help panel explaining lives, shields, and game over.
 2026-10-04-07:31 (Claude): Fixed stuck New-Best flags so orbs/combo/streak/corner record popups fire every run, not just once per page load.
+2026-10-04-08:35 (Claude): Fixed the score-progress bar text freezing at the old best instead of showing the real score after beating it.

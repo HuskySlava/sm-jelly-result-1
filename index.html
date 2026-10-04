@@ -3017,7 +3017,11 @@
 		ctx.textAlign = "center";
 		ctx.textBaseline = "bottom";
 		ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-		ctx.fillText(`🏆 ${Math.min(score, previousBestScore)}/${previousBestScore}`, canvas.width / 2, y - 3);
+		// Unlike pct (clamped so the bar fill caps at full width), the numerator here must
+		// stay uncapped: once this run beats previousBestScore the bar turns gold (below) to
+		// celebrate the new record, but a clamped number would freeze at "100/100" for the
+		// rest of the run instead of reflecting the still-climbing real score.
+		ctx.fillText(`🏆 ${score}/${previousBestScore}`, canvas.width / 2, y - 3);
 		ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
 		ctx.fillRect(x, y, barWidth, barHeight);
 		// Gold once this run has actually overtaken the record, matching the gold used
