@@ -260,3 +260,4 @@
 <2026-10-04-23:05> (Claude): Fixed autopilot fighting manual steering by pausing its pull while the player is actively dragging.
 <2026-10-04-23:33> (Claude): Added a shrinking ring around the orb showing the orb-streak timer, mirroring the combo ring.
 <2026-10-05-05:05> (Claude): Fixed next-goal hint to break ties toward the smaller target instead of declaration order.
+<2026-10-05-07:34> (Claude): Fixed Magnet mode fighting manual steering by skipping its pull while the player is dragging.
