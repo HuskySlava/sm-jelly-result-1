@@ -3191,8 +3191,16 @@
 	const updateNextGoalStat = () => {
 		// Ranks by completion ratio (not declaration order) so this reflects the
 		// achievement the player is actually nearest to earning, as the tooltip promises.
+		// Ties (commonly several achievements all sitting at 0 progress for a new player)
+		// break toward the smaller target, since that one takes the fewest steps to reach
+		// next — without this, a stable sort left ties at declaration order instead, so a
+		// fresh player could see a 100-target achievement billed as their "nearest" goal
+		// over a 1-target one sitting right next to it in the list.
 		const locked = ACHIEVEMENTS.filter(a => !unlockedAchievements.has(a.id));
-		const next = locked.sort((a, b) => (b.progress() / b.target) - (a.progress() / a.target))[0];
+		const next = locked.sort((a, b) => {
+			const ratioDiff = (b.progress() / b.target) - (a.progress() / a.target);
+			return ratioDiff !== 0 ? ratioDiff : a.target - b.target;
+		})[0];
 		if (!next) {
 			nextGoalStatEl.textContent = "🎯 All goals earned!";
 			return;
