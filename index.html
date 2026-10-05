@@ -4300,14 +4300,29 @@
 	// mode is active prevents that; browsers without the API (desktop Safari, older
 	// Android) just no-op the feature check below instead of erroring.
 	let wakeLock = null;
+	// True only while the request() promise below is in flight. Without it, toggling
+	// a mode on then off again before that promise resolves left the resolved lock
+	// unconditionally assigned here with no re-check of current state, holding the
+	// screen awake forever even though neither mode was on anymore.
+	let wakeLockPending = false;
 	const updateWakeLock = async () => {
 		if (!navigator.wakeLock) return;
-		if ((autopilotOn || zenOn) && !document.hidden) {
-			if (!wakeLock) {
+		const shouldHold = (autopilotOn || zenOn) && !document.hidden;
+		if (shouldHold) {
+			if (!wakeLock && !wakeLockPending) {
+				wakeLockPending = true;
 				try {
-					wakeLock = await navigator.wakeLock.request("screen");
-					wakeLock.addEventListener("release", () => { wakeLock = null; });
-				} catch {}
+					const lock = await navigator.wakeLock.request("screen");
+					wakeLockPending = false;
+					if ((autopilotOn || zenOn) && !document.hidden) {
+						wakeLock = lock;
+						wakeLock.addEventListener("release", () => { wakeLock = null; });
+					} else {
+						lock.release().catch(() => {});
+					}
+				} catch {
+					wakeLockPending = false;
+				}
 			}
 		} else if (wakeLock) {
 			wakeLock.release().catch(() => {});
