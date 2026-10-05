@@ -1655,7 +1655,9 @@
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
 		const hazardDist = Math.hypot(cx - hazard.x, cy - hazard.y);
-		const hitRadius = hazard.radius + jelly.w / 2;
+		// Matches the combo-stretched size the jelly is actually drawn at (see drawJelly's
+		// comboScale), otherwise a hot streak visibly overlaps the hazard well before it registers.
+		const hitRadius = hazard.radius + (jelly.w / 2) * comboScale;
 		// Shielded passes carry no real risk, so they don't earn the "close one" callout
 		// that's meant to celebrate a genuinely daring pass.
 		if (shieldTimeRemaining <= 0 && hazardDist >= hitRadius && hazardDist < hitRadius + nearMissMargin
@@ -2762,7 +2764,9 @@
 	const checkOrbCollision = () => {
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
-		if (Math.hypot(cx - orb.x, cy - orb.y) < orb.radius + jelly.w / 2) {
+		// Matches the combo-stretched size the jelly is actually drawn at (see drawJelly's
+		// comboScale), otherwise a hot streak visibly overlaps orbs well before they register.
+		if (Math.hypot(cx - orb.x, cy - orb.y) < orb.radius + (jelly.w / 2) * comboScale) {
 			const wasMega = orb.isMega;
 			const wasFreeze = orb.isFreeze;
 			const wasShield = orb.isShield;
