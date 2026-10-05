@@ -1014,6 +1014,7 @@
 		<ul>
 			<li>Toggle Hazard (V) to spawn a red danger zone that chases your combo, not just your score</li>
 			<li>Touching it costs a life (start with 3) and resets your combo &amp; orb streak</li>
+			<li>Skim past it without touching it for a "Close one!" — +3 score, rewarding the risk</li>
 			<li>A Shield orb blocks one hit for free — no life lost, no streak broken</li>
 			<li>Lose your last life and the run ends on the spot — Game Over, then an auto-reset</li>
 		</ul>
@@ -1684,8 +1685,9 @@
 		if (shieldTimeRemaining <= 0 && hazardDist >= hitRadius && hazardDist < hitRadius + nearMissMargin
 			&& elapsedTime - lastNearMissElapsed > nearMissCooldown) {
 			lastNearMissElapsed = elapsedTime;
+			nearMissPoints += nearMissBonus;
 			spawnParticles(cx, cy, "#ffd700");
-			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, "Close one!", "#ffd700");
+			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, `Close one! +${nearMissBonus}`, "#ffd700");
 			if (hapticsOn && navigator.vibrate) navigator.vibrate(10);
 		}
 		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
@@ -3035,6 +3037,11 @@
 	// Cumulative points banked from orb streaks this run, mirroring comboPoints above so
 	// keeping an orb streak alive pays off in the score like a bounce combo does.
 	let orbStreakPoints = 0;
+	// Cumulative points banked from hazard near-misses, so Hazard mode carries an upside
+	// to offset its lives/combo/streak risk instead of being a mode with pure downside
+	// that a score-maximizing player is strictly better off never touching.
+	let nearMissPoints = 0;
+	const nearMissBonus = 3;
 
 	// Longest bounce streak ever landed, persisted like top speed/high score so it survives resets/reloads.
 	const bestComboEl = document.querySelector("#best-combo");
@@ -3058,7 +3065,7 @@
 	// single bounce/orb pickup for the rest of the run, spamming a confetti burst each time.
 	let previousBestScore = bestScore;
 	let beatBestScoreThisRun = false;
-	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2 + comboPoints + orbStreakPoints;
+	const computeScore = () => bounces + cornerBounces * 5 + orbsCollected * 2 + comboPoints + orbStreakPoints + nearMissPoints;
 	// Mirrors the score into the tab title so it stays visible even when this
 	// tab isn't focused (e.g. playing while switching between windows).
 	const defaultTitle = document.title;
@@ -4492,6 +4499,7 @@
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
 		lastNearMissElapsed = -Infinity;
+		nearMissPoints = 0;
 		lastBoostElapsed = -Infinity;
 		lives = maxLives;
 		updateLivesStat();
