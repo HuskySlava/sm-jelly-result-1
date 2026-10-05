@@ -1689,6 +1689,10 @@
 			spawnParticles(cx, cy, "#ffd700");
 			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, `Close one! +${nearMissBonus}`, "#ffd700");
 			if (hapticsOn && navigator.vibrate) navigator.vibrate(10);
+			// Without this, the "Score:" stat tile, tab title, and best-score check (all
+			// handled inside updateScoreStat) would lag behind computeScore() until the
+			// next bounce or orb pickup happened to call it — or never, if the run ends first.
+			updateScoreStat();
 		}
 		if (elapsedTime - lastHazardHitElapsed <= hazardHitCooldown) return;
 		if (hazardDist < hitRadius) {
