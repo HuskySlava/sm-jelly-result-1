@@ -1849,8 +1849,11 @@
 		if (elapsedTime - lastPortalElapsed <= portalCooldown) return;
 		const cx = jelly.x + jelly.w / 2;
 		const cy = jelly.y + jelly.h / 2;
-		const enter = Math.hypot(cx - portalA.x, cy - portalA.y) < portalA.radius + jelly.w / 2 ? portalA
-			: Math.hypot(cx - portalB.x, cy - portalB.y) < portalB.radius + jelly.w / 2 ? portalB
+		// Matches the combo-stretched size the jelly is actually drawn at (see drawJelly's
+		// comboScale), otherwise a hot streak visibly overlaps a portal well before it registers.
+		const hitRadius = (jelly.w / 2) * comboScale;
+		const enter = Math.hypot(cx - portalA.x, cy - portalA.y) < portalA.radius + hitRadius ? portalA
+			: Math.hypot(cx - portalB.x, cy - portalB.y) < portalB.radius + hitRadius ? portalB
 			: null;
 		if (!enter) return;
 		const exit = enter === portalA ? portalB : portalA;

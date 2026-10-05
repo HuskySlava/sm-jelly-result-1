@@ -261,3 +261,4 @@
 <2026-10-04-23:33> (Claude): Added a shrinking ring around the orb showing the orb-streak timer, mirroring the combo ring.
 <2026-10-05-05:05> (Claude): Fixed next-goal hint to break ties toward the smaller target instead of declaration order.
 <2026-10-05-07:34> (Claude): Fixed Magnet mode fighting manual steering by skipping its pull while the player is dragging.
+<2026-10-05-08:34> (Claude): Fixed portal teleport hitbox to scale with combo stretch, matching hazard/orb collision checks.
