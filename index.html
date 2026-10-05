@@ -2580,7 +2580,11 @@
 		));
 		orb.isMega = Math.random() < megaOrbChance;
 		orb.isFreeze = !orb.isMega && Math.random() < freezeOrbChance;
-		orb.isShield = !orb.isMega && !orb.isFreeze && Math.random() < shieldOrbChance;
+		// Shield only ever does anything via checkHazardCollision's shieldTimeRemaining check,
+		// which is itself gated on hazardOn — so without this guard, a Shield orb could spawn
+		// and be "collected" while Hazard mode is off, taking its slot in the exclusivity chain
+		// above while granting a buff that protects against nothing.
+		orb.isShield = hazardOn && !orb.isMega && !orb.isFreeze && Math.random() < shieldOrbChance;
 		orb.isSpeed = !orb.isMega && !orb.isFreeze && !orb.isShield && Math.random() < speedOrbChance;
 		orb.isShrink = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && Math.random() < shrinkOrbChance;
 		orb.isDouble = !orb.isMega && !orb.isFreeze && !orb.isShield && !orb.isSpeed && !orb.isShrink && Math.random() < doubleOrbChance;
