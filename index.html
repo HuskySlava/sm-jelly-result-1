@@ -10,6 +10,10 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Canvas Jelly</title>
 	<link rel="icon" id="favicon" href="">
+	<!-- Lets mobile browsers (Android Chrome/Samsung Internet) tint their own address/status
+		 bar to match the jelly, extending the "lit by the jelly" glow already mirrored onto
+		 the canvas, title, and favicon out to the browser chrome itself. -->
+	<meta name="theme-color" id="theme-color-meta" content="#000000">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -1420,6 +1424,7 @@
 	faviconCanvas.height = 32;
 	const faviconCtx = faviconCanvas.getContext("2d");
 	const faviconLink = document.querySelector("#favicon");
+	const themeColorMeta = document.querySelector("#theme-color-meta");
 	const updateFavicon = (color) => {
 		faviconCtx.clearRect(0, 0, 32, 32);
 		faviconCtx.beginPath();
@@ -1427,6 +1432,8 @@
 		faviconCtx.fillStyle = color;
 		faviconCtx.fill();
 		faviconLink.href = faviconCanvas.toDataURL("image/png");
+		// Same sync, extended to the mobile browser's own chrome (see the meta tag's comment).
+		themeColorMeta.content = color;
 	};
 	updateFavicon(jelly.color);
 

@@ -265,3 +265,4 @@
 <2026-10-05-11:04> (Claude): Fixed Shield orb spawning and doing nothing outside Hazard mode, wasting a pickup slot.
 <2026-10-05-11:34> (Claude): Fixed Zen mode not hiding the on-canvas score-progress bar, breaking its distraction-free view.
 2026-10-05-15:05 (Claude): Fixed orb-streak scoring bug so isolated orb pickups no longer bank an extra point like chained ones.
+<2026-10-05-17:32> (Claude): Synced the browser theme-color meta tag to the jelly's color, tinting mobile browser chrome to match.
