@@ -4101,10 +4101,13 @@
 		drawParticles();
 		drawRings();
 		drawClickRipples();
-		if (windOn) drawWindIndicator();
-		if (magnetOn) drawMagnetField();
-		drawOrbCompass();
-		if (predictOn) drawTrajectory();
+		// See drawScoreProgress's zen-mode guard below: these are the same class of
+		// canvas-drawn HUD overlay (fixed-position indicators, not the jelly/orb itself),
+		// so they get the same "distraction-free means distraction-free" treatment.
+		if (windOn && !zenOn) drawWindIndicator();
+		if (magnetOn && !zenOn) drawMagnetField();
+		if (!zenOn) drawOrbCompass();
+		if (predictOn && !zenOn) drawTrajectory();
 		// Ambient glow around the canvas echoes the jelly's own shadow, so the
 		// whole scene feels lit by it rather than just the sprite itself.
 		canvas.style.boxShadow = `0 0 40px 6px ${jelly.color}`;
