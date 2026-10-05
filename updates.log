@@ -263,3 +263,4 @@
 <2026-10-05-07:34> (Claude): Fixed Magnet mode fighting manual steering by skipping its pull while the player is dragging.
 <2026-10-05-08:34> (Claude): Fixed portal teleport hitbox to scale with combo stretch, matching hazard/orb collision checks.
 <2026-10-05-11:04> (Claude): Fixed Shield orb spawning and doing nothing outside Hazard mode, wasting a pickup slot.
+<2026-10-05-11:34> (Claude): Fixed Zen mode not hiding the on-canvas score-progress bar, breaking its distraction-free view.

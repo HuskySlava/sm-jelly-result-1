@@ -4906,7 +4906,10 @@
 				drawConfetti();
 				drawVignette();
 				drawDangerWarning(now / 1000);
-				drawScoreProgress();
+				// Zen mode hides every other stat/HUD element (see body.zen-mode rules above),
+				// but this canvas-drawn bar was never wired into that check, so it kept
+				// painting a live score HUD over the supposedly distraction-free view.
+				if (!zenOn) drawScoreProgress();
 			}
 			updateFrame();
 		});
