@@ -4841,6 +4841,15 @@
 				// they see its current position instead of lagging a frame behind (which
 				// used to let a fast jelly visibly overlap a hazard/portal before it registered).
 				if (hazardOn) checkHazardCollision();
+				// checkHazardCollision() may have just set this and painted the frozen
+				// "GAME OVER" frame via drawGameOverOverlay(); without this guard, the
+				// collision checks and full redraw below ran anyway on the same tick,
+				// letting a portal/orb register post-mortem and overdrawing the freeze
+				// frame with a live jelly before the player ever saw it.
+				if (gameOverFreezeActive) {
+					updateFrame();
+					return;
+				}
 				if (portalOn) checkPortalCollision();
 				checkOrbCollision();
 				checkAchievements();
