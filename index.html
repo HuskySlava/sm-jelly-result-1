@@ -158,6 +158,14 @@
 			transform: scale(0.95);
 		}
 
+		/* Boost (the only button with a cooldown) needs a visible "not ready yet" state;
+		   custom-styled buttons don't get the browser's own disabled dimming for free. */
+		#controls button:disabled {
+			opacity: 0.4;
+			cursor: default;
+			transform: none;
+		}
+
 		/* Matches the pill-shaped buttons' look so the volume control reads as part
 		   of the same toolbar instead of a foreign form element. */
 		#volume-control,
@@ -1438,10 +1446,16 @@
 	updateFavicon(jelly.color);
 
 	const boostBtn = document.querySelector("#boost-btn");
+	// Without a cooldown, nothing stopped spamming this for a free, instant climb to
+	// maxSpeed, which undercut the "risk/reward" framing below (no risk, guaranteed reward).
+	let lastBoostElapsed = -Infinity;
+	const boostCooldown = 1.2;
 	boostBtn.addEventListener("click", () => {
 		// Nothing should be able to change velocity while paused, or the resulting
 		// speed/top-speed popups would fire for a jelly that visibly never moved.
 		if (paused) return;
+		if (elapsedTime - lastBoostElapsed <= boostCooldown) return;
+		lastBoostElapsed = elapsedTime;
 		// Kick the jelly off in a random direction at 1.5x its current speed, so
 		// boosting is a deliberate risk/reward move rather than a guaranteed max-speed jump.
 		// Floor at a minimum speed so boost can always recover a jelly that arrow-key
@@ -4478,6 +4492,7 @@
 		if (hazardOn) spawnHazard();
 		lastHazardHitElapsed = -Infinity;
 		lastNearMissElapsed = -Infinity;
+		lastBoostElapsed = -Infinity;
 		lives = maxLives;
 		updateLivesStat();
 		if (portalOn) spawnPortals();
@@ -4835,6 +4850,9 @@
 				if (doubleTimeRemaining > 0) doubleTimeRemaining = Math.max(doubleTimeRemaining - rawDt, 0);
 				if (ghostTimeRemaining > 0) ghostTimeRemaining = Math.max(ghostTimeRemaining - rawDt, 0);
 				if (growTimeRemaining > 0) growTimeRemaining = Math.max(growTimeRemaining - rawDt, 0);
+				// Visibly dims the button for the cooldown window above, so a mid-cooldown
+				// click reads as "not ready yet" instead of a silent, unexplained no-op.
+				boostBtn.disabled = elapsedTime - lastBoostElapsed <= boostCooldown;
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
