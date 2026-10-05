@@ -2800,13 +2800,16 @@
 					spawnPopup(orb.x, orb.y - 50, "New Best Orbs!", "#ffcc00");
 				}
 			}
-			orbStreak = (elapsedTime - lastOrbElapsed <= orbStreakWindow) ? orbStreak + 1 : 1;
+			// Mirrors comboPoints below: points only bank on a step that chains onto an
+			// existing streak, not on the frame a broken streak resets back to 1.
+			if (elapsedTime - lastOrbElapsed <= orbStreakWindow) {
+				orbStreak += 1;
+				orbStreakPoints += orbStreak;
+			} else {
+				orbStreak = 1;
+			}
 			lastOrbElapsed = elapsedTime;
 			orbStreakEl.textContent = `Orb streak: x${orbStreak}`;
-			// Mirrors comboPoints: without this, orb streak was purely cosmetic (shown in
-			// stats/mood/achievements but worth nothing), unlike bounce combos which bank
-			// points for staying alive.
-			orbStreakPoints += orbStreak;
 			if (orbStreak > bestOrbStreak) {
 				bestOrbStreak = orbStreak;
 				localStorage.setItem("jelly-best-orb-streak", bestOrbStreak);
