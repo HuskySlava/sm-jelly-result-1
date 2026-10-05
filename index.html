@@ -3135,7 +3135,9 @@
 		else if (shrinkTimeRemaining > 0) { mood = "🐣 Tiny!"; currentMouthType = "o"; }
 		else if (growTimeRemaining > 0) { mood = "🦣 Giant!"; currentMouthType = "grin"; }
 		else if (doubleTimeRemaining > 0) { mood = "✖️2️⃣ Double bonus!"; currentMouthType = "grin"; }
-		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < 80) { mood = "😰 Too close!"; currentMouthType = "o"; }
+		// Shares dangerProximity with drawDangerWarning's border glow (see its comment)
+		// so the two "too close" cues always agree instead of disagreeing for a 20px band.
+		else if (hazardOn && Math.hypot(cx - hazard.x, cy - hazard.y) < dangerProximity) { mood = "😰 Too close!"; currentMouthType = "o"; }
 		else if (combo >= 10) { mood = "🤩 Unstoppable!"; currentMouthType = "grin"; }
 		else if (combo >= 5) { mood = "🔥 On a roll!"; currentMouthType = "grin"; }
 		else if (speed > maxSpeed * 0.85) { mood = "😵 Dizzy!"; currentMouthType = "wavy"; }
