@@ -931,23 +931,23 @@
 	</div>
 </section>
 <div id="achievements-overlay">
-	<div id="achievements-panel">
+	<div id="achievements-panel" role="dialog" aria-modal="true" aria-labelledby="achievements-title">
 		<button class="overlay-close" id="achievements-close" aria-label="Close">&times;</button>
-		<h2>Achievements</h2>
+		<h2 id="achievements-title">Achievements</h2>
 		<ul id="achievements-list"></ul>
 	</div>
 </div>
 <div id="leaderboard-overlay">
-	<div id="leaderboard-panel">
+	<div id="leaderboard-panel" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
 		<button class="overlay-close" id="leaderboard-close" aria-label="Close">&times;</button>
-		<h2>Leaderboard — Top 5</h2>
+		<h2 id="leaderboard-title">Leaderboard — Top 5</h2>
 		<div id="leaderboard-list"></div>
 	</div>
 </div>
 <div id="confirm-overlay">
-	<div id="confirm-panel">
+	<div id="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
 		<button class="overlay-close" id="confirm-close" aria-label="Close">&times;</button>
-		<h2>Clear all saved data?</h2>
+		<h2 id="confirm-title">Clear all saved data?</h2>
 		<p>Stats, records, achievements, and toggle preferences will all be wiped. This can't be undone.</p>
 		<div id="confirm-actions">
 			<button id="confirm-cancel-btn">Cancel</button>
@@ -956,9 +956,9 @@
 	</div>
 </div>
 <div id="help-overlay">
-	<div id="help-panel">
+	<div id="help-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
 		<button class="overlay-close" id="help-close" aria-label="Close">&times;</button>
-		<h2>Keyboard Shortcuts</h2>
+		<h2 id="help-title">Keyboard Shortcuts</h2>
 		<ul>
 			<li><kbd>Space</kbd> Pause / Resume</li>
 			<li><kbd>R</kbd> Reset</li>
