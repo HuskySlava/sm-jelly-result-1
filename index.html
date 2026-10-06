@@ -1686,6 +1686,8 @@
 			&& elapsedTime - lastNearMissElapsed > nearMissCooldown) {
 			lastNearMissElapsed = elapsedTime;
 			nearMissPoints += nearMissBonus;
+			totalNearMisses++;
+			localStorage.setItem("jelly-total-near-misses", totalNearMisses);
 			spawnParticles(cx, cy, "#ffd700");
 			spawnPopup(jelly.x + jelly.w / 2, jelly.y - 10, `Close one! +${nearMissBonus}`, "#ffd700");
 			if (hapticsOn && navigator.vibrate) navigator.vibrate(10);
@@ -3046,6 +3048,10 @@
 	// that a score-maximizing player is strictly better off never touching.
 	let nearMissPoints = 0;
 	const nearMissBonus = 3;
+	// Lifetime near-miss count, persisted like totalBounces/totalOrbs/portalUses: without
+	// this, skimming the hazard had a per-run score bonus but nothing a returning player
+	// builds toward across runs, unlike every other skill (bouncing, orbs, portals) here.
+	let totalNearMisses = Number(localStorage.getItem("jelly-total-near-misses")) || 0;
 
 	// Longest bounce streak ever landed, persisted like top speed/high score so it survives resets/reloads.
 	const bestComboEl = document.querySelector("#best-combo");
@@ -3203,7 +3209,11 @@
 		// shown as "Total time") but never fed into a goal, so a player who only ever plays
 		// in short bursts (never beating bestTime's single-run Survivor/Marathoner targets)
 		// had no progression goal tied to their cumulative engagement at all.
-		{ id: "dedicated", name: "Dedicated", check: () => totalPlayTime >= 1800, progress: () => totalPlayTime, target: 1800 }
+		{ id: "dedicated", name: "Dedicated", check: () => totalPlayTime >= 1800, progress: () => totalPlayTime, target: 1800 },
+		// Near-misses already banked a per-run score bonus (see nearMissPoints) but had no
+		// lifetime goal of their own, unlike bouncing/orbs/portals — this rewards skimming
+		// the hazard on purpose, the one hazard-mode skill that previously went unrecognized.
+		{ id: "daredevil", name: "Daredevil", check: () => totalNearMisses >= 10, progress: () => totalNearMisses, target: 10 }
 	];
 	// A triumphant ascending three-note chime marks an achievement unlock; every other
 	// event (bounce, orb pickups, hazard, portal, snapshot) already has a distinct sound,
