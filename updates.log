@@ -269,3 +269,4 @@
 2026-10-05-21:05 (Claude): Added a 1.2s cooldown (with a dimmed button state) to Boost so it's a real risk/reward move, not spammable.
 <2026-10-05-23:34> (Claude): Fixed hazard near-miss bonus not updating the Score stat/tab title/best-score check until the next bounce.
 <2026-10-06-04:03> (Claude): Gave the Help/Achievements/Leaderboard/Clear-Stats modals proper dialog ARIA roles for screen readers.
+<2026-10-06-07:05> (Claude): Boost button now shows its cooldown countdown in seconds instead of just dimming with no indication of wait time.

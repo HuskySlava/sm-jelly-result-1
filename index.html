@@ -4873,8 +4873,14 @@
 				if (ghostTimeRemaining > 0) ghostTimeRemaining = Math.max(ghostTimeRemaining - rawDt, 0);
 				if (growTimeRemaining > 0) growTimeRemaining = Math.max(growTimeRemaining - rawDt, 0);
 				// Visibly dims the button for the cooldown window above, so a mid-cooldown
-				// click reads as "not ready yet" instead of a silent, unexplained no-op.
-				boostBtn.disabled = elapsedTime - lastBoostElapsed <= boostCooldown;
+				// click reads as "not ready yet" instead of a silent, unexplained no-op. The
+				// countdown text goes further: every other timed state in the game (shield,
+				// freeze, shrink, ...) gets an on-canvas ring showing exactly how long is left,
+				// but boost's own cooldown previously gave no indication of *how much* longer
+				// to wait, just a dimmed button.
+				const boostRemaining = Math.max(boostCooldown - (elapsedTime - lastBoostElapsed), 0);
+				boostBtn.disabled = boostRemaining > 0;
+				boostBtn.textContent = boostRemaining > 0 ? `Boost (${boostRemaining.toFixed(1)}s)` : "Boost";
 				// Use rawDt (not the slow-mo-scaled dt) so the survival clock reflects
 				// real elapsed time rather than appearing to pause during slow-mo.
 				elapsedTime += rawDt;
